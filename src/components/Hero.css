@@ -113,17 +113,25 @@
   border-radius: var(--radius-pill);
   font-size: 0.82rem;
   font-weight: 500;
-  color: #C4B5FD;
+  color: #7C3AED;
   margin-bottom: var(--space-xl);
   letter-spacing: 0.02em;
+}
+
+[data-theme="dark"] .hero__badge {
+  color: #C4B5FD;
 }
 
 .hero__badge-dot {
   width: 7px;
   height: 7px;
-  background: #C4B5FD;
+  background: #7C3AED;
   border-radius: var(--radius-full);
   animation: pulse-badge 2s ease-in-out infinite;
+}
+
+[data-theme="dark"] .hero__badge-dot {
+  background: #C4B5FD;
 }
 
 @keyframes pulse-badge {

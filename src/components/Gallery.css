@@ -1,7 +1,7 @@
 .gallery {
   position: relative;
   padding: 120px 0;
-  background-color: #0A0A0F;
+  background-color: var(--color-bg);
   overflow: hidden;
   z-index: 1;
 }
@@ -42,12 +42,12 @@
   font-weight: 800;
   line-height: 1.1;
   margin: 0 0 24px 0;
-  color: #F0F0F5;
+  color: var(--color-text-primary);
   letter-spacing: -0.02em;
 }
 
 .gallery__subtitle {
-  color: #9CA3B0;
+  color: var(--color-text-secondary);
   font-size: 1.15rem;
   line-height: 1.7;
 }
