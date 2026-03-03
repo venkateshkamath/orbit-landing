@@ -85,24 +85,50 @@ export default function Dashboard() {
   const [geoMarkers, setGeoMarkers] = useState([]);
   const [geoLoading, setGeoLoading] = useState(false);
 
-  const fetchStats = async () => {
-    setRefreshing(true);
+  const fetchStats = async (isPolling = false) => {
+    if (!isPolling) setRefreshing(true);
     try {
       const res = await fetch('/api/waitlist/stats');
       const data = await res.json();
-      console.log('📊 Stats loaded:', data);
       setStats(data);
     } catch (err) {
       console.error('Failed to fetch stats:', err);
     } finally {
-      setLoading(false);
-      setRefreshing(false);
+      if (!isPolling) {
+        setLoading(false);
+        setRefreshing(false);
+      }
     }
   };
 
-  console.log(stats)
+  useEffect(() => { 
+    fetchStats(); 
+    // Establish polling every 15 seconds for live dashboard updates
+    const interval = setInterval(() => fetchStats(true), 15000);
+    return () => clearInterval(interval);
+  }, []);
 
-  useEffect(() => { fetchStats(); }, []);
+  const exportToCSV = () => {
+    if (!stats || !stats.recentSignups) return;
+    
+    const headers = ['Email', 'City', 'Joined Date'];
+    const rows = stats.recentSignups.map(s => [
+      s.email,
+      `"${(s.city || 'Unknown').replace(/"/g, '""')}"`,
+      new Date(s.created_at).toLocaleString()
+    ]);
+    
+    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `orbit_waitlist_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   // Geocode cities once stats are loaded
   useEffect(() => {
@@ -147,11 +173,11 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="header-actions">
-          <button className={`btn-refresh ${refreshing ? 'spinning' : ''}`} onClick={fetchStats}>
+          <button className={`btn-refresh ${refreshing ? 'spinning' : ''}`} onClick={() => fetchStats(false)}>
             <RefreshCw size={18} />
             {refreshing ? 'Syncing…' : 'Refresh Data'}
           </button>
-          <button className="btn-export">
+          <button className="btn-export" onClick={exportToCSV}>
             <Download size={18} />
             Export CSV
           </button>
