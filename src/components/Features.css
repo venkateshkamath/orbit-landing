@@ -1,0 +1,112 @@
+/* ============================================
+   Features Section
+   ============================================ */
+
+.features {
+  padding: var(--space-5xl) 0;
+  position: relative;
+}
+
+.features__header {
+  text-align: center;
+  margin-bottom: var(--space-4xl);
+}
+
+.features__title {
+  font-size: clamp(2rem, 4.5vw, 3.5rem);
+  margin-bottom: var(--space-md);
+}
+
+.features__subtitle {
+  font-size: 1.05rem;
+  color: var(--color-text-secondary);
+  max-width: 520px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+.features__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-lg);
+}
+
+.features__card {
+  background: var(--color-bg-card);
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  transition: all var(--transition-base);
+  cursor: default;
+}
+
+.features__card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-xl);
+  border-color: var(--card-accent, var(--color-border-hover));
+}
+
+.features__card-image-wrap {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--color-bg-alt);
+}
+
+.features__card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-slow);
+}
+
+.features__card:hover .features__card-image {
+  transform: scale(1.05);
+}
+
+.features__card-image-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.features__card:hover .features__card-image-glow {
+  opacity: 1;
+}
+
+.features__card-content {
+  padding: var(--space-xl) var(--space-lg);
+}
+
+.features__card-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  margin-bottom: var(--space-md);
+}
+
+.features__card-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin-bottom: var(--space-sm);
+}
+
+.features__card-desc {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  line-height: 1.65;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .features__grid {
+    grid-template-columns: 1fr;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+}

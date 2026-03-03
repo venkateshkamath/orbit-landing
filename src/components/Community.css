@@ -1,0 +1,137 @@
+/* ============================================
+   Community / Testimonials Section
+   ============================================ */
+
+.community {
+  padding: var(--space-5xl) 0;
+  position: relative;
+}
+
+.community__header {
+  text-align: center;
+  margin-bottom: var(--space-4xl);
+}
+
+.community__title {
+  font-size: clamp(2rem, 4.5vw, 3.5rem);
+  margin-bottom: var(--space-md);
+}
+
+.community__subtitle {
+  font-size: 1.05rem;
+  color: var(--color-text-secondary);
+  max-width: 480px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+.community__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-lg);
+  margin-bottom: var(--space-4xl);
+}
+
+.community__card {
+  background: var(--color-bg-card);
+  border-radius: var(--radius-xl);
+  padding: var(--space-xl) var(--space-lg);
+  border: 1px solid var(--color-border);
+  transition: all var(--transition-base);
+}
+
+.community__card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.community__card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.community__card-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+
+.community__card-name {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.community__card-handle {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.community__card-text {
+  font-size: 0.92rem;
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+  margin-bottom: var(--space-md);
+}
+
+.community__card-stars {
+  display: flex;
+  gap: 3px;
+}
+
+/* Stats */
+.community__stats {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-4xl);
+  padding: var(--space-2xl) 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.community__stat {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.community__stat-value {
+  font-family: var(--font-heading);
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+  font-weight: 800;
+  background: var(--color-accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.community__stat-label {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  font-weight: 450;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .community__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .community__stats {
+    flex-wrap: wrap;
+    gap: var(--space-xl);
+  }
+
+  .community__stat {
+    width: 40%;
+  }
+}

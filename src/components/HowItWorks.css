@@ -1,0 +1,172 @@
+/* ============================================
+   How It Works Section
+   ============================================ */
+
+.how {
+  padding: var(--space-5xl) 0;
+  background: var(--color-bg-alt);
+  position: relative;
+}
+
+.how__header {
+  text-align: center;
+  margin-bottom: var(--space-4xl);
+}
+
+.how__title {
+  font-size: clamp(2rem, 4.5vw, 3.5rem);
+  margin-bottom: var(--space-md);
+}
+
+.how__subtitle {
+  font-size: 1.05rem;
+  color: var(--color-text-secondary);
+  max-width: 480px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+.how__steps {
+  position: relative;
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xl);
+}
+
+/* Connector line */
+.how__connector {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  transform: translateX(-50%);
+}
+
+.how__connector-line {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, var(--color-accent-coral), var(--color-accent-lavender), var(--color-accent-teal));
+  border-radius: var(--radius-pill);
+  transform-origin: top;
+  opacity: 0.3;
+}
+
+/* Step item */
+.how__step {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-xl);
+  position: relative;
+  width: 50%;
+}
+
+.how__step--left {
+  align-self: flex-start;
+  padding-right: var(--space-2xl);
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+.how__step--right {
+  align-self: flex-end;
+  padding-left: var(--space-2xl);
+}
+
+.how__step-marker {
+  position: absolute;
+  top: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-card);
+  border: 2px solid var(--color-accent-lavender);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  box-shadow: var(--shadow-md);
+}
+
+.how__step--left .how__step-marker {
+  right: -20px;
+}
+
+.how__step--right .how__step-marker {
+  left: -20px;
+}
+
+.how__step-number {
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-accent-lavender);
+}
+
+.how__step-card {
+  background: var(--color-bg-card);
+  border-radius: var(--radius-xl);
+  padding: var(--space-xl) var(--space-lg);
+  border: 1px solid var(--color-border);
+  transition: all var(--transition-base);
+  flex: 1;
+}
+
+.how__step-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-3px);
+}
+
+.how__step-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, rgba(196, 181, 253, 0.12), rgba(94, 234, 212, 0.12));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--space-md);
+  color: #7C3AED;
+}
+
+.how__step--left .how__step-icon {
+  margin-left: auto;
+}
+
+.how__step-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: var(--space-sm);
+}
+
+.how__step-desc {
+  font-size: 0.88rem;
+  color: var(--color-text-secondary);
+  line-height: 1.65;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .how__connector {
+    left: 20px;
+  }
+
+  .how__step {
+    width: 100%;
+    padding-left: 60px !important;
+    padding-right: 0 !important;
+    flex-direction: row !important;
+    text-align: left !important;
+  }
+
+  .how__step .how__step-marker {
+    left: 0 !important;
+    right: auto !important;
+  }
+
+  .how__step .how__step-icon {
+    margin-left: 0 !important;
+  }
+}
