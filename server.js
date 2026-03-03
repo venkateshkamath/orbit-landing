@@ -132,7 +132,7 @@ app.get('/api/waitlist/count', async (req, res) => {
 });
 
 // ─── SPA fallback: serve index.html for all non-API routes ──
-app.get('*', (req, res) => {
+app.get('{*path}', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
