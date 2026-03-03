@@ -131,6 +131,15 @@ app.get('/api/waitlist/count', async (req, res) => {
   }
 });
 
+// ─── Health check (for external uptime pings) ────────────────
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'alive',
+    uptime: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // ─── SPA fallback: serve index.html for all non-API routes ──
 app.get('{*path}', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
