@@ -184,10 +184,28 @@
   color: #9CA3B0;
 }
 
-.pie-legend {
+/* Scrollable city legend */
+.pie-legend-scroll {
   display: grid;
   gap: 10px;
   margin-top: 16px;
+  max-height: 160px;
+  overflow-y: auto;
+  padding-right: 6px;
+  position: relative;
+}
+.pie-legend-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+.pie-legend-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.pie-legend-scroll::-webkit-scrollbar-thumb {
+  background: rgba(196,181,253,0.25);
+  border-radius: 100px;
+}
+.pie-legend-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(196,181,253,0.5);
 }
 .legend-item {
   display: flex;
@@ -218,6 +236,16 @@
   margin-top: 4px;
 }
 
+.geo-status {
+  color: #FFB347;
+  font-size: 0.8rem;
+  animation: geopulse 1.5s ease-in-out infinite;
+}
+@keyframes geopulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
 .map-viewport {
   position: relative;
   height: 420px;
@@ -227,14 +255,42 @@
   margin-top: 10px;
 }
 
-.world-dots {
-  width: 100%;
-  height: 100%;
+/* ── Leaflet Overrides (dark theme) ─────────── */
+.map-viewport .leaflet-container {
+  background: #151525;
+}
+.map-viewport .leaflet-control-zoom a {
+  background: #1C1C2E !important;
+  color: #F0F0F5 !important;
+  border-color: rgba(255,255,255,0.08) !important;
+}
+.map-viewport .leaflet-control-zoom a:hover {
+  background: #282845 !important;
+}
+
+/* Custom ORBIT-branded tooltip */
+.orbit-map-tooltip {
+  background: #1C1C2E !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  border-radius: 10px !important;
+  color: #F0F0F5 !important;
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 0.85rem !important;
+  padding: 8px 14px !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4) !important;
+}
+.orbit-map-tooltip::before {
+  border-top-color: #1C1C2E !important;
+}
+.orbit-map-tooltip strong {
+  color: #C4B5FD;
+  font-weight: 700;
 }
 
 .map-overlay {
   position: absolute;
   bottom: 20px; left: 20px;
+  z-index: 1000;
   display: flex;
   gap: 24px;
   background: rgba(15,15,26,0.85);

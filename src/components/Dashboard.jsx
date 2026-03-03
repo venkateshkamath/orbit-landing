@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { 
   Users, MapPin, TrendingUp, Activity, RefreshCw, 
   Download, ChevronLeft, Calendar, Search, 
@@ -8,32 +8,73 @@ import {
   AreaChart, Area, XAxis, YAxis, 
   Tooltip, ResponsiveContainer, PieChart, Pie, Cell 
 } from 'recharts';
+import { MapContainer, TileLayer, CircleMarker, Tooltip as MapTooltip, useMap } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 import './Dashboard.css';
 
 // ORBIT Brand Colors (from website design system)
 const COLORS = ['#FF6B6B', '#C4B5FD', '#5EEAD4', '#FFB347', '#818CF8'];
 
-// City → rough lat/lng for the SVG map
-const cityCoords = {
-  'mangalore':      { x: 62.5, y: 56 },
-  'belgaum':        { x: 62.3, y: 54 },
-  'bengaluru':      { x: 63,   y: 55.5 },
-  'mumbai':         { x: 61.5, y: 52 },
-  'delhi':          { x: 62.5, y: 47 },
-  'london':         { x: 48,   y: 33 },
-  'new york':       { x: 25.5, y: 40 },
-  'san francisco':  { x: 15,   y: 42 },
-  'tokyo':          { x: 82,   y: 42 },
-  'berlin':         { x: 51.5, y: 33 },
-  'kathmandu':      { x: 65.5, y: 47 },
-};
+// ─── Dynamic Geocoding via OpenStreetMap Nominatim (free, no API key) ───
+const GEO_CACHE_KEY = 'orbit_geo_cache';
 
-function getCityPos(city) {
-  const key = city.toLowerCase();
-  for (const [name, pos] of Object.entries(cityCoords)) {
-    if (key.includes(name)) return pos;
+function loadGeoCache() {
+  try {
+    return JSON.parse(localStorage.getItem(GEO_CACHE_KEY) || '{}');
+  } catch { return {}; }
+}
+
+function saveGeoCache(cache) {
+  localStorage.setItem(GEO_CACHE_KEY, JSON.stringify(cache));
+}
+
+async function geocodeCity(cityName) {
+  const cache = loadGeoCache();
+  const key = cityName.toLowerCase().trim();
+  if (cache[key]) return cache[key];
+
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cityName)}&format=json&limit=1`,
+      { headers: { 'User-Agent': 'OrbitLandingPage/1.0' } }
+    );
+    const data = await res.json();
+    if (data && data.length > 0) {
+      const coords = { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+      cache[key] = coords;
+      saveGeoCache(cache);
+      return coords;
+    }
+  } catch (err) {
+    console.warn(`Geocoding failed for "${cityName}":`, err);
   }
-  return { x: 50 + Math.random() * 10, y: 40 + Math.random() * 10 };
+  return null;
+}
+
+// Geocode all cities with a small delay between requests (Nominatim rate limit: 1 req/sec)
+async function geocodeAllCities(cityStats) {
+  const results = [];
+  for (const city of cityStats) {
+    const coords = await geocodeCity(city.city);
+    if (coords) {
+      results.push({ ...city, lat: coords.lat, lng: coords.lng });
+    }
+    // Wait 1.1s between requests to respect Nominatim's rate limit
+    await new Promise(r => setTimeout(r, 1100));
+  }
+  return results;
+}
+
+// Auto-fit map bounds to markers
+function FitBounds({ markers }) {
+  const map = useMap();
+  useEffect(() => {
+    if (markers.length > 0) {
+      const bounds = markers.map(m => [m.lat, m.lng]);
+      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 5 });
+    }
+  }, [markers, map]);
+  return null;
 }
 
 export default function Dashboard() {
@@ -41,6 +82,8 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [geoMarkers, setGeoMarkers] = useState([]);
+  const [geoLoading, setGeoLoading] = useState(false);
 
   const fetchStats = async () => {
     setRefreshing(true);
@@ -57,7 +100,19 @@ export default function Dashboard() {
     }
   };
 
+  console.log(stats)
+
   useEffect(() => { fetchStats(); }, []);
+
+  // Geocode cities once stats are loaded
+  useEffect(() => {
+    if (!stats?.cityStats?.length) return;
+    setGeoLoading(true);
+    geocodeAllCities(stats.cityStats).then(markers => {
+      setGeoMarkers(markers);
+      setGeoLoading(false);
+    });
+  }, [stats?.cityStats]);
 
   if (loading) {
     return (
@@ -140,9 +195,9 @@ export default function Dashboard() {
               <h3>City Distribution</h3>
               <Globe size={18} color="#9CA3B0"/>
             </div>
-            <ResponsiveContainer width="100%" height={220}>
+            <ResponsiveContainer width="100%" height={200}>
               <PieChart>
-                <Pie data={stats?.cityStats || []} cx="50%" cy="50%" innerRadius={55} outerRadius={75} paddingAngle={4} dataKey="count" nameKey="city">
+                <Pie data={stats?.cityStats || []} cx="50%" cy="50%" innerRadius={50} outerRadius={70} paddingAngle={4} dataKey="count" nameKey="city">
                   {(stats?.cityStats || []).map((_, i) => (
                     <Cell key={i} fill={COLORS[i % COLORS.length]}/>
                   ))}
@@ -150,8 +205,8 @@ export default function Dashboard() {
                 <Tooltip contentStyle={{ background:'#1C1C2E', border:'1px solid rgba(255,255,255,0.08)', borderRadius:12, color:'#F0F0F5' }}/>
               </PieChart>
             </ResponsiveContainer>
-            <div className="pie-legend">
-              {(stats?.cityStats || []).slice(0, 4).map((c, i) => (
+            <div className="pie-legend-scroll">
+              {(stats?.cityStats || []).map((c, i) => (
                 <div key={c.city} className="legend-item">
                   <span className="dot" style={{ background: COLORS[i % COLORS.length] }}/>
                   <span className="label">{c.city}</span>
@@ -162,43 +217,66 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* ── Global Map (pure SVG — no external lib) ───── */}
+        {/* ── Global Map (Leaflet — dynamic geocoding) ───── */}
         <section className="map-section">
           <div className="map-card">
             <div className="card-header">
               <div className="header-info">
                 <h3>Global Heatmap</h3>
-                <p>Live signup origins across the globe</p>
+                <p>Live signup origins across the globe {geoLoading && <span className="geo-status">· Geocoding cities…</span>}</p>
               </div>
               <Globe size={18} color="#9CA3B0"/>
             </div>
             <div className="map-viewport">
-              <svg viewBox="0 0 100 60" className="world-dots">
-                {/* Simplified dot-matrix world map */}
-                {worldDots.map((d, i) => (
-                  <circle key={i} cx={d[0]} cy={d[1]} r={0.35} fill="#2a2a45" opacity={0.6}/>
-                ))}
-                {/* City markers */}
-                {(stats?.cityStats || []).map((c, i) => {
-                  const pos = getCityPos(c.city);
-                  const r = Math.max(1, Math.min(c.count * 0.8, 3));
+              <MapContainer
+                center={[20, 0]}
+                zoom={2}
+                minZoom={2}
+                maxZoom={12}
+                scrollWheelZoom={true}
+                style={{ height: '100%', width: '100%', borderRadius: '16px' }}
+                attributionControl={false}
+              >
+                <TileLayer
+                  url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                  attribution='&copy; <a href="https://carto.com/">CARTO</a>'
+                />
+                <FitBounds markers={geoMarkers} />
+                {geoMarkers.map((marker, i) => {
+                  const radius = Math.max(6, Math.min(marker.count * 4, 25));
                   return (
-                    <g key={i}>
-                      <circle cx={pos.x} cy={pos.y} r={r + 1.5} fill="#FF6B6B" opacity={0.15}>
-                        <animate attributeName="r" from={r+1} to={r+3} dur="2s" repeatCount="indefinite"/>
-                        <animate attributeName="opacity" from="0.25" to="0" dur="2s" repeatCount="indefinite"/>
-                      </circle>
-                      <circle cx={pos.x} cy={pos.y} r={r} fill="#FF6B6B" opacity={0.7}/>
-                      <circle cx={pos.x} cy={pos.y} r={0.5} fill="#fff"/>
-                      <text x={pos.x} y={pos.y - r - 1} textAnchor="middle" fill="#C4B5FD" fontSize="1.8" fontWeight="600">{c.city}</text>
-                    </g>
+                    <CircleMarker
+                      key={marker.city}
+                      center={[marker.lat, marker.lng]}
+                      radius={radius}
+                      pathOptions={{
+                        color: '#FF6B6B',
+                        fillColor: '#FF6B6B',
+                        fillOpacity: 0.35,
+                        weight: 2,
+                        opacity: 0.8,
+                      }}
+                    >
+                      <MapTooltip
+                        direction="top"
+                        offset={[0, -radius]}
+                        className="orbit-map-tooltip"
+                      >
+                        <strong>{marker.city}</strong><br />
+                        {marker.count} signup{marker.count !== 1 ? 's' : ''}
+                      </MapTooltip>
+                    </CircleMarker>
                   );
                 })}
-              </svg>
+              </MapContainer>
               <div className="map-overlay">
                 <div className="map-stat">
                   <h4>Top Region</h4>
                   <p>{stats?.cityStats?.[0]?.city || 'N/A'}</p>
+                </div>
+                <div className="map-stat">
+                  <h4>Cities Reached</h4>
+                  <p>{geoMarkers.length} of {stats?.cityStats?.length || 0}</p>
                 </div>
                 <div className="map-stat">
                   <h4>Live Tracking</h4>
@@ -314,51 +392,4 @@ function HealthItem({ label, value, status }) {
   );
 }
 
-/* ─── Simplified dot-matrix world map points ── */
-const worldDots = [
-  // North America
-  [14,30],[16,30],[18,30],[20,30],[22,30],[24,30],[14,32],[16,32],[18,32],[20,32],[22,32],[24,32],[26,32],
-  [14,34],[16,34],[18,34],[20,34],[22,34],[24,34],[26,34],[28,34],
-  [16,36],[18,36],[20,36],[22,36],[24,36],[26,36],[28,36],
-  [18,38],[20,38],[22,38],[24,38],[26,38],[28,38],
-  [20,40],[22,40],[24,40],[26,40],[28,40],
-  [22,42],[24,42],[26,42],
-  // South America
-  [28,46],[30,46],[32,46],[34,46],
-  [28,48],[30,48],[32,48],[34,48],[36,48],
-  [30,50],[32,50],[34,50],[36,50],
-  [30,52],[32,52],[34,52],
-  [32,54],[34,54],
-  [32,56],
-  // Europe
-  [46,28],[48,28],[50,28],[46,30],[48,30],[50,30],[52,30],
-  [46,32],[48,32],[50,32],[52,32],[54,32],
-  [46,34],[48,34],[50,34],[52,34],[54,34],[56,34],
-  [48,36],[50,36],[52,36],[54,36],
-  // Africa
-  [48,38],[50,38],[52,38],[54,38],[56,38],
-  [48,40],[50,40],[52,40],[54,40],[56,40],
-  [48,42],[50,42],[52,42],[54,42],[56,42],
-  [48,44],[50,44],[52,44],[54,44],
-  [50,46],[52,46],[54,46],
-  [50,48],[52,48],
-  // Asia
-  [56,28],[58,28],[60,28],[62,28],[64,28],[66,28],[68,28],
-  [56,30],[58,30],[60,30],[62,30],[64,30],[66,30],[68,30],[70,30],
-  [58,32],[60,32],[62,32],[64,32],[66,32],[68,32],[70,32],[72,32],
-  [58,34],[60,34],[62,34],[64,34],[66,34],[68,34],[70,34],[72,34],[74,34],
-  [56,36],[58,36],[60,36],[62,36],[64,36],[66,36],[68,36],[70,36],[72,36],[74,36],[76,36],
-  [58,38],[60,38],[62,38],[64,38],[66,38],[68,38],[70,38],[72,38],[74,38],[76,38],[78,38],[80,38],
-  [60,40],[62,40],[64,40],[66,40],[68,40],[70,40],[72,40],[74,40],[76,40],[78,40],[80,40],[82,40],
-  [60,42],[62,42],[64,42],[66,42],[68,42],[70,42],[72,42],[74,42],[76,42],[78,42],[80,42],
-  [62,44],[64,44],[66,44],[68,44],[70,44],[72,44],[74,44],[76,44],
-  [62,46],[64,46],[66,46],[68,46],[70,46],
-  [62,48],[64,48],[66,48],
-  [64,50],[66,50],
-  [64,52],[66,52],
-  [64,54],[66,54],
-  // Australia
-  [76,46],[78,46],[80,46],[82,46],[84,46],
-  [76,48],[78,48],[80,48],[82,48],[84,48],
-  [78,50],[80,50],[82,50],
-];
+

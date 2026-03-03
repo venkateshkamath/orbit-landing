@@ -19,6 +19,10 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 app.use(cors());
 app.use(express.json());
 
+// ─── City name normalizer (top-level utility) ─────────────
+const toTitleCase = (str) =>
+  str.trim().replace(/\s+/g, ' ').replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+
 // ─── Serve the Vite build (production) ────────────────────
 app.use(express.static(path.join(__dirname, 'dist')));
 
@@ -59,9 +63,11 @@ app.post('/api/waitlist', async (req, res) => {
       return res.status(409).json({ error: 'This email is already on the waitlist!' });
     }
 
+    const normalizedCity = toTitleCase(city);
+
     const { data, error } = await supabase
       .from('waitlist')
-      .insert([{ email: email.toLowerCase(), city }])
+      .insert([{ email: email.toLowerCase(), city: normalizedCity }])
       .select();
 
     if (error) {
@@ -94,25 +100,37 @@ app.get('/api/waitlist/stats', async (req, res) => {
 
     const total = allData.length;
 
+    // Normalize city names to Title Case so "mangalore" and "Mangalore" merge
+
     const cityCounts = allData.reduce((acc, row) => {
-      acc[row.city] = (acc[row.city] || 0) + 1;
+      const normalizedCity = toTitleCase(row.city);
+      acc[normalizedCity] = (acc[normalizedCity] || 0) + 1;
       return acc;
     }, {});
     const cityStats = Object.entries(cityCounts)
       .map(([city, count]) => ({ city, count }))
       .sort((a, b) => b.count - a.count);
 
+    // Use ISO date for reliable sorting, short label for display
     const dailyCounts = allData.reduce((acc, row) => {
-      const date = new Date(row.created_at).toLocaleDateString();
-      acc[date] = (acc[date] || 0) + 1;
+      const d = new Date(row.created_at);
+      const isoDate = d.toISOString().split('T')[0]; // "2026-03-03"
+      acc[isoDate] = (acc[isoDate] || 0) + 1;
       return acc;
     }, {});
     const growthData = Object.entries(dailyCounts)
-      .map(([date, count]) => ({ date, count }))
-      .sort((a, b) => new Date(a.date) - new Date(b.date))
-      .slice(-7);
+      .sort(([a], [b]) => a.localeCompare(b))
+      .slice(-7)
+      .map(([isoDate, count]) => {
+        const d = new Date(isoDate + 'T00:00:00');
+        const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); // "Mar 3"
+        return { date: label, count };
+      });
 
-    res.json({ totalCount: total, cityStats, growthData, recentSignups: allData });
+    // Normalize city names in recent signups for display consistency
+    const recentSignups = allData.map(row => ({ ...row, city: toTitleCase(row.city) }));
+
+    res.json({ totalCount: total, cityStats, growthData, recentSignups });
   } catch (err) {
     console.error('❌ Stats error:', err);
     res.status(500).json({ error: 'Failed to fetch analytics.' });
@@ -128,6 +146,45 @@ app.get('/api/waitlist/count', async (req, res) => {
     res.json({ count: count || 0 });
   } catch (err) {
     res.json({ count: 0 });
+  }
+});
+
+// GET /api/cities — unique city names for autocomplete dropdown
+let citiesCache = { data: [], timestamp: 0 };
+const CITIES_CACHE_TTL = 60000; // 60 seconds
+
+app.get('/api/cities', async (req, res) => {
+  try {
+    const now = Date.now();
+    // Serve from cache if fresh
+    if (now - citiesCache.timestamp < CITIES_CACHE_TTL && citiesCache.data.length > 0) {
+      const q = (req.query.q || '').toLowerCase();
+      const filtered = q
+        ? citiesCache.data.filter(c => c.toLowerCase().includes(q))
+        : citiesCache.data;
+      return res.json({ cities: filtered });
+    }
+
+    // Fetch only city column (lightweight)
+    const { data, error } = await supabase
+      .from('waitlist')
+      .select('city');
+
+    if (error) throw error;
+
+    // Normalize, deduplicate, sort
+    const unique = [...new Set(data.map(r => toTitleCase(r.city)))].sort();
+    citiesCache = { data: unique, timestamp: now };
+
+    const q = (req.query.q || '').toLowerCase();
+    const filtered = q
+      ? unique.filter(c => c.toLowerCase().includes(q))
+      : unique;
+
+    res.json({ cities: filtered });
+  } catch (err) {
+    console.error('❌ Cities error:', err);
+    res.status(500).json({ cities: [] });
   }
 });
 

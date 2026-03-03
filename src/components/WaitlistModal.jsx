@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import gsap from 'gsap';
 import './WaitlistModal.css';
 
@@ -9,6 +9,111 @@ export default function WaitlistModal({ isOpen, onClose }) {
   const [city, setCity] = useState('');
   const [status, setStatus] = useState('idle'); // idle | submitting | success | error
   const [errorMsg, setErrorMsg] = useState('');
+
+  // City autocomplete state
+  const [citySuggestions, setCitySuggestions] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [highlightIdx, setHighlightIdx] = useState(-1);
+  const [localCities, setLocalCities] = useState([]); // from DB
+  const [searching, setSearching] = useState(false);
+  const cityInputRef = useRef(null);
+  const dropdownRef = useRef(null);
+  const debounceRef = useRef(null);
+
+  // Fetch local cities once on mount (popular cities)
+  useEffect(() => {
+    fetch('/api/cities')
+      .then(r => r.json())
+      .then(d => setLocalCities(d.cities || []))
+      .catch(() => {});
+  }, []);
+
+  // Filter & fetch global cities as user types
+  const handleCityChange = useCallback((val) => {
+    setCity(val);
+    setHighlightIdx(-1);
+
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    if (val.trim().length === 0) {
+      setCitySuggestions(localCities.slice(0, 8));
+      setShowDropdown(localCities.length > 0);
+      setSearching(false);
+      return;
+    }
+
+    setSearching(true);
+    setShowDropdown(true);
+
+    debounceRef.current = setTimeout(async () => {
+      try {
+        // Query OpenStreetMap for real global cities
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(val)}&format=json&featuretype=city&limit=5`, {
+          headers: { 'Accept-Language': 'en-US,en;q=0.9' }
+        });
+        const data = await res.json();
+        
+        // Extract clean city and country names (e.g., "Paris, Île-de-France, France" -> "Paris, France")
+        const globalCities = data.map(d => {
+             const parts = d.display_name.split(',');
+             const city = parts[0].trim();
+             const country = parts.length > 1 ? parts[parts.length - 1].trim() : '';
+             return country ? `${city}, ${country}` : city;
+        });
+        
+        // Merge with local matches
+        const q = val.toLowerCase();
+        const localMatches = localCities.filter(c => c.toLowerCase().includes(q));
+        
+        const merged = [...new Set([...globalCities, ...localMatches])].slice(0, 8);
+        setCitySuggestions(merged);
+      } catch (err) {
+        // Fallback to local only on network error
+        const q = val.toLowerCase();
+        const localMatches = localCities.filter(c => c.toLowerCase().includes(q));
+        setCitySuggestions(localMatches.slice(0, 8));
+      } finally {
+        setSearching(false);
+      }
+    }, 400); // 400ms debounce
+  }, [localCities]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        dropdownRef.current && !dropdownRef.current.contains(e.target) &&
+        cityInputRef.current && !cityInputRef.current.contains(e.target)
+      ) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Keyboard navigation
+  const handleCityKeyDown = (e) => {
+    if (!showDropdown || citySuggestions.length === 0) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setHighlightIdx(prev => (prev < citySuggestions.length - 1 ? prev + 1 : 0));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setHighlightIdx(prev => (prev > 0 ? prev - 1 : citySuggestions.length - 1));
+    } else if (e.key === 'Enter' && highlightIdx >= 0) {
+      e.preventDefault();
+      selectCity(citySuggestions[highlightIdx]);
+    } else if (e.key === 'Escape') {
+      setShowDropdown(false);
+    }
+  };
+
+  const selectCity = (name) => {
+    setCity(name);
+    setShowDropdown(false);
+    setHighlightIdx(-1);
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -37,6 +142,7 @@ export default function WaitlistModal({ isOpen, onClose }) {
         setEmail('');
         setCity('');
         setErrorMsg('');
+        setShowDropdown(false);
         onClose();
       }
     });
@@ -48,6 +154,7 @@ export default function WaitlistModal({ isOpen, onClose }) {
 
     setStatus('submitting');
     setErrorMsg('');
+    setShowDropdown(false);
 
     try {
       const res = await fetch('/api/waitlist', {
@@ -140,7 +247,7 @@ export default function WaitlistModal({ isOpen, onClose }) {
                 </div>
               </div>
 
-              <div className="modal__field">
+              <div className="modal__field modal__field--city" style={{ position: 'relative' }}>
                 <label className="modal__label" htmlFor="modal-city">Your City</label>
                 <div className="modal__input-wrap">
                   <svg className="modal__input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -148,15 +255,42 @@ export default function WaitlistModal({ isOpen, onClose }) {
                     <circle cx="12" cy="10" r="3"/>
                   </svg>
                   <input
+                    ref={cityInputRef}
                     type="text"
                     id="modal-city"
                     className="modal__input"
-                    placeholder="e.g. Bangalore, Mumbai"
+                    placeholder="Search your city…"
                     value={city}
-                    onChange={(e) => setCity(e.target.value)}
+                    onChange={(e) => handleCityChange(e.target.value)}
+                    onFocus={() => handleCityChange(city)}
+                    onKeyDown={handleCityKeyDown}
                     required
+                    autoComplete="off"
                   />
+                  {searching && (
+                    <div style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)' }}>
+                       <span className="modal__spinner" style={{ display: 'block', width: '14px', height: '14px', borderWidth: '2px', borderTopColor: '#C4B5FD', borderRightColor: 'transparent', borderBottomColor: 'transparent', borderLeftColor: '#C4B5FD', borderRadius: '50%' }}></span>
+                    </div>
+                  )}
                 </div>
+                {showDropdown && citySuggestions.length > 0 && (
+                  <div ref={dropdownRef} className="city-dropdown">
+                    {citySuggestions.map((name, i) => (
+                      <div
+                        key={name}
+                        className={`city-dropdown__item ${i === highlightIdx ? 'city-dropdown__item--active' : ''}`}
+                        onClick={() => selectCity(name)}
+                        onMouseEnter={() => setHighlightIdx(i)}
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                          <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                        {name}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {errorMsg && (
@@ -165,7 +299,7 @@ export default function WaitlistModal({ isOpen, onClose }) {
 
               <button type="submit" className="modal__submit" disabled={status === 'submitting'}>
                 {status === 'submitting' ? (
-                  <span className="modal__spinner"></span>
+                  <span className="modal__spinner" style={{display: 'block'}}></span>
                 ) : (
                   <>
                     Get Early Access
