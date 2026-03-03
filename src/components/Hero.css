@@ -113,7 +113,7 @@
   border-radius: var(--radius-pill);
   font-size: 0.82rem;
   font-weight: 500;
-  color: #7C3AED;
+  color: #C4B5FD;
   margin-bottom: var(--space-xl);
   letter-spacing: 0.02em;
 }
@@ -121,7 +121,7 @@
 .hero__badge-dot {
   width: 7px;
   height: 7px;
-  background: #7C3AED;
+  background: #C4B5FD;
   border-radius: var(--radius-full);
   animation: pulse-badge 2s ease-in-out infinite;
 }

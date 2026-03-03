@@ -54,13 +54,13 @@ export default function Gallery() {
 
       // Bento box stagger animation
       gsap.fromTo('.bento-item', {
-        y: 60, opacity: 0, scale: 0.9, filter: 'blur(10px)'
+        y: 40, opacity: 0, scale: 0.95
       }, {
-        y: 0, opacity: 1, scale: 1, filter: 'blur(0px)', duration: 0.9,
-        stagger: 0.15, ease: 'power3.out',
+        y: 0, opacity: 1, scale: 1, duration: 0.6,
+        stagger: 0.1, ease: 'power3.out',
         scrollTrigger: {
           trigger: '.bento-grid',
-          start: 'top 80%',
+          start: 'top 90%',
         }
       });
     }, sectionRef);
