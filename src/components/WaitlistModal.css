@@ -64,14 +64,15 @@
 }
 
 .modal__brand {
-  position: absolute;
-  top: 24px;
-  left: 24px;
-  font-size: 0.9rem;
+  display: flex;
+  justify-content: center;
+  margin: 0 auto 20px auto;
+  font-size: 1.2rem;
   font-weight: 800;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.15em;
   background: linear-gradient(to right, #C4B5FD, #5EEAD4);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   user-select: none;
 }
@@ -97,6 +98,7 @@
   letter-spacing: -0.02em;
   background: linear-gradient(135deg, #FF6B6B 0%, #C4B5FD 50%, #5EEAD4 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -316,7 +318,6 @@
   .modal { padding: 32px 24px; border-radius: 16px; }
   .modal__title { font-size: 1.75rem; }
   .modal__close { top: 12px; right: 12px; }
-  .modal__brand { top: 20px; left: 20px; }
 }
 
 /* FORCE DROPDOWN BACKGROUND styling fixes */

@@ -203,23 +203,6 @@ export default function WaitlistModal({ isOpen, onClose }) {
         {status !== 'success' ? (
           <div className="modal__body">
             <div className="modal__brand">ORBIT</div>
-            <div className="modal__icon">
-              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                <circle cx="16" cy="16" r="14" stroke="url(#modal-g1)" strokeWidth="2"/>
-                <ellipse cx="16" cy="16" rx="9" ry="14" transform="rotate(35 16 16)" stroke="url(#modal-g2)" strokeWidth="1.5"/>
-                <circle cx="16" cy="16" r="4" fill="url(#modal-g1)"/>
-                <defs>
-                  <linearGradient id="modal-g1" x1="0" y1="0" x2="32" y2="32">
-                    <stop offset="0%" stopColor="#FF6B6B"/>
-                    <stop offset="100%" stopColor="#5EEAD4"/>
-                  </linearGradient>
-                  <linearGradient id="modal-g2" x1="4" y1="4" x2="28" y2="28">
-                    <stop offset="0%" stopColor="#C4B5FD"/>
-                    <stop offset="100%" stopColor="#FF6B6B"/>
-                  </linearGradient>
-                </defs>
-              </svg>
-            </div>
 
             <h2 className="modal__title"><span className="gradient-text">Join the Waitlist</span></h2>
             <p className="modal__subtitle">
