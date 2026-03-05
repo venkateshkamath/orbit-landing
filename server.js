@@ -201,7 +201,7 @@ app.get('/api/health', (req, res) => {
 
 // ─── SPA fallback: serve index.html for all non-API routes ──
 if (!process.env.VERCEL) {
-  app.get('*', (req, res) => {
+  app.get('{*path}', (req, res) => {
     res.sendFile(path.join(__dirname, 'dist', 'index.html'));
   });
 
