@@ -16,6 +16,7 @@ import Footer from './components/Footer';
 import WaitlistModal from './components/WaitlistModal';
 import Dashboard from './components/Dashboard';
 import Login from './components/Login';
+import NotFound from './components/NotFound';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -74,6 +75,8 @@ export default function App() {
         />
         {/* Redirect old dashboard link to admin */}
         <Route path="/dashboard" element={<Navigate to="/orbit-admin" replace />} />
+        {/* Catch-all 404 Route */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
       <WaitlistModal isOpen={isModalOpen} onClose={closeModal} />
     </Router>

@@ -1,0 +1,124 @@
+.not-found-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #0F0F1A;
+  color: #F8F9FA;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+}
+
+.not-found-gradient {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.gradient-1 {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(196, 181, 253, 0.2) 0%, rgba(0, 0, 0, 0) 70%);
+  top: -20%;
+  left: -10%;
+}
+
+.gradient-2 {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(255, 107, 107, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+  bottom: -20%;
+  right: -10%;
+}
+
+.not-found-content {
+  position: relative;
+  z-index: 2;
+  max-width: 500px;
+  padding: 40px;
+  background: rgba(28, 28, 46, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  border-radius: 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.not-found-icon-wrapper {
+  color: #C4B5FD;
+  margin-bottom: 24px;
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-15px) rotate(5deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+.not-found-title {
+  font-size: 6rem;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+.bg-gradient {
+  background: linear-gradient(135deg, #FF6B6B 0%, #C4B5FD 50%, #5EEAD4 100%);
+}
+
+.text-transparent {
+  color: transparent;
+}
+
+.bg-clip-text {
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+.not-found-subtitle {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin: 16px 0;
+  color: #E2E8F0;
+}
+
+.not-found-text {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #9CA3AF;
+  margin-bottom: 32px;
+}
+
+.not-found-button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  color: white;
+  text-decoration: none;
+  background: linear-gradient(135deg, rgba(255, 107, 107, 0.8) 0%, rgba(196, 181, 253, 0.8) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 20px rgba(196, 181, 253, 0.2);
+}
+
+.not-found-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 25px rgba(196, 181, 253, 0.3);
+  background: linear-gradient(135deg, rgba(255, 107, 107, 0.9) 0%, rgba(196, 181, 253, 0.9) 100%);
+}
+
+.not-found-button:active {
+  transform: translateY(0);
+}
