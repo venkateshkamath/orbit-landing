@@ -102,9 +102,6 @@ export default function Dashboard() {
 
   useEffect(() => { 
     fetchStats(); 
-    // Establish polling every 15 seconds for live dashboard updates
-    const interval = setInterval(() => fetchStats(true), 15000);
-    return () => clearInterval(interval);
   }, []);
 
   const exportToCSV = () => {
