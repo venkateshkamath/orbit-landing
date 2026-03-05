@@ -51,7 +51,6 @@ async function geocodeCity(cityName) {
   return null;
 }
 
-// Geocode all cities with a small delay between requests (Nominatim rate limit: 1 req/sec)
 async function geocodeAllCities(cityStats) {
   const results = [];
   for (const city of cityStats) {

@@ -24,7 +24,9 @@ const toTitleCase = (str) =>
   str.trim().replace(/\s+/g, ' ').replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
 
 // ─── Serve the Vite build (production) ────────────────────
-app.use(express.static(path.join(__dirname, 'dist')));
+if (!process.env.VERCEL) {
+  app.use(express.static(path.join(__dirname, 'dist')));
+}
 
 // POST /api/admin/login — secure backend login
 app.post('/api/admin/login', (req, res) => {
@@ -198,12 +200,16 @@ app.get('/api/health', (req, res) => {
 });
 
 // ─── SPA fallback: serve index.html for all non-API routes ──
-app.get('{*path}', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
-});
+if (!process.env.VERCEL) {
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+  });
 
-app.listen(PORT, () => {
-  console.log(`\n🚀 ORBIT running on port ${PORT}`);
-  console.log(`📊 Database: Supabase (${SUPABASE_URL})`);
-  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}\n`);
-});
+  app.listen(PORT, () => {
+    console.log(`\n🚀 ORBIT running on port ${PORT}`);
+    console.log(`📊 Database: Supabase (${SUPABASE_URL})`);
+    console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}\n`);
+  });
+}
+
+export default app;
