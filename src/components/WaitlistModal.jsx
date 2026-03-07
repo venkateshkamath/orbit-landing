@@ -7,6 +7,10 @@ export default function WaitlistModal({ isOpen, onClose }) {
   const modalRef = useRef(null);
   const [email, setEmail] = useState('');
   const [city, setCity] = useState('');
+  const [age, setAge] = useState('');
+  const [gender, setGender] = useState('');
+  const [profession, setProfession] = useState('');
+  const [otherProfession, setOtherProfession] = useState('');
   const [status, setStatus] = useState('idle'); // idle | submitting | success | error
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -141,6 +145,10 @@ export default function WaitlistModal({ isOpen, onClose }) {
         setStatus('idle');
         setEmail('');
         setCity('');
+        setAge('');
+        setGender('');
+        setProfession('');
+        setOtherProfession('');
         setErrorMsg('');
         setShowDropdown(false);
         onClose();
@@ -150,7 +158,8 @@ export default function WaitlistModal({ isOpen, onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email || !city || status === 'submitting') return;
+    const finalProfession = profession === 'Other' ? otherProfession.trim() : profession;
+    if (!email || !city || !age || !gender || !finalProfession || status === 'submitting') return;
 
     setStatus('submitting');
     setErrorMsg('');
@@ -160,7 +169,7 @@ export default function WaitlistModal({ isOpen, onClose }) {
       const res = await fetch('/api/waitlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, city }),
+        body: JSON.stringify({ email, city, age, gender, profession: finalProfession }),
       });
 
       const data = await res.json();
@@ -275,6 +284,94 @@ export default function WaitlistModal({ isOpen, onClose }) {
                   </div>
                 )}
               </div>
+
+              <div className="modal__field">
+                <label className="modal__label" htmlFor="modal-age">Age</label>
+                <div className="modal__input-wrap">
+                  <svg className="modal__input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                  </svg>
+                  <input
+                    type="number"
+                    id="modal-age"
+                    className="modal__input"
+                    placeholder="Your age"
+                    value={age}
+                    onChange={(e) => setAge(e.target.value)}
+                    required
+                    min="1"
+                  />
+                </div>
+              </div>
+
+              <div className="modal__field">
+                <label className="modal__label" htmlFor="modal-gender">Gender</label>
+                <div className="modal__input-wrap">
+                  <svg className="modal__input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="m12 16 4-4-4-4"></path>
+                    <path d="M8 12h8"></path>
+                  </svg>
+                  <select
+                    id="modal-gender"
+                    className="modal__input"
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value)}
+                    required
+                  >
+                    <option value="" disabled>Select your gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Non-binary">Non-binary</option>
+                    <option value="Prefer not to say">Prefer not to say</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="modal__field">
+                <label className="modal__label" htmlFor="modal-profession">Profession</label>
+                <div className="modal__input-wrap">
+                  <svg className="modal__input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                  </svg>
+                  <select
+                    id="modal-profession"
+                    className="modal__input"
+                    value={profession}
+                    onChange={(e) => setProfession(e.target.value)}
+                    required
+                  >
+                    <option value="" disabled>Select your profession</option>
+                    <option value="Student">Student</option>
+                    <option value="Software Engineer">Software Engineer</option>
+                    <option value="Designer">Designer</option>
+                    <option value="Product Manager">Product Manager</option>
+                    <option value="Founder">Founder</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+
+              {profession === 'Other' && (
+                <div className="modal__field" style={{ marginTop: '-8px' }}>
+                  <div className="modal__input-wrap">
+                    <svg className="modal__input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                    <input
+                      type="text"
+                      className="modal__input"
+                      placeholder="Please specify your profession"
+                      value={otherProfession}
+                      onChange={(e) => setOtherProfession(e.target.value)}
+                      required={profession === 'Other'}
+                    />
+                  </div>
+                </div>
+              )}
 
               {errorMsg && (
                 <p className="modal__error">{errorMsg}</p>

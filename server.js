@@ -44,10 +44,10 @@ app.post('/api/admin/login', (req, res) => {
 // POST /api/waitlist — save email + city to Supabase
 app.post('/api/waitlist', async (req, res) => {
   try {
-    const { email, city } = req.body;
+    const { email, city, age, gender, profession } = req.body;
 
-    if (!email || !city) {
-      return res.status(400).json({ error: 'Email and city are required.' });
+    if (!email || !city || !age || !gender || !profession) {
+      return res.status(400).json({ error: 'All fields are required.' });
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -69,7 +69,7 @@ app.post('/api/waitlist', async (req, res) => {
 
     const { data, error } = await supabase
       .from('waitlist')
-      .insert([{ email: email.toLowerCase(), city: normalizedCity }])
+      .insert([{ email: email.toLowerCase(), city: normalizedCity, age: Number(age), gender, profession }])
       .select();
 
     if (error) {
