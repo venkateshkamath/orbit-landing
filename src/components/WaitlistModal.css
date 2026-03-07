@@ -36,6 +36,8 @@
   z-index: -1;
   opacity: 0.4;
   pointer-events: none;
+  transform: translateZ(0);
+  will-change: transform;
 }
 .modal__decor--1 { top: -50px; right: -50px; background: rgba(196, 181, 253, 0.3); }
 .modal__decor--2 { bottom: -80px; left: -80px; background: rgba(255, 107, 107, 0.2); }

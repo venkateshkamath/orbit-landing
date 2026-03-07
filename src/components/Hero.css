@@ -25,6 +25,8 @@
   border-radius: 50%;
   filter: blur(100px);
   opacity: 0.35;
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .hero__gradient--1 {

@@ -47,6 +47,8 @@
   z-index: 1;
   pointer-events: none;
   transition: var(--transition-base);
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .gradient-1 {
