@@ -16,9 +16,14 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // ─── Supabase ─────────────────────────────────────────────
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://aayqbazqqfyetkwhhwnt.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_KEY || 'sb_publishable_xzWQowLPMrAPuExx_GYb0A_AX6NJRY0';
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_KEY;
+
+if (!SUPABASE_URL || !SUPABASE_KEY) {
+  console.error('❌ CRITICAL: SUPABASE_URL and SUPABASE_KEY must be provided in environment variables.');
+}
+
+const supabase = createClient(SUPABASE_URL || '', SUPABASE_KEY || '');
 
 app.use(cors());
 app.use(express.json());
@@ -35,8 +40,12 @@ if (!process.env.VERCEL) {
 // POST /api/admin/login — secure backend login
 app.post('/api/admin/login', (req, res) => {
   const { username, password } = req.body;
-  const ADMIN_USER = process.env.ADMIN_USER || 'orbitAdmin';
-  const ADMIN_PASS = process.env.ADMIN_PASS || 'orbitAdmin3326';
+  const ADMIN_USER = process.env.ADMIN_USER;
+  const ADMIN_PASS = process.env.ADMIN_PASS;
+
+  if (!ADMIN_USER || !ADMIN_PASS) {
+    return res.status(500).json({ success: false, error: 'Admin credentials not configured on server.' });
+  }
 
   if (username === ADMIN_USER && password === ADMIN_PASS) {
     res.json({ success: true, token: 'orbit_secure_session_token_' + Date.now() });
@@ -182,12 +191,12 @@ const buildWelcomeEmail = (email) => {
 const sendWelcomeEmail = (email) => {
   try {
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.hostinger.com',
-      port: process.env.SMTP_PORT || 465,
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
       secure: true,
       auth: {
-        user: process.env.SMTP_USER || 'hello@joinorbit.org',
-        pass: process.env.SMTP_PASS || 'orbitAdmin3326*',
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
       },
     });
 
@@ -399,8 +408,8 @@ app.post('/api/admin/email-export', async (req, res) => {
 
     // Create Transporter (Requires env variables)
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.hostinger.com',
-      port: process.env.SMTP_PORT || 465,
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
       secure: true, // true for 465, false for other ports
       auth: {
         user: process.env.SMTP_USER,
@@ -408,7 +417,7 @@ app.post('/api/admin/email-export', async (req, res) => {
       },
     });
 
-    const targetEmail = 'harshithakulal1999@gmail.com';
+    const targetEmail = process.env.EXPORT_EMAIL
 
     // Verify SMTP config exists to prevent unhandled rejections if empty
     if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
@@ -464,19 +473,19 @@ cron.schedule('0 */6 * * *', async () => {
     const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
 
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.hostinger.com',
-      port: process.env.SMTP_PORT || 465,
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
       secure: true,
       auth: {
-        user: process.env.SMTP_USER || 'hello@joinorbit.org',
-        pass: process.env.SMTP_PASS || 'orbitAdmin3326*',
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
       },
     });
 
-    const targetEmail = 'irenik.tech@gmail.com';
+    const targetEmail = process.env.EXPORT_EMAIL || 'harshithakulal1999@gmail.com';
 
     await transporter.sendMail({
-      from: `"Orbit Waitlist" <${process.env.SMTP_USER || 'hello@joinorbit.org'}>`,
+      from: `"Orbit Waitlist" <${process.env.SMTP_USER}>`,
       to: targetEmail,
       subject: `Orbit Waitlist Scheduled Export - ${new Date().toISOString().split('T')[0]}`,
       text: 'Hello,\n\nAttached is the scheduled export of the Orbit waitlist.\n\nBest,\nOrbit Admin',
