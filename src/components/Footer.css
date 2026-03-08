@@ -35,7 +35,7 @@
 
 .footer__logo-text {
   font-family: var(--font-heading);
-  font-size: 1.4rem;
+  font-size: 1rem;
   font-weight: 800;
   letter-spacing: 0.15em;
   background: var(--color-accent-gradient);
@@ -46,7 +46,7 @@
 }
 
 .footer__tagline {
-  font-size: 1.1rem;
+  font-size: 1rem;
   /* Slightly larger for better hierarchy */
   color: var(--color-text-muted);
   line-height: 1.5;
@@ -65,7 +65,7 @@
 .footer__contact-link {
   color: #ffffff;
   text-decoration: none;
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 500;
   transition: all var(--transition-fast);
   font-family: var(--font-body);
