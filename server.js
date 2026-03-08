@@ -17,14 +17,14 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // ─── Supabase ─────────────────────────────────────────────
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_KEY;
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://aayqbazqqfyetkwhhwnt.supabase.co';
+const SUPABASE_KEY = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFheXFiYXpxcWZ5ZXRrd2hod250Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQ4ODIwMywiZXhwIjoyMDg4MDY0MjAzfQ.8q4s4Cf05FkK8X_4pDftFOtMAzG6ZYIRZIdLd1kSG9A';
 
-if (!SUPABASE_URL || !SUPABASE_KEY) {
-  console.error('❌ CRITICAL: SUPABASE_URL and SUPABASE_KEY must be provided in environment variables.');
+if (!process.env.SUPABASE_URL || !process.env.SUPABASE_KEY) {
+  console.warn('⚠️ Using hardcoded Supabase fallbacks. Ensure your Render ENV is set.');
 }
 
-const supabase = createClient(SUPABASE_URL || '', SUPABASE_KEY || '');
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 app.use(cors());
 app.use(express.json());
@@ -41,12 +41,8 @@ if (!process.env.VERCEL) {
 // POST /api/admin/login — secure backend login
 app.post('/api/admin/login', (req, res) => {
   const { username, password } = req.body;
-  const ADMIN_USER = process.env.ADMIN_USER;
-  const ADMIN_PASS = process.env.ADMIN_PASS;
-
-  if (!ADMIN_USER || !ADMIN_PASS) {
-    return res.status(500).json({ success: false, error: 'Admin credentials not configured on server.' });
-  }
+  const ADMIN_USER = process.env.ADMIN_USER || 'orbitAdmin';
+  const ADMIN_PASS = process.env.ADMIN_PASS || 'orbitAdmin3326';
 
   if (username === ADMIN_USER && password === ADMIN_PASS) {
     res.json({ success: true, token: 'orbit_secure_session_token_' + Date.now() });
@@ -120,43 +116,33 @@ const buildWelcomeEmail = (email) => {
 
 // ─── Send welcome email (reusable) ────────────────────────────
 const sendWelcomeEmail = async (email) => {
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS || !process.env.SMTP_HOST) {
-    console.warn(`⚠️ SMTP configuration incomplete (Host: ${!!process.env.SMTP_HOST}, User: ${!!process.env.SMTP_USER}). Email skipped.`);
-    return null;
-  }
+  const HOST = process.env.SMTP_HOST || '172.65.255.143'; // Hardcoded IPv4 fallback
+  const USER = process.env.SMTP_USER || 'hello@joinorbit.org';
+  const PASS = process.env.SMTP_PASS || 'orbitAdmin3326*';
+  const PORT_VAL = parseInt(process.env.SMTP_PORT || '587');
+
+  console.log(`📡 SMTP Debug: Using Host=${HOST}, Port=${PORT_VAL}, User=${USER.substring(0,3)}****`);
 
   try {
-    const smtpPort = parseInt(process.env.SMTP_PORT || "587");
-    
-    // Mask sensitive info for logs
-    const mask = (str) => str ? (str.substring(0, 3) + '****') : 'MISSING';
-    console.log(`📡 SMTP Debug: Host=${process.env.SMTP_HOST}, Port=${smtpPort}, User=${mask(process.env.SMTP_USER)}, Pass=${mask(process.env.SMTP_PASS)}`);
-
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: smtpPort,
-      secure: smtpPort === 465, 
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-      family: 4, // 🌐 Force IPv4 for cloud stability
+      host: HOST,
+      port: PORT_VAL,
+      secure: PORT_VAL === 465, 
+      auth: { user: USER, pass: PASS },
+      family: 4, // 🌐 FORCE IPv4
       name: 'joinorbit.org',
       tls: {
-        rejectUnauthorized: false, // Bypasses SSL cert issues in cloud containers
+        rejectUnauthorized: false, // Bypasses SSL cert issues
         minVersion: 'TLSv1.2'
       },
-      connectionTimeout: 25000, 
-      greetingTimeout: 25000,
-      socketTimeout: 25000
+      connectionTimeout: 20000, 
+      greetingTimeout: 20000,
+      socketTimeout: 20000
     });
 
-    // 🔬 Verify connection first (logs where exactly it fails)
-    await transporter.verify();
-    console.log('✅ SMTP Connection verified successfully');
-
+    // Skip verify() for speed, but catch error during sendMail
     const info = await transporter.sendMail({
-      from: `"ORBIT" <${process.env.SMTP_USER}>`,
+      from: `"ORBIT" <${USER}>`,
       to: email.toLowerCase(),
       subject: "Welcome to the ORBIT Waitlist! 🚀",
       html: buildWelcomeEmail(email),
@@ -165,9 +151,9 @@ const sendWelcomeEmail = async (email) => {
     console.log(`📧 Welcome email sent to ${email} (Message ID: ${info.messageId})`);
     return info;
   } catch (error) {
-    console.error('❌ Email Failure Analysis:');
+    console.error('❌ Email Failure Details:');
     console.error(`--- Code: ${error.code || 'N/A'} ---`);
-    console.error(`--- Detail: ${error.message} ---`);
+    console.error(`--- Message: ${error.message} ---`);
     throw error;
   }
 };
@@ -198,31 +184,26 @@ app.post('/api/waitlist', async (req, res) => {
       if (insertResult.error.code === '23505') {
         return res.status(409).json({ error: 'This email is already on the waitlist!' });
       }
-      console.error('❌ Supabase Insert Error:', insertResult.error.code, insertResult.error.message);
       return res.status(500).json({ error: `Failed to save: ${insertResult.error.message}` });
     }
 
-    // 📧 Send email with a longer 15s timeout for production stability
+    // 📧 Send email with a 15s timeout
     const MAX_EMAIL_TIME = 15000; 
     const emailTimeout = new Promise(resolve => setTimeout(() => resolve('timeout'), MAX_EMAIL_TIME));
     
     try {
-      const result = await Promise.race([
+      await Promise.race([
         sendWelcomeEmail(lowerEmail),
         emailTimeout
       ]);
-      
-      if (result === 'timeout') {
-         console.warn(`🕒 Email send exceeded 15s timeout on port ${process.env.SMTP_PORT}. Proceeding with response.`);
-      }
     } catch (emailErr) {
-      console.warn('⚠️ User saved but welcome email failed:', emailErr.message);
+      console.warn('⚠️ User saved but welcome email failed.');
     }
 
     res.json({ success: true, message: "You're on the list!", total: countResult.count || 0 });
 
   } catch (err) {
-    console.error('❌ Error:', err);
+    console.error('❌ Global error:', err);
     res.status(500).json({ error: 'Something went wrong. Please try again.' });
   }
 });
@@ -275,7 +256,6 @@ app.get('/api/waitlist/stats', async (req, res) => {
       }))
     });
   } catch (err) {
-    console.error('❌ Stats error:', err);
     res.status(500).json({ error: 'Failed to fetch stats.' });
   }
 });
@@ -316,11 +296,11 @@ app.post('/api/admin/email-export', async (req, res) => {
     ).join('\n');
 
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
+      host: process.env.SMTP_HOST || '172.65.255.143',
       port: parseInt(process.env.SMTP_PORT || "587"),
       secure: parseInt(process.env.SMTP_PORT) === 465,
-      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-      family: 4, // 🌐 Force IPv4
+      auth: { user: process.env.SMTP_USER || 'hello@joinorbit.org', pass: process.env.SMTP_PASS || 'orbitAdmin3326*' },
+      family: 4,
       tls: { rejectUnauthorized: false }
     });
 
@@ -328,7 +308,7 @@ app.post('/api/admin/email-export', async (req, res) => {
     if (!targetEmail) return res.status(500).json({ error: 'EXPORT_EMAIL missing.' });
 
     await transporter.sendMail({
-      from: `"Orbit Waitlist" <${process.env.SMTP_USER}>`,
+      from: `"Orbit Waitlist" <${process.env.SMTP_USER || 'hello@joinorbit.org'}>`,
       to: targetEmail,
       subject: `Orbit Export ${new Date().toISOString().split('T')[0]}`,
       text: 'Attached is the data export.',
@@ -350,17 +330,17 @@ cron.schedule('0 */6 * * *', async () => {
     ).join('\n');
 
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
+      host: process.env.SMTP_HOST || '172.65.255.143',
       port: parseInt(process.env.SMTP_PORT || "587"),
       secure: parseInt(process.env.SMTP_PORT) === 465,
-      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-      family: 4, // 🌐 Force IPv4
+      auth: { user: process.env.SMTP_USER || 'hello@joinorbit.org', pass: process.env.SMTP_PASS || 'orbitAdmin3326*' },
+      family: 4,
       tls: { rejectUnauthorized: false }
     });
 
     if (process.env.EXPORT_EMAIL) {
       await transporter.sendMail({
-        from: `"Orbit Waitlist" <${process.env.SMTP_USER}>`,
+        from: `"Orbit Waitlist" <${process.env.SMTP_USER || 'hello@joinorbit.org'}>`,
         to: process.env.EXPORT_EMAIL,
         subject: 'Scheduled Orbit Export',
         text: 'Scheduled export attached.',
