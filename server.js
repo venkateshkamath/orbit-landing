@@ -1,9 +1,11 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { createClient } from '@supabase/supabase-js';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
+import nodemailer from 'nodemailer';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -33,7 +35,7 @@ app.post('/api/admin/login', (req, res) => {
   const { username, password } = req.body;
   const ADMIN_USER = process.env.ADMIN_USER || 'orbitAdmin';
   const ADMIN_PASS = process.env.ADMIN_PASS || 'orbitAdmin3326';
-  
+
   if (username === ADMIN_USER && password === ADMIN_PASS) {
     res.json({ success: true, token: 'orbit_secure_session_token_' + Date.now() });
   } else {
@@ -211,5 +213,129 @@ if (!process.env.VERCEL) {
     console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}\n`);
   });
 }
+
+
+// POST /api/admin/email-export — generate and email CSV
+app.post('/api/admin/email-export', async (req, res) => {
+  try {
+    const { data: allData, error: dbError } = await supabase
+      .from('waitlist')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (dbError) throw dbError;
+
+    // Generate CSV
+    const headers = ['Email', 'City', 'Age', 'Gender', 'Profession', 'Joined Date'];
+    const rows = allData.map(s => [
+      s.email,
+      `"${(s.city || 'Unknown').replace(/"/g, '""')}"`,
+      s.age || 'N/A',
+      `"${(s.gender || 'N/A').replace(/"/g, '""')}"`,
+      `"${(s.profession || 'N/A').replace(/"/g, '""')}"`,
+      new Date(s.created_at).toLocaleString()
+    ]);
+
+    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+
+    // Create Transporter (Requires env variables)
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST || 'smtp.hostinger.com',
+      port: process.env.SMTP_PORT || 465,
+      secure: true, // true for 465, false for other ports
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+
+    const targetEmail = 'harshithakulal1999@gmail.com';
+
+    // Verify SMTP config exists to prevent unhandled rejections if empty
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      console.warn('⚠️ SMTP_USER or SMTP_PASS not found. Email not sent.');
+      return res.status(500).json({ error: 'SMTP configuration is missing on the server.' });
+    }
+
+    await transporter.sendMail({
+      from: `"Orbit Waitlist" <${process.env.SMTP_USER}>`,
+      to: targetEmail,
+      subject: `Orbit Waitlist Data Export - ${new Date().toISOString().split('T')[0]}`,
+      text: 'Hello,\n\nAttached is the latest export of the Orbit waitlist.\n\nBest,\nOrbit Admin',
+      attachments: [
+        {
+          filename: `orbit_waitlist_${new Date().toISOString().split('T')[0]}.csv`,
+          content: csvContent,
+          contentType: 'text/csv'
+        }
+      ]
+    });
+
+    res.json({ success: true, message: `Email triggered successfully to ${targetEmail}!` });
+  } catch (err) {
+    console.error('❌ Email export error:', err);
+    res.status(500).json({ error: 'Failed to generate and email CSV.' });
+  }
+});
+
+
+import cron from 'node-cron';
+
+// ─── Automated Email Cron Job (Runs Backend Level) ────────
+// Use '0 */6 * * *' to run every 6 hours and '*/5 * * * *' for 5 minutes
+cron.schedule('0 */6 * * *', async () => {
+  console.log('⏰ Running scheduled email export (every 6 hours)...');
+  try {
+    const { data: allData, error: dbError } = await supabase
+      .from('waitlist')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (dbError) throw dbError;
+
+    // Generate CSV
+    const headers = ['Email', 'City', 'Age', 'Gender', 'Profession', 'Joined Date'];
+    const rows = allData.map(s => [
+      s.email,
+      `"${(s.city || 'Unknown').replace(/"/g, '""')}"`,
+      s.age || 'N/A',
+      `"${(s.gender || 'N/A').replace(/"/g, '""')}"`,
+      `"${(s.profession || 'N/A').replace(/"/g, '""')}"`,
+      new Date(s.created_at).toLocaleString()
+    ]);
+
+    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.hostinger.com',
+      port: 465,
+      secure: true,
+      auth: {
+        user: 'hello@joinorbit.org',
+        pass: 'orbitAdmin3326*',
+      },
+    });
+
+    const targetEmail = 'irenik.tech@gmail.com';
+
+    await transporter.sendMail({
+      from: `"Orbit Waitlist" <hello@joinorbit.org>`,
+      to: targetEmail,
+      subject: `Orbit Waitlist Scheduled Export - ${new Date().toISOString().split('T')[0]}`,
+      text: 'Hello,\n\nAttached is the scheduled export of the Orbit waitlist.\n\nBest,\nOrbit Admin',
+      attachments: [
+        {
+          filename: `orbit_waitlist_scheduled_${new Date().toISOString().split('T')[0]}.csv`,
+          content: csvContent,
+          contentType: 'text/csv'
+        }
+      ]
+    });
+
+    console.log(`✅ Scheduled email successfully sent to ${targetEmail}`);
+  } catch (err) {
+    console.error('❌ Cron email export error:', err);
+  }
+});
 
 export default app;
