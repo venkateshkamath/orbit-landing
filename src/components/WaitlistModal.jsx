@@ -208,7 +208,7 @@ export default function WaitlistModal({ isOpen, onClose }) {
 
             <h2 className="modal__title"><span className="gradient-text">Join the Waitlist</span></h2>
             <p className="modal__subtitle">
-              Be among the first to experience ORBIT. We'll notify you when we launch in your city.
+              Be among the first to experience ORBIT. We'll notify you when we launch.
             </p>
 
             <form className="modal__form" onSubmit={handleSubmit}>
