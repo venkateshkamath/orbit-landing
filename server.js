@@ -140,11 +140,12 @@ const sendWelcomeEmail = async (email) => {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
       },
+      // 🌐 FORCE IPv4: Resolves the ENETUNREACH (IPv6) error common on Render
+      family: 4, 
       // 🛡️ HELO/EHLO: Some SMTP servers reject connections without an explicit name
       name: 'joinorbit.org',
       tls: {
         rejectUnauthorized: false,
-        // Optional: force STARTTLS if port is 587
         minVersion: 'TLSv1.2'
       },
       connectionTimeout: 15000, 
@@ -316,6 +317,7 @@ app.post('/api/admin/email-export', async (req, res) => {
       port: parseInt(process.env.SMTP_PORT || "587"),
       secure: parseInt(process.env.SMTP_PORT) === 465,
       auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+      family: 4, // 🌐 Force IPv4
       tls: { rejectUnauthorized: false }
     });
 
@@ -349,6 +351,7 @@ cron.schedule('0 */6 * * *', async () => {
       port: parseInt(process.env.SMTP_PORT || "587"),
       secure: parseInt(process.env.SMTP_PORT) === 465,
       auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+      family: 4, // 🌐 Force IPv4
       tls: { rejectUnauthorized: false }
     });
 
