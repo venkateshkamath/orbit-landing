@@ -190,20 +190,25 @@ const buildWelcomeEmail = (email) => {
 
 // ─── Send welcome email (reusable) ────────────────────────────
 const sendWelcomeEmail = async (email) => {
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    console.warn('⚠️ SMTP credentials missing. Email skipped.');
-    return;
+  // 🛡️ Guard: Skip if credentials are missing
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS || !process.env.SMTP_HOST) {
+    console.warn(`⚠️ SMTP configuration incomplete (Host: ${!!process.env.SMTP_HOST}, User: ${!!process.env.SMTP_USER}). Email skipped.`);
+    return null;
   }
 
   try {
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
-      port: process.env.SMTP_PORT,
+      port: Number(process.env.SMTP_PORT || 465),
       secure: true,
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
       },
+      // ⏱️ Timeouts prevent the server from hanging if SMTP is blocked
+      connectionTimeout: 8000, 
+      greetingTimeout: 8000,
+      socketTimeout: 8000
     });
 
     const info = await transporter.sendMail({
@@ -216,7 +221,9 @@ const sendWelcomeEmail = async (email) => {
     console.log(`📧 Welcome email sent to ${email} (Message ID: ${info.messageId})`);
     return info;
   } catch (error) {
-    console.error('❌ Email sending failed:', error.message);
+    console.error('❌ Email sending failed. This is likely an SMTP config/firewall issue on the server.');
+    console.error(`--- Detail: ${error.message} ---`);
+    // We throw here so the parent catch handles it gracefully
     throw error;
   }
 };
@@ -258,11 +265,22 @@ app.post('/api/waitlist', async (req, res) => {
       console.warn('⚠️ Supabase Count Error:', countResult.error.message);
     }
 
-    // Send email (Wait for it in production/serverless)
+    // 📧 Send email (Fire-and-forget but awaited with a short timeout to prevent hanging)
+    // This ensures that even if SMTP is slow/blocked, the user gets their success screen.
+    const emailTimeout = new Promise(resolve => setTimeout(() => resolve('timeout'), 4500));
+    
     try {
-      await sendWelcomeEmail(lowerEmail);
+      // Race the email send against a 4.5s timeout
+      const result = await Promise.race([
+        sendWelcomeEmail(lowerEmail),
+        emailTimeout
+      ]);
+      
+      if (result === 'timeout') {
+         console.warn('🕒 Email send exceeded 4.5s timeout. Proceeding with response.');
+      }
     } catch (emailErr) {
-      console.warn('⚠️ User saved but welcome email failed.');
+      console.warn('⚠️ User saved but welcome email failed:', emailErr.message);
     }
 
     // Send success response
