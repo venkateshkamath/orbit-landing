@@ -43,7 +43,7 @@ export default function Waitlist({ onJoinWaitlist }) {
               Join the Waitlist
             </span>
             <h2 className="waitlist__title">
-              Ready to leave<br />the algorithm behind?
+              Ready to expand<br />your orbit?
             </h2>
             <p className="waitlist__subtitle">
               Be among the first to experience ORBIT. Join our waitlist and help shape the future of real-world connections.

@@ -114,9 +114,9 @@ export default function Hero({ onJoinWaitlist }) {
         </div>
 
         <h1 ref={titleRef} className="hero__title">
-          <span className="hero__title-line">Real Connections.</span>
+          <span className="hero__title-line">Find your people.</span>
           <span className="hero__title-line">
-            <span className="gradient-text">Not Just Followers.</span>
+            <span className="gradient-text">Build your orbit.</span>
           </span>
         </h1>
 
@@ -137,70 +137,7 @@ export default function Hero({ onJoinWaitlist }) {
           </button>
         </div>
 
-        <div ref={visualRef} className="hero__visual" style={{ opacity: 0 }}>
-          {/* Pure CSS/SVG Animated Orbits */}
-          <div className="orbit-system">
-            <div className="orbit-center">
-              <div className="orbit-center-orb">
-                <span>O</span>
-              </div>
-            </div>
-
-            {/* Ring 1 - smallest */}
-            <div className="orbit-ring orbit-ring--1">
-              <div className="orbit-person orbit-person--1" style={{ top: 0, left: '50%', transform: 'translate(-50%, -50%)' }}>
-                <span style={{ background: 'linear-gradient(135deg, #FF6B6B, #FFB347)' }}>A</span>
-              </div>
-              <div className="orbit-person orbit-person--4" style={{ bottom: 0, left: '50%', transform: 'translate(-50%, 50%)' }}>
-                <span style={{ background: 'linear-gradient(135deg, #FFB347, #F59E0B)' }}>R</span>
-              </div>
-            </div>
-
-            {/* Ring 2 - medium */}
-            <div className="orbit-ring orbit-ring--2">
-              <div className="orbit-person orbit-person--2" style={{ top: '15%', right: 0, transform: 'translate(50%, -50%)' }}>
-                <span style={{ background: 'linear-gradient(135deg, #C4B5FD, #818CF8)' }}>M</span>
-              </div>
-              <div className="orbit-person orbit-person--5" style={{ bottom: '15%', left: 0, transform: 'translate(-50%, 50%)' }}>
-                <span style={{ background: 'linear-gradient(135deg, #5EEAD4, #34D399)' }}>P</span>
-              </div>
-            </div>
-
-            {/* Ring 3 - largest */}
-            <div className="orbit-ring orbit-ring--3">
-              <div className="orbit-person orbit-person--3" style={{ top: '50%', right: 0, transform: 'translate(50%, -50%)' }}>
-                <span style={{ background: 'linear-gradient(135deg, #5EEAD4, #A78BFA)' }}>D</span>
-              </div>
-              <div className="orbit-person orbit-person--6" style={{ top: '50%', left: 0, transform: 'translate(-50%, -50%)' }}>
-                <span style={{ background: 'linear-gradient(135deg, #FF6B6B, #C4B5FD)' }}>S</span>
-              </div>
-            </div>
-
-            {/* Decorative floating dots on orbits */}
-            <div className="orbit-ring orbit-ring--1">
-              <div className="orbit-dot" style={{ top: '50%', right: 0, background: '#FF6B6B' }}></div>
-            </div>
-            <div className="orbit-ring orbit-ring--2">
-              <div className="orbit-dot" style={{ bottom: 0, left: '50%', background: '#C4B5FD' }}></div>
-            </div>
-            <div className="orbit-ring orbit-ring--3">
-              <div className="orbit-dot" style={{ top: 0, left: '30%', background: '#5EEAD4' }}></div>
-            </div>
-          </div>
-          <div className="hero__visual-glow"></div>
-
-          {/* social proof */}
-          <div className="hero__social-proof">
-            <div className="hero__avatars">
-              <div className="hero__avatar" style={{ background: 'linear-gradient(135deg, #FF6B6B, #FFB347)' }}>V</div>
-              <div className="hero__avatar" style={{ background: 'linear-gradient(135deg, #C4B5FD, #818CF8)' }}>A</div>
-              <div className="hero__avatar" style={{ background: 'linear-gradient(135deg, #5EEAD4, #34D399)' }}>S</div>
-              <div className="hero__avatar" style={{ background: 'linear-gradient(135deg, #FFB347, #F59E0B)' }}>R</div>
-              <div className="hero__avatar hero__avatar--count">+{Math.floor(waitlistCount/1000)}k</div>
-            </div>
-            <p className="hero__social-text">{waitlistCount.toLocaleString()} people on the waitlist</p>
-          </div>
-        </div>
+        
       </div>
     </section>
   );

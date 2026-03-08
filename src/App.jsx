@@ -16,6 +16,11 @@ import Footer from './components/Footer';
 import WaitlistModal from './components/WaitlistModal';
 import Dashboard from './components/Dashboard';
 import Login from './components/Login';
+<<<<<<< HEAD
+=======
+import NotFound from './components/NotFound';
+import DiscoverMap from './components/DiscoverMap';
+>>>>>>> 44a9ed5 (Work in progress)
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -39,6 +44,7 @@ function LandingPage({ onJoinWaitlist }) {
       <Navbar onJoinWaitlist={onJoinWaitlist} />
       <main>
         <Hero onJoinWaitlist={onJoinWaitlist} />
+        <DiscoverMap />
         <Gallery />
         <Features />
         <HowItWorks />

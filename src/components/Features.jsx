@@ -7,26 +7,29 @@ gsap.registerPlugin(ScrollTrigger);
 
 const features = [
   {
-    icon: '/feature-discover.png',
-    title: 'Discover Nearby',
-    description: 'Find people with shared interests in your neighborhood. No endless swiping — just real, curated connections.',
-    tag: 'Discovery',
-    color: '#FF6B6B',
+    image: '/feature-discover.png',
+    name: 'Discover Nearby',
+    role: 'Find people with shared interests in your neighborhood. No endless swiping — just real, curated connections.',
+    followers: 312,
+    posts: 48,
+    verified: true
   },
   {
-    icon: '/feature-events.png',
-    title: 'Join Local Events',
-    description: 'Browse and join community events, meetups, and micro-hangouts happening around you — all in real time.',
-    tag: 'Events',
-    color: '#C4B5FD',
+    image: '/feature-events.png',
+    name: 'Join Local Events',
+    role: 'Browse and join community events, meetups, and micro-hangouts happening around you — all in real time.',
+    followers: 210,
+    posts: 35,
+    verified: true
   },
   {
-    icon: '/feature-circles.png',
-    title: 'Build Your Circle',
-    description: 'Create tight-knit groups with people who get you. Share moments, plan outings, and grow together.',
-    tag: 'Community',
-    color: '#5EEAD4',
-  },
+    image: '/feature-circles.png',
+    name: 'Build Your Circle',
+    role: 'Create tight-knit groups with people who get you. Share moments, plan outings, and grow together.',
+    followers: 198,
+    posts: 29,
+    verified: false
+  }
 ];
 
 export default function Features() {
@@ -35,32 +38,39 @@ export default function Features() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Section header animation
-      gsap.fromTo('.features__header', {
-        y: 40, opacity: 0,
-      }, {
-        y: 0, opacity: 1, duration: 0.8,
-        scrollTrigger: {
-          trigger: '.features__header',
-          start: 'top 85%',
-          toggleActions: 'play none none reverse',
+
+      gsap.fromTo('.features__header',
+        { y: 40, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.8,
+          scrollTrigger: {
+            trigger: '.features__header',
+            start: 'top 85%',
+            toggleActions: 'play none none reverse'
+          }
         }
+      );
+
+      cardsRef.current.forEach((card, i) => {
+        gsap.fromTo(card,
+          { y: 60, opacity: 0, scale: 0.96 },
+          {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            duration: 0.7,
+            delay: i * 0.15,
+            scrollTrigger: {
+              trigger: card,
+              start: 'top 88%',
+              toggleActions: 'play none none reverse'
+            }
+          }
+        );
       });
 
-      // Cards stagger animation
-      cardsRef.current.forEach((card, i) => {
-        gsap.fromTo(card, {
-          y: 60, opacity: 0, scale: 0.96,
-        }, {
-          y: 0, opacity: 1, scale: 1, duration: 0.7,
-          delay: i * 0.15,
-          scrollTrigger: {
-            trigger: card,
-            start: 'top 88%',
-            toggleActions: 'play none none reverse',
-          }
-        });
-      });
     }, sectionRef);
 
     return () => ctx.revert();
@@ -68,41 +78,78 @@ export default function Features() {
 
   return (
     <section ref={sectionRef} className="features" id="features">
+
       <div className="container">
+
         <div className="features__header">
           <span className="section-label">Features</span>
+
           <h2 className="features__title">
-            Everything you need to<br />
+            Everything you need to <br />
             <span className="gradient-text">connect offline</span>
           </h2>
+
           <p className="features__subtitle">
-            ORBIT is built for real-world connections. No algorithms deciding your friendships — just genuine moments.
+            ORBIT is built for real world connections. No algorithms deciding
+            your friendships — just genuine moments.
           </p>
         </div>
 
         <div className="features__grid">
+
           {features.map((feature, i) => (
+
             <div
-              key={feature.title}
-              ref={el => cardsRef.current[i] = el}
-              className="features__card"
-              style={{ '--card-accent': feature.color }}
+              key={feature.name}
+              ref={(el) => (cardsRef.current[i] = el)}
+              className="profile-card"
             >
-              <div className="features__card-image-wrap">
-                <img src={feature.icon} alt={feature.title} className="features__card-image" loading="lazy" />
-                <div className="features__card-image-glow" style={{ background: `radial-gradient(circle, ${feature.color}20 0%, transparent 70%)` }}></div>
+
+              <img
+                src={feature.image}
+                alt={feature.name}
+                className="profile-card__image"
+              />
+
+              <div className="profile-overlay">
+
+                <h3 className="profile-name">
+                  {feature.name}
+                  {feature.verified && (
+                    <span className="verified">✔</span>
+                  )}
+                </h3>
+
+                <p className="profile-role">
+                  {feature.role}
+                </p>
+
+                <div className="profile-meta">
+
+                  <div className="meta-item">
+                    👤 {feature.followers}
+                  </div>
+
+                  <div className="meta-item">
+                    📁 {feature.posts}
+                  </div>
+
+                  <button className="follow-btn">
+                    Follow +
+                  </button>
+
+                </div>
+
               </div>
-              <div className="features__card-content">
-                <span className="features__card-tag" style={{ color: feature.color, background: `${feature.color}12` }}>
-                  {feature.tag}
-                </span>
-                <h3 className="features__card-title">{feature.title}</h3>
-                <p className="features__card-desc">{feature.description}</p>
-              </div>
+
             </div>
+
           ))}
+
         </div>
+
       </div>
+
     </section>
   );
 }

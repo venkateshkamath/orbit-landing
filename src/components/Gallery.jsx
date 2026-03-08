@@ -78,8 +78,8 @@ export default function Gallery() {
         <div className="gallery__header">
           <span className="section-label">Real Life</span>
           <h2 className="gallery__title">
-            Stop Scrolling.<br />
-            <span className="gradient-text">Start Living.</span>
+            Social media made us connected.<br />
+            <span className="gradient-text">ORBIT makes us close.</span>
           </h2>
           <p className="gallery__subtitle">
             ORBIT is about the moments that happen when you finally put your phone down and look up. Discover the beauty of offline connections.
