@@ -107,13 +107,11 @@ export default function Dashboard() {
   const exportToCSV = () => {
     if (!stats || !stats.recentSignups) return;
     
-    const headers = ['Email', 'City', 'Age', 'Gender', 'Profession', 'Joined Date'];
+    const headers = ['Email', 'City', 'Age', 'Joined Date'];
     const rows = stats.recentSignups.map(s => [
       s.email,
       `"${(s.city || 'Unknown').replace(/"/g, '""')}"`,
       s.age || 'N/A',
-      `"${(s.gender || 'N/A').replace(/"/g, '""')}"`,
-      `"${(s.profession || 'N/A').replace(/"/g, '""')}"`,
       new Date(s.created_at).toLocaleString()
     ]);
     
@@ -150,8 +148,7 @@ export default function Dashboard() {
 
   const filteredSignups = (stats?.recentSignups || []).filter(s =>
     s.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    s.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (s.profession && s.profession.toLowerCase().includes(searchTerm.toLowerCase()))
+    s.city.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const latestGrowth = stats?.growthData?.length > 0
@@ -324,7 +321,7 @@ export default function Dashboard() {
                 <h3>Recent Signups</h3>
                 <div className="search-bar">
                   <Search size={16}/>
-                  <input type="text" placeholder="Search by email, city, or profession…" value={searchTerm} onChange={e => setSearchTerm(e.target.value)}/>
+                  <input type="text" placeholder="Search by email or city…" value={searchTerm} onChange={e => setSearchTerm(e.target.value)}/>
                 </div>
               </div>
             </div>
@@ -335,8 +332,6 @@ export default function Dashboard() {
                     <th>Email Address</th>
                     <th>Region</th>
                     <th>Age</th>
-                    <th>Gender</th>
-                    <th>Profession</th>
                     <th>Joined Date</th>
                     <th>Status</th>
                     <th></th>
@@ -351,8 +346,6 @@ export default function Dashboard() {
                       </td>
                       <td>{s.city}</td>
                       <td>{s.age || '—'}</td>
-                      <td>{s.gender || '—'}</td>
-                      <td>{s.profession || '—'}</td>
                       <td className="date-cell">
                         <Calendar size={14}/>
                         {new Date(s.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit' })}
@@ -362,7 +355,7 @@ export default function Dashboard() {
                     </tr>
                   ))}
                   {filteredSignups.length === 0 && (
-                    <tr><td colSpan={8} style={{textAlign:'center',padding:40,color:'#6B7280'}}>No signups found.</td></tr>
+                    <tr><td colSpan={6} style={{textAlign:'center',padding:40,color:'#6B7280'}}>No signups found.</td></tr>
                   )}
                 </tbody>
               </table>
