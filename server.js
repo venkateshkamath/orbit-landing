@@ -126,21 +126,30 @@ const sendWelcomeEmail = async (email) => {
   }
 
   try {
-    const smtpPort = parseInt(process.env.SMTP_PORT || "465");
+    const smtpPort = parseInt(process.env.SMTP_PORT || "587");
+    
+    // Mask sensitive info for logs
+    const mask = (str) => str ? (str.substring(0, 3) + '****') : 'MISSING';
+    console.log(`📡 SMTP Debug: Host=${process.env.SMTP_HOST}, Port=${smtpPort}, User=${mask(process.env.SMTP_USER)}, Pass=${mask(process.env.SMTP_PASS)}`);
+
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: smtpPort,
-      secure: smtpPort === 465, 
+      secure: smtpPort === 465, // True only for SSL (465), False for STARTTLS (587)
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
       },
+      // 🛡️ HELO/EHLO: Some SMTP servers reject connections without an explicit name
+      name: 'joinorbit.org',
       tls: {
-        rejectUnauthorized: false 
+        rejectUnauthorized: false,
+        // Optional: force STARTTLS if port is 587
+        minVersion: 'TLSv1.2'
       },
-      connectionTimeout: 10000, 
-      greetingTimeout: 10000,
-      socketTimeout: 10000
+      connectionTimeout: 15000, 
+      greetingTimeout: 15000,
+      socketTimeout: 15000
     });
 
     const info = await transporter.sendMail({
