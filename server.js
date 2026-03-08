@@ -8,6 +8,7 @@ import { createClient } from '@supabase/supabase-js';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import nodemailer from 'nodemailer';
+import cron from 'node-cron';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -16,9 +17,15 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // ─── Supabase ─────────────────────────────────────────────
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://aayqbazqqfyetkwhhwnt.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_KEY || 'sb_publishable_xzWQowLPMrAPuExx_GYb0A_AX6NJRY0';
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_KEY;
+
+if (!SUPABASE_URL || !SUPABASE_KEY) {
+  console.error('❌ CRITICAL: SUPABASE_URL and SUPABASE_KEY must be provided in environment variables.');
+}
+
+// Global Supabase client
+const supabase = createClient(SUPABASE_URL || '', SUPABASE_KEY || '');
 
 app.use(cors());
 app.use(express.json());
@@ -35,8 +42,12 @@ if (!process.env.VERCEL) {
 // POST /api/admin/login — secure backend login
 app.post('/api/admin/login', (req, res) => {
   const { username, password } = req.body;
-  const ADMIN_USER = process.env.ADMIN_USER || 'orbitAdmin';
-  const ADMIN_PASS = process.env.ADMIN_PASS || 'orbitAdmin3326';
+  const ADMIN_USER = process.env.ADMIN_USER;
+  const ADMIN_PASS = process.env.ADMIN_PASS;
+
+  if (!ADMIN_USER || !ADMIN_PASS) {
+    return res.status(500).json({ success: false, error: 'Admin credentials not configured on server.' });
+  }
 
   if (username === ADMIN_USER && password === ADMIN_PASS) {
     res.json({ success: true, token: 'orbit_secure_session_token_' + Date.now() });
@@ -44,6 +55,131 @@ app.post('/api/admin/login', (req, res) => {
     res.status(401).json({ success: false, error: 'Invalid credentials' });
   }
 });
+
+// ─── Build welcome email HTML ────────────────────────────────
+const buildWelcomeEmail = (email) => {
+  const username = email.split('@')[0];
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body style="margin: 0; padding: 0; background-color: #0d0d14; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+
+  <div style="max-width: 600px; margin: 0 auto; background-color: #0d0d14; border: 1px solid #1a1a24;">
+    
+    <!-- Hero / Logo Section -->
+    <div style="padding: 40px 40px 20px; text-align: center;">
+      <div style="font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 30px;">
+        <span style="background: linear-gradient(135deg, #FF6B6B 0%, #C4B5FD 50%, #5EEAD4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: #C4B5FD;">ORBIT</span>
+      </div>
+      
+      <!-- Premium Radar Visual (SVG) -->
+      <div style="margin: 20px 0 40px;">
+        <svg width="120" height="120" viewBox="0 0 120 120" fill="none" style="margin: 0 auto;">
+          <circle cx="60" cy="60" r="58" stroke="#1a1a24" stroke-width="1"/>
+          <circle cx="60" cy="60" r="40" stroke="#1a1a24" stroke-width="1"/>
+          <circle cx="60" cy="60" r="22" stroke="#1a1a24" stroke-width="1"/>
+          <circle cx="60" cy="60" r="4" fill="#C4B5FD" opacity="0.8"/>
+          <path d="M60 2 L60 118" stroke="#1a1a24" stroke-width="0.5"/>
+          <path d="M2 60 L118 60" stroke="#1a1a24" stroke-width="0.5"/>
+          <circle cx="85" cy="45" r="3" fill="#5EEAD4" opacity="0.6">
+            <animate attributeName="opacity" values="0.2;0.8;0.2" dur="3s" repeatCount="indefinite" />
+          </circle>
+          <circle cx="40" cy="80" r="4" fill="#FF6B6B" opacity="0.4">
+            <animate attributeName="opacity" values="0.1;0.6;0.1" dur="4s" repeatCount="indefinite" />
+          </circle>
+        </svg>
+      </div>
+
+      <h1 style="font-family: 'Outfit', sans-serif; font-size: 32px; font-weight: 700; color: #ffffff; margin: 0 0 16px; letter-spacing: -0.02em;">You're in Orbit, ${username}</h1>
+      <p style="font-size: 16px; line-height: 1.6; color: #94a3b8; margin: 0 auto; max-width: 460px;">
+        Welcome to the next generation of social proximity. We're building a world where connection is measured by distance, not just data.
+      </p>
+    </div>
+
+    <!-- Content Card -->
+    <div style="padding: 0 40px 40px;">
+      <div style="background: linear-gradient(180deg, #16161f 0%, #0d0d14 100%); border: 1px solid #1a1a24; border-radius: 12px; padding: 32px; text-align: center;">
+        <div style="display: inline-block; padding: 6px 12px; border-radius: 20px; background-color: rgba(94, 234, 212, 0.1); color: #5EEAD4; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 20px;">
+          Early Access Secured
+        </div>
+        <p style="color: #cbd5e1; font-size: 15px; line-height: 1.6; margin: 0 0 24px;">
+          We'll notify you as soon as we launch in your city. Get ready to experience what's happening right around you, in real-time.
+        </p>
+        <a href="https://joinorbit.org" style="display: inline-block; background: linear-gradient(135deg, #FF6B6B 0%, #C4B5FD 100%); color: #ffffff; padding: 14px 28px; border-radius: 8px; font-family: 'Outfit', sans-serif; font-weight: 600; text-decoration: none; font-size: 15px; box-shadow: 0 4px 12px rgba(255, 107, 107, 0.2);">
+          Explore the Vision
+        </a>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="padding: 30px 40px; border-top: 1px solid #1a1a24; text-align: center;">
+      <table width="100%" cellspacing="0" cellpadding="0">
+        <tr>
+          <td style="color: #64748b; font-size: 13px; line-height: 1.5;">
+            &copy; 2026 ORBIT Proximity Platform. All rights reserved.<br>
+            <div style="margin-top: 10px;">
+              <a href="https://joinorbit.org" style="color: #94a3b8; text-decoration: none; margin: 0 10px;">Website</a>
+              <a href="https://joinorbit.org/privacy" style="color: #94a3b8; text-decoration: none; margin: 0 10px;">Privacy</a>
+            </div>
+          </td>
+        </tr>
+      </table>
+
+    </div>
+  </div>
+
+</body>
+</html>`;
+};
+
+// ─── Send welcome email (reusable) ────────────────────────────
+const sendWelcomeEmail = async (email) => {
+  // 🛡️ Guard: Skip if credentials are missing
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS || !process.env.SMTP_HOST) {
+    console.warn(\`⚠️ SMTP configuration incomplete (Host: \${!!process.env.SMTP_HOST}, User: \${!!process.env.SMTP_USER}). Email skipped.\`);
+    return null;
+  }
+
+  try {
+    const smtpPort = parseInt(process.env.SMTP_PORT || "465");
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: smtpPort,
+      secure: smtpPort === 465, // Use SSL only for port 465
+      auth: {
+        user: process.env.SMTP_USER || 'hello@joinorbit.org',
+        pass: process.env.SMTP_PASS || 'orbitAdmin3326*',
+      },
+      tls: {
+        // 🧪 Crucial for cloud hosts like Render/Vercel: 
+        // prevents failure if the server has issues validating the SSL/TLS cert
+        rejectUnauthorized: false 
+      },
+      connectionTimeout: 10000, 
+      greetingTimeout: 10000,
+      socketTimeout: 10000
+    });
+
+    const info = await transporter.sendMail({
+      from: \`"ORBIT" <\${process.env.SMTP_USER}>\`,
+      to: email.toLowerCase(),
+      subject: "Welcome to the ORBIT Waitlist! 🚀",
+      html: buildWelcomeEmail(email),
+    });
+
+    console.log(\`📧 Welcome email sent to \${email} (Message ID: \${info.messageId})\`);
+    return info;
+  } catch (error) {
+    console.error('❌ Email sending failed. This is likely an SMTP config/firewall issue on the server.');
+    console.error(\`--- Detail: \${error.message} ---\`);
+    throw error;
+  }
+};
 
 // POST /api/waitlist — save email + city to Supabase
 app.post('/api/waitlist', async (req, res) => {
@@ -59,115 +195,45 @@ app.post('/api/waitlist', async (req, res) => {
       return res.status(400).json({ error: 'Please enter a valid email address.' });
     }
 
-    const { data: existing } = await supabase
-      .from('waitlist')
-      .select('email')
-      .eq('email', email.toLowerCase())
-      .maybeSingle();
-
-    if (existing) {
-      return res.status(409).json({ error: 'This email is already on the waitlist!' });
-    }
-
+    const lowerEmail = email.toLowerCase();
     const normalizedCity = toTitleCase(city);
 
-    const { data, error } = await supabase
-      .from('waitlist')
-      .insert([{ email: email.toLowerCase(), city: normalizedCity, age }])
-      .select();
+    // Parallelize getting count and inserting to save time
+    const [insertResult, countResult] = await Promise.all([
+      supabase.from('waitlist').insert([{ email: lowerEmail, city: normalizedCity, age }]).select(),
+      supabase.from('waitlist').select('*', { count: 'exact', head: true })
+    ]);
 
-    if (error) {
-      console.error('❌ Supabase error:', error.message);
-      return res.status(500).json({ error: 'Failed to save. Please try again.' });
+    if (insertResult.error) {
+      if (insertResult.error.code === '23505') { // Unique violation
+        return res.status(409).json({ error: 'This email is already on the waitlist!' });
+      }
+      console.error('❌ Supabase Insert Error:', insertResult.error.code, insertResult.error.message, insertResult.error.details);
+      return res.status(500).json({ error: \`Failed to save: \${insertResult.error.message}\` });
     }
 
-    const { count } = await supabase
-      .from('waitlist')
-      .select('*', { count: 'exact', head: true });
+    if (countResult.error) {
+      console.warn('⚠️ Supabase Count Error:', countResult.error.message);
+    }
 
-    console.log(`✅ New signup: ${email} from ${city} (Total: ${count})`);
-
-    // ─── Trigger Nodemailer Welcome Email ─────────────────────────
+    // 📧 Send email (Fire-and-forget but awaited with a short timeout to prevent hanging)
+    const emailTimeout = new Promise(resolve => setTimeout(() => resolve('timeout'), 4500));
+    
     try {
-      const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST || 'smtp.hostinger.com',
-        port: process.env.SMTP_PORT || 465,
-        secure: true, // true for 465, false for other ports
-        auth: {
-          user: process.env.SMTP_USER || 'hello@joinorbit.org',
-          pass: process.env.SMTP_PASS || 'orbitAdmin3326*',
-        },
-      });
-
-      const info = await transporter.sendMail({
-        from: '"ORBIT" <hello@joinorbit.org>', // sender address
-        to: email.toLowerCase(), // list of receivers
-        subject: "Welcome to the ORBIT Waitlist! 🚀", // Subject line
-        html: `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="utf-8">
-            <link rel="preconnect" href="https://fonts.googleapis.com">
-            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
-          </head>
-          <body style="margin: 0; padding: 0; background-color: #0d0d14; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-            <div style="background-color: #0d0d14; padding: 40px 20px; color: #F0F0F5;">
-              <div style="max-width: 600px; margin: 0 auto; background: #161622; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; overflow: hidden; box-shadow: 0 24px 48px rgba(0,0,0,0.4);">
-                
-                <!-- Gradient Header Bar -->
-                <div style="height: 6px; background: linear-gradient(90deg, #FF6B6B 0%, #C4B5FD 50%, #5EEAD4 100%);"></div>
-                
-                <div style="padding: 48px 40px;">
-                  <!-- Brand Mark -->
-                  <div style="text-align: center; margin-bottom: 40px;">
-                    <h1 style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 38px; font-weight: 800; letter-spacing: 0.15em; background: linear-gradient(135deg, #FF6B6B 0%, #C4B5FD 50%, #5EEAD4 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: #C4B5FD;">ORBIT</h1>
-                  </div>
-
-                  <!-- Main Content -->
-                  <h2 style="font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 700; margin-bottom: 24px; color: #FFFFFF; text-align: center;">You're on the list! 🎉</h2>
-                  
-                  <p style="font-size: 16px; line-height: 1.7; color: #D1D5DB; margin-bottom: 24px;">
-                    Hey there,
-                  </p>
-                  
-                  <p style="font-size: 16px; line-height: 1.7; color: #D1D5DB; margin-bottom: 32px;">
-                    Thanks for joining the ORBIT waitlist! We are absolutely thrilled to have you onboard. We'll notify you securely as soon as we officially launch.
-                  </p>
-
-                  <div style="background: rgba(196, 181, 253, 0.05); border: 1px solid rgba(196, 181, 253, 0.15); border-radius: 12px; padding: 28px; text-align: center; margin: 0 0 40px 0;">
-                    <p style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 22px; font-weight: 600; line-height: 1.4; background: linear-gradient(90deg, #C4B5FD 0%, #5EEAD4 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: #5EEAD4;">
-                      Get ready to connect offline<br/>and live more.
-                    </p>
-                  </div>
-
-                  <p style="font-size: 15px; line-height: 1.7; color: #9CA3B0; margin-bottom: 40px;">
-                    — Built with 🖤 by the ORBIT Team.
-                  </p>
-
-                  <!-- Footer -->
-                  <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 32px; text-align: center;">
-                    <p style="font-size: 13px; color: #6B7280; margin-bottom: 8px; font-family: 'Outfit', sans-serif; font-weight: 500; letter-spacing: 0.05em;">
-                      ORBIT — Connect Offline. Live More.
-                    </p>
-                    <a href="https://joinorbit.org" style="color: #C4B5FD; text-decoration: none; font-weight: 500; font-size: 14px;">joinorbit.org</a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </body>
-          </html>
-        `
-      });
-
-      console.log(`📧 Welcome email sent to ${email} (Message ID: ${info.messageId})`);
+      const result = await Promise.race([
+        sendWelcomeEmail(lowerEmail),
+        emailTimeout
+      ]);
+      
+      if (result === 'timeout') {
+         console.warn('🕒 Email send exceeded 4.5s timeout. Proceeding with response.');
+      }
     } catch (emailErr) {
-      console.error('❌ Failed to trigger email via nodemailer:', emailErr);
+      console.warn('⚠️ User saved but welcome email failed:', emailErr.message);
     }
-    // ──────────────────────────────────────────────────────────
 
-    res.json({ success: true, message: "You're on the list!", total: count });
+    res.json({ success: true, message: "You're on the list!", total: countResult.count });
+
   } catch (err) {
     console.error('❌ Error:', err);
     res.status(500).json({ error: 'Something went wrong. Please try again.' });
@@ -184,23 +250,22 @@ app.get('/api/waitlist/stats', async (req, res) => {
 
     if (dbError) throw dbError;
 
-    const total = allData.length;
+    const totalSignups = allData.length;
+    const now = Date.now();
+    const last24h = allData.filter(r => (now - new Date(r.created_at).getTime()) < 24 * 60 * 60 * 1000).length;
 
-    // Normalize city names to Title Case so "mangalore" and "Mangalore" merge
-
-    const cityCounts = allData.reduce((acc, row) => {
-      const normalizedCity = toTitleCase(row.city);
-      acc[normalizedCity] = (acc[normalizedCity] || 0) + 1;
-      return acc;
-    }, {});
-    const cityStats = Object.entries(cityCounts)
-      .map(([city, count]) => ({ city, count }))
+    const cityStats = Object.entries(
+      allData.reduce((acc, row) => {
+        const c = toTitleCase(row.city);
+        acc[c] = (acc[c] || 0) + 1;
+        return acc;
+      }, {})
+    ).map(([city, count]) => ({ city, count }))
       .sort((a, b) => b.count - a.count);
 
-    // Use ISO date for reliable sorting, short label for display
     const dailyCounts = allData.reduce((acc, row) => {
       const d = new Date(row.created_at);
-      const isoDate = d.toISOString().split('T')[0]; // "2026-03-03"
+      const isoDate = d.toISOString().split('T')[0];
       acc[isoDate] = (acc[isoDate] || 0) + 1;
       return acc;
     }, {});
@@ -209,93 +274,70 @@ app.get('/api/waitlist/stats', async (req, res) => {
       .slice(-7)
       .map(([isoDate, count]) => {
         const d = new Date(isoDate + 'T00:00:00');
-        const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); // "Mar 3"
+        const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
         return { date: label, count };
       });
 
-    // Normalize city names in recent signups for display consistency
-    const recentSignups = allData.map(row => ({ ...row, city: toTitleCase(row.city) }));
+    const recentSignups = allData.slice(0, 50).map(r => ({
+      email: r.email,
+      city: toTitleCase(r.city),
+      time: new Date(r.created_at).toLocaleString()
+    }));
 
-    res.json({ totalCount: total, cityStats, growthData, recentSignups });
+    res.json({
+      totalSignups,
+      last24h,
+      cityStats,
+      growthData,
+      recentSignups
+    });
   } catch (err) {
     console.error('❌ Stats error:', err);
-    res.status(500).json({ error: 'Failed to fetch analytics.' });
+    res.status(500).json({ error: 'Failed to fetch stats.' });
   }
 });
 
-// GET /api/waitlist/count — return total signups
-app.get('/api/waitlist/count', async (req, res) => {
-  try {
-    const { count } = await supabase
-      .from('waitlist')
-      .select('*', { count: 'exact', head: true });
-    res.json({ count: count || 0 });
-  } catch (err) {
-    res.json({ count: 0 });
-  }
-});
-
-// GET /api/cities — unique city names for autocomplete dropdown
+// GET /api/cities — helper for autocomplete
 let citiesCache = { data: [], timestamp: 0 };
-const CITIES_CACHE_TTL = 60000; // 60 seconds
-
 app.get('/api/cities', async (req, res) => {
   try {
     const now = Date.now();
-    // Serve from cache if fresh
-    if (now - citiesCache.timestamp < CITIES_CACHE_TTL && citiesCache.data.length > 0) {
-      const q = (req.query.q || '').toLowerCase();
-      const filtered = q
-        ? citiesCache.data.filter(c => c.toLowerCase().includes(q))
-        : citiesCache.data;
-      return res.json({ cities: filtered });
+    if (citiesCache.data.length > 0 && (now - citiesCache.timestamp < 3600000)) {
+       const q = (req.query.q || '').toLowerCase();
+       const filtered = q ? citiesCache.data.filter(c => c.toLowerCase().includes(q)) : citiesCache.data;
+       return res.json({ cities: filtered });
     }
 
-    // Fetch only city column (lightweight)
-    const { data, error } = await supabase
-      .from('waitlist')
-      .select('city');
-
+    const { data, error } = await supabase.from('waitlist').select('city');
     if (error) throw error;
 
-    // Normalize, deduplicate, sort
     const unique = [...new Set(data.map(r => toTitleCase(r.city)))].sort();
     citiesCache = { data: unique, timestamp: now };
 
     const q = (req.query.q || '').toLowerCase();
-    const filtered = q
-      ? unique.filter(c => c.toLowerCase().includes(q))
-      : unique;
-
+    const filtered = q ? unique.filter(c => c.toLowerCase().includes(q)) : unique;
     res.json({ cities: filtered });
   } catch (err) {
     console.error('❌ Cities error:', err);
-    res.status(500).json({ cities: [] });
+    res.json({ cities: [] });
   }
 });
 
-// ─── Health check (for external uptime pings) ────────────────
 app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'alive',
-    uptime: Math.floor(process.uptime()),
-    timestamp: new Date().toISOString(),
-  });
+  res.json({ status: 'alive', uptime: Math.floor(process.uptime()), timestamp: new Date().toISOString() });
 });
 
-// ─── SPA fallback: serve index.html for all non-API routes ──
 if (!process.env.VERCEL) {
   app.get('{*path}', (req, res) => {
     res.sendFile(path.join(__dirname, 'dist', 'index.html'));
   });
 
   app.listen(PORT, () => {
-    console.log(`\n🚀 ORBIT running on port ${PORT}`);
-    console.log(`📊 Database: Supabase (${SUPABASE_URL})`);
-    console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}\n`);
+    console.log(\`\\n🚀 ORBIT running on port \${PORT}\`);
+    console.log(\`📊 Database: Supabase (\${SUPABASE_URL})\`);
+    console.log(\`🌍 Environment: \${process.env.NODE_ENV || 'development'}\\n\`);
   });
 }
-
 
 // POST /api/admin/email-export — generate and email CSV
 app.post('/api/admin/email-export', async (req, res) => {
@@ -307,62 +349,52 @@ app.post('/api/admin/email-export', async (req, res) => {
 
     if (dbError) throw dbError;
 
-    // Generate CSV
     const headers = ['Email', 'City', 'Age', 'Joined Date'];
     const rows = allData.map(s => [
       s.email,
-      `"${(s.city || 'Unknown').replace(/"/g, '""')}"`,
+      \`"\${(s.city || 'Unknown').replace(/"/g, '""')}"\`,
       s.age || 'N/A',
       new Date(s.created_at).toLocaleString()
     ]);
 
-    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\\n');
 
-    // Create Transporter (Requires env variables)
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.hostinger.com',
-      port: process.env.SMTP_PORT || 465,
-      secure: true, // true for 465, false for other ports
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT || "587"),
+      secure: parseInt(process.env.SMTP_PORT) === 465,
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
       },
+      tls: { rejectUnauthorized: false }
     });
 
-    const targetEmail = 'harshithakulal1999@gmail.com';
-
-    // Verify SMTP config exists to prevent unhandled rejections if empty
-    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-      console.warn('⚠️ SMTP_USER or SMTP_PASS not found. Email not sent.');
-      return res.status(500).json({ error: 'SMTP configuration is missing on the server.' });
+    const targetEmail = process.env.EXPORT_EMAIL;
+    if (!targetEmail) {
+      return res.status(500).json({ error: 'EXPORT_EMAIL not configured on server.' });
     }
 
     await transporter.sendMail({
-      from: `"Orbit Waitlist" <${process.env.SMTP_USER}>`,
+      from: \`"Orbit Waitlist" <\${process.env.SMTP_USER}>\`,
       to: targetEmail,
-      subject: `Orbit Waitlist Data Export - ${new Date().toISOString().split('T')[0]}`,
-      text: 'Hello,\n\nAttached is the latest export of the Orbit waitlist.\n\nBest,\nOrbit Admin',
-      attachments: [
-        {
-          filename: `orbit_waitlist_${new Date().toISOString().split('T')[0]}.csv`,
-          content: csvContent,
-          contentType: 'text/csv'
-        }
-      ]
+      subject: \`Orbit Waitlist Data Export - \${new Date().toISOString().split('T')[0]}\`,
+      text: 'Hello,\\n\\nAttached is the latest export of the Orbit waitlist.\\n\\nBest,\\nOrbit Admin',
+      attachments: [{
+        filename: \`orbit_waitlist_\${new Date().toISOString().split('T')[0]}.csv\`,
+        content: csvContent,
+        contentType: 'text/csv'
+      }]
     });
 
-    res.json({ success: true, message: `Email triggered successfully to ${targetEmail}!` });
+    res.json({ success: true, message: \`Email triggered successfully to \${targetEmail}!\` });
   } catch (err) {
     console.error('❌ Email export error:', err);
     res.status(500).json({ error: 'Failed to generate and email CSV.' });
   }
 });
 
-
-import cron from 'node-cron';
-
 // ─── Automated Email Cron Job (Runs Backend Level) ────────
-// Use '0 */6 * * *' to run every 6 hours and '*/5 * * * *' for 5 minutes
 cron.schedule('0 */6 * * *', async () => {
   console.log('⏰ Running scheduled email export (every 6 hours)...');
   try {
@@ -373,44 +405,40 @@ cron.schedule('0 */6 * * *', async () => {
 
     if (dbError) throw dbError;
 
-    // Generate CSV
     const headers = ['Email', 'City', 'Age', 'Joined Date'];
     const rows = allData.map(s => [
       s.email,
-      `"${(s.city || 'Unknown').replace(/"/g, '""')}"`,
+      \`"\${(s.city || 'Unknown').replace(/"/g, '""')}"\`,
       s.age || 'N/A',
       new Date(s.created_at).toLocaleString()
     ]);
 
-    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\\n');
 
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.hostinger.com',
-      port: process.env.SMTP_PORT || 465,
-      secure: true,
-      auth: {
-        user: process.env.SMTP_USER || 'hello@joinorbit.org',
-        pass: process.env.SMTP_PASS || 'orbitAdmin3326*',
-      },
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT || "587"),
+      secure: parseInt(process.env.SMTP_PORT) === 465,
+      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+      tls: { rejectUnauthorized: false }
     });
 
-    const targetEmail = 'irenik.tech@gmail.com';
+    const targetEmail = process.env.EXPORT_EMAIL;
+    if (!targetEmail) return;
 
     await transporter.sendMail({
-      from: `"Orbit Waitlist" <${process.env.SMTP_USER || 'hello@joinorbit.org'}>`,
+      from: \`"Orbit Waitlist" <\${process.env.SMTP_USER}>\`,
       to: targetEmail,
-      subject: `Orbit Waitlist Scheduled Export - ${new Date().toISOString().split('T')[0]}`,
-      text: 'Hello,\n\nAttached is the scheduled export of the Orbit waitlist.\n\nBest,\nOrbit Admin',
-      attachments: [
-        {
-          filename: `orbit_waitlist_scheduled_${new Date().toISOString().split('T')[0]}.csv`,
-          content: csvContent,
-          contentType: 'text/csv'
-        }
-      ]
+      subject: \`Orbit Waitlist Scheduled Export - \${new Date().toISOString().split('T')[0]}\`,
+      text: 'Hello,\\n\\nAttached is the scheduled export of the Orbit waitlist.\\n\\nBest,\\nOrbit Admin',
+      attachments: [{
+        filename: \`orbit_waitlist_scheduled_\${new Date().toISOString().split('T')[0]}.csv\`,
+        content: csvContent,
+        contentType: 'text/csv'
+      }]
     });
 
-    console.log(`✅ Scheduled email successfully sent to ${targetEmail}`);
+    console.log(\`✅ Scheduled email successfully sent to \${targetEmail}\`);
   } catch (err) {
     console.error('❌ Cron email export error:', err);
   }
