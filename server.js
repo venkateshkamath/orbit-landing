@@ -8,6 +8,7 @@ import { createClient } from '@supabase/supabase-js';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import nodemailer from 'nodemailer';
+import cron from 'node-cron';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -188,7 +189,12 @@ const buildWelcomeEmail = (email) => {
 };
 
 // ─── Send welcome email (reusable) ────────────────────────────
-const sendWelcomeEmail = (email) => {
+const sendWelcomeEmail = async (email) => {
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    console.warn('⚠️ SMTP credentials missing. Email skipped.');
+    return;
+  }
+
   try {
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
@@ -200,18 +206,18 @@ const sendWelcomeEmail = (email) => {
       },
     });
 
-    transporter.sendMail({
-      from: '"ORBIT" <hello@joinorbit.org>',
+    const info = await transporter.sendMail({
+      from: `"ORBIT" <${process.env.SMTP_USER}>`,
       to: email.toLowerCase(),
       subject: "Welcome to the ORBIT Waitlist! 🚀",
       html: buildWelcomeEmail(email),
-    }).then(info => {
-      console.log(`📧 Welcome email sent to ${email} (Message ID: ${info.messageId})`);
-    }).catch(emailErr => {
-      console.error('❌ Failed to trigger email via nodemailer:', emailErr);
     });
-  } catch (configErr) {
-    console.error('❌ Nodemailer configuration error:', configErr);
+
+    console.log(`📧 Welcome email sent to ${email} (Message ID: ${info.messageId})`);
+    return info;
+  } catch (error) {
+    console.error('❌ Email sending failed:', error.message);
+    throw error;
   }
 };
 
@@ -244,17 +250,23 @@ app.post('/api/waitlist', async (req, res) => {
       if (insertResult.error.code === '23505') { // Unique violation
         return res.status(409).json({ error: 'This email is already on the waitlist!' });
       }
-      console.error('❌ Supabase error:', insertResult.error.message);
-      return res.status(500).json({ error: 'Failed to save. Please try again.' });
+      console.error('❌ Supabase Insert Error:', insertResult.error.code, insertResult.error.message, insertResult.error.details);
+      return res.status(500).json({ error: `Failed to save: ${insertResult.error.message}` });
     }
 
-    console.log(`✅ New signup: ${lowerEmail} (Total: ${countResult.count})`);
+    if (countResult.error) {
+      console.warn('⚠️ Supabase Count Error:', countResult.error.message);
+    }
+
+    // Send email (Wait for it in production/serverless)
+    try {
+      await sendWelcomeEmail(lowerEmail);
+    } catch (emailErr) {
+      console.warn('⚠️ User saved but welcome email failed.');
+    }
 
     // Send success response
     res.json({ success: true, message: "You're on the list!", total: countResult.count });
-
-    // Send email in background
-    setImmediate(() => sendWelcomeEmail(lowerEmail));
 
   } catch (err) {
     console.error('❌ Error:', err);
@@ -417,7 +429,10 @@ app.post('/api/admin/email-export', async (req, res) => {
       },
     });
 
-    const targetEmail = process.env.EXPORT_EMAIL
+    const targetEmail = process.env.EXPORT_EMAIL;
+    if (!targetEmail) {
+      return res.status(500).json({ error: 'EXPORT_EMAIL not configured on server.' });
+    }
 
     // Verify SMTP config exists to prevent unhandled rejections if empty
     if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
@@ -447,7 +462,6 @@ app.post('/api/admin/email-export', async (req, res) => {
 });
 
 
-import cron from 'node-cron';
 
 // ─── Automated Email Cron Job (Runs Backend Level) ────────
 // Use '0 */6 * * *' to run every 6 hours and '*/5 * * * *' for 5 minutes
@@ -482,7 +496,8 @@ cron.schedule('0 */6 * * *', async () => {
       },
     });
 
-    const targetEmail = process.env.EXPORT_EMAIL || 'harshithakulal1999@gmail.com';
+    const targetEmail = process.env.EXPORT_EMAIL;
+    if (!targetEmail) return;
 
     await transporter.sendMail({
       from: `"Orbit Waitlist" <${process.env.SMTP_USER}>`,
