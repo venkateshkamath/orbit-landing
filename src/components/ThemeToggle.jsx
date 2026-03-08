@@ -4,9 +4,13 @@ import './ThemeToggle.css';
 export default function ThemeToggle() {
   const [dark, setDark] = useState(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('orbit-theme') === 'dark';
+      const storedTheme = localStorage.getItem('orbit-theme');
+      if (storedTheme) {
+        return storedTheme === 'dark';
+      }
     }
-    return false;
+    // Default to dark mode if no preference found
+    return true;
   });
 
   useEffect(() => {

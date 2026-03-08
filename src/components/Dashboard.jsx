@@ -51,7 +51,6 @@ async function geocodeCity(cityName) {
   return null;
 }
 
-// Geocode all cities with a small delay between requests (Nominatim rate limit: 1 req/sec)
 async function geocodeAllCities(cityStats) {
   const results = [];
   for (const city of cityStats) {
@@ -103,18 +102,16 @@ export default function Dashboard() {
 
   useEffect(() => { 
     fetchStats(); 
-    // Establish polling every 15 seconds for live dashboard updates
-    const interval = setInterval(() => fetchStats(true), 15000);
-    return () => clearInterval(interval);
   }, []);
 
   const exportToCSV = () => {
     if (!stats || !stats.recentSignups) return;
     
-    const headers = ['Email', 'City', 'Joined Date'];
+    const headers = ['Email', 'City', 'Age', 'Joined Date'];
     const rows = stats.recentSignups.map(s => [
       s.email,
       `"${(s.city || 'Unknown').replace(/"/g, '""')}"`,
+      s.age || 'N/A',
       new Date(s.created_at).toLocaleString()
     ]);
     
@@ -334,6 +331,7 @@ export default function Dashboard() {
                   <tr>
                     <th>Email Address</th>
                     <th>Region</th>
+                    <th>Age</th>
                     <th>Joined Date</th>
                     <th>Status</th>
                     <th></th>
@@ -347,6 +345,7 @@ export default function Dashboard() {
                         {s.email}
                       </td>
                       <td>{s.city}</td>
+                      <td>{s.age || '—'}</td>
                       <td className="date-cell">
                         <Calendar size={14}/>
                         {new Date(s.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit' })}
@@ -356,7 +355,7 @@ export default function Dashboard() {
                     </tr>
                   ))}
                   {filteredSignups.length === 0 && (
-                    <tr><td colSpan={5} style={{textAlign:'center',padding:40,color:'#6B7280'}}>No signups found.</td></tr>
+                    <tr><td colSpan={6} style={{textAlign:'center',padding:40,color:'#6B7280'}}>No signups found.</td></tr>
                   )}
                 </tbody>
               </table>

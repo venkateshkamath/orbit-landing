@@ -7,6 +7,7 @@ export default function WaitlistModal({ isOpen, onClose }) {
   const modalRef = useRef(null);
   const [email, setEmail] = useState('');
   const [city, setCity] = useState('');
+  const [age, setAge] = useState('');
   const [status, setStatus] = useState('idle'); // idle | submitting | success | error
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -141,6 +142,7 @@ export default function WaitlistModal({ isOpen, onClose }) {
         setStatus('idle');
         setEmail('');
         setCity('');
+        setAge('');
         setErrorMsg('');
         setShowDropdown(false);
         onClose();
@@ -150,7 +152,7 @@ export default function WaitlistModal({ isOpen, onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email || !city || status === 'submitting') return;
+    if (!email || !city || !age || status === 'submitting') return;
 
     setStatus('submitting');
     setErrorMsg('');
@@ -160,7 +162,7 @@ export default function WaitlistModal({ isOpen, onClose }) {
       const res = await fetch('/api/waitlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, city }),
+        body: JSON.stringify({ email, city, age }),
       });
 
       const data = await res.json();
@@ -276,6 +278,30 @@ export default function WaitlistModal({ isOpen, onClose }) {
                 )}
               </div>
 
+              <div className="modal__field">
+                <label className="modal__label" htmlFor="modal-age">Age Range</label>
+                <div className="modal__input-wrap">
+                  <svg className="modal__input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                  </svg>
+                  <select
+                    id="modal-age"
+                    className="modal__input"
+                    value={age}
+                    onChange={(e) => setAge(e.target.value)}
+                    required
+                  >
+                    <option value="" disabled>Select your age range</option>
+                    <option value="16-25">16 - 25</option>
+                    <option value="26-35">26 - 35</option>
+                    <option value="36-45">36 - 45</option>
+                    <option value="46-60">46 - 60</option>
+                    <option value="60+">Above 60</option>
+                  </select>
+                </div>
+              </div>
+
               {errorMsg && (
                 <p className="modal__error">{errorMsg}</p>
               )}
@@ -305,7 +331,7 @@ export default function WaitlistModal({ isOpen, onClose }) {
             </div>
             <h2 className="modal__title">You're on the list! 🎉</h2>
             <p className="modal__subtitle">
-              We'll notify you at <strong>{email}</strong> when ORBIT launches in <strong>{city}</strong>.
+              We'll notify you at <strong>{email}</strong> when ORBIT launches.
             </p>
             <button className="modal__submit" onClick={handleClose}>
               Done
