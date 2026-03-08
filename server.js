@@ -1,4 +1,6 @@
-import 'dotenv/config';
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
@@ -46,9 +48,9 @@ app.post('/api/admin/login', (req, res) => {
 // POST /api/waitlist — save email + city to Supabase
 app.post('/api/waitlist', async (req, res) => {
   try {
-    const { email, city, age, gender, profession } = req.body;
+    const { email, city, age } = req.body;
 
-    if (!email || !city || !age || !gender || !profession) {
+    if (!email || !city || !age) {
       return res.status(400).json({ error: 'All fields are required.' });
     }
 
@@ -71,7 +73,7 @@ app.post('/api/waitlist', async (req, res) => {
 
     const { data, error } = await supabase
       .from('waitlist')
-      .insert([{ email: email.toLowerCase(), city: normalizedCity, age: Number(age), gender, profession }])
+      .insert([{ email: email.toLowerCase(), city: normalizedCity, age }])
       .select();
 
     if (error) {
@@ -84,6 +86,86 @@ app.post('/api/waitlist', async (req, res) => {
       .select('*', { count: 'exact', head: true });
 
     console.log(`✅ New signup: ${email} from ${city} (Total: ${count})`);
+
+    // ─── Trigger Nodemailer Welcome Email ─────────────────────────
+    try {
+      const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST || 'smtp.hostinger.com',
+        port: process.env.SMTP_PORT || 465,
+        secure: true, // true for 465, false for other ports
+        auth: {
+          user: process.env.SMTP_USER || 'hello@joinorbit.org',
+          pass: process.env.SMTP_PASS || 'orbitAdmin3326*',
+        },
+      });
+
+      const info = await transporter.sendMail({
+        from: '"ORBIT" <hello@joinorbit.org>', // sender address
+        to: email.toLowerCase(), // list of receivers
+        subject: "Welcome to the ORBIT Waitlist! 🚀", // Subject line
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+          </head>
+          <body style="margin: 0; padding: 0; background-color: #0d0d14; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+            <div style="background-color: #0d0d14; padding: 40px 20px; color: #F0F0F5;">
+              <div style="max-width: 600px; margin: 0 auto; background: #161622; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; overflow: hidden; box-shadow: 0 24px 48px rgba(0,0,0,0.4);">
+                
+                <!-- Gradient Header Bar -->
+                <div style="height: 6px; background: linear-gradient(90deg, #FF6B6B 0%, #C4B5FD 50%, #5EEAD4 100%);"></div>
+                
+                <div style="padding: 48px 40px;">
+                  <!-- Brand Mark -->
+                  <div style="text-align: center; margin-bottom: 40px;">
+                    <h1 style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 38px; font-weight: 800; letter-spacing: 0.15em; background: linear-gradient(135deg, #FF6B6B 0%, #C4B5FD 50%, #5EEAD4 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: #C4B5FD;">ORBIT</h1>
+                  </div>
+
+                  <!-- Main Content -->
+                  <h2 style="font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 700; margin-bottom: 24px; color: #FFFFFF; text-align: center;">You're on the list! 🎉</h2>
+                  
+                  <p style="font-size: 16px; line-height: 1.7; color: #D1D5DB; margin-bottom: 24px;">
+                    Hey there,
+                  </p>
+                  
+                  <p style="font-size: 16px; line-height: 1.7; color: #D1D5DB; margin-bottom: 32px;">
+                    Thanks for joining the ORBIT waitlist! We are absolutely thrilled to have you onboard. We'll notify you securely as soon as we officially launch.
+                  </p>
+
+                  <div style="background: rgba(196, 181, 253, 0.05); border: 1px solid rgba(196, 181, 253, 0.15); border-radius: 12px; padding: 28px; text-align: center; margin: 0 0 40px 0;">
+                    <p style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 22px; font-weight: 600; line-height: 1.4; background: linear-gradient(90deg, #C4B5FD 0%, #5EEAD4 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: #5EEAD4;">
+                      Get ready to connect offline<br/>and live more.
+                    </p>
+                  </div>
+
+                  <p style="font-size: 15px; line-height: 1.7; color: #9CA3B0; margin-bottom: 40px;">
+                    — Built with 🖤 by the ORBIT Team.
+                  </p>
+
+                  <!-- Footer -->
+                  <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 32px; text-align: center;">
+                    <p style="font-size: 13px; color: #6B7280; margin-bottom: 8px; font-family: 'Outfit', sans-serif; font-weight: 500; letter-spacing: 0.05em;">
+                      ORBIT — Connect Offline. Live More.
+                    </p>
+                    <a href="https://joinorbit.org" style="color: #C4B5FD; text-decoration: none; font-weight: 500; font-size: 14px;">joinorbit.org</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </body>
+          </html>
+        `
+      });
+
+      console.log(`📧 Welcome email sent to ${email} (Message ID: ${info.messageId})`);
+    } catch (emailErr) {
+      console.error('❌ Failed to trigger email via nodemailer:', emailErr);
+    }
+    // ──────────────────────────────────────────────────────────
 
     res.json({ success: true, message: "You're on the list!", total: count });
   } catch (err) {
@@ -226,13 +308,11 @@ app.post('/api/admin/email-export', async (req, res) => {
     if (dbError) throw dbError;
 
     // Generate CSV
-    const headers = ['Email', 'City', 'Age', 'Gender', 'Profession', 'Joined Date'];
+    const headers = ['Email', 'City', 'Age', 'Joined Date'];
     const rows = allData.map(s => [
       s.email,
       `"${(s.city || 'Unknown').replace(/"/g, '""')}"`,
       s.age || 'N/A',
-      `"${(s.gender || 'N/A').replace(/"/g, '""')}"`,
-      `"${(s.profession || 'N/A').replace(/"/g, '""')}"`,
       new Date(s.created_at).toLocaleString()
     ]);
 
@@ -294,32 +374,30 @@ cron.schedule('0 */6 * * *', async () => {
     if (dbError) throw dbError;
 
     // Generate CSV
-    const headers = ['Email', 'City', 'Age', 'Gender', 'Profession', 'Joined Date'];
+    const headers = ['Email', 'City', 'Age', 'Joined Date'];
     const rows = allData.map(s => [
       s.email,
       `"${(s.city || 'Unknown').replace(/"/g, '""')}"`,
       s.age || 'N/A',
-      `"${(s.gender || 'N/A').replace(/"/g, '""')}"`,
-      `"${(s.profession || 'N/A').replace(/"/g, '""')}"`,
       new Date(s.created_at).toLocaleString()
     ]);
 
     const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
 
     const transporter = nodemailer.createTransport({
-      host: 'smtp.hostinger.com',
-      port: 465,
+      host: process.env.SMTP_HOST || 'smtp.hostinger.com',
+      port: process.env.SMTP_PORT || 465,
       secure: true,
       auth: {
-        user: 'hello@joinorbit.org',
-        pass: 'orbitAdmin3326*',
+        user: process.env.SMTP_USER || 'hello@joinorbit.org',
+        pass: process.env.SMTP_PASS || 'orbitAdmin3326*',
       },
     });
 
     const targetEmail = 'irenik.tech@gmail.com';
 
     await transporter.sendMail({
-      from: `"Orbit Waitlist" <hello@joinorbit.org>`,
+      from: `"Orbit Waitlist" <${process.env.SMTP_USER || 'hello@joinorbit.org'}>`,
       to: targetEmail,
       subject: `Orbit Waitlist Scheduled Export - ${new Date().toISOString().split('T')[0]}`,
       text: 'Hello,\n\nAttached is the scheduled export of the Orbit waitlist.\n\nBest,\nOrbit Admin',
