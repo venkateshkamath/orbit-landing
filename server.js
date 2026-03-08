@@ -87,7 +87,10 @@ app.post('/api/waitlist', async (req, res) => {
 
     console.log(`✅ New signup: ${email} from ${city} (Total: ${count})`);
 
-    // ─── Trigger Nodemailer Welcome Email ─────────────────────────
+    // Send success response immediately so the user doesn't wait for SMTP
+    res.json({ success: true, message: "You're on the list!", total: count });
+
+    // ─── Trigger Nodemailer Welcome Email (Async Background) ────────────────
     try {
       const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST || 'smtp.hostinger.com',
@@ -99,7 +102,7 @@ app.post('/api/waitlist', async (req, res) => {
         },
       });
 
-      const info = await transporter.sendMail({
+      transporter.sendMail({
         from: '"ORBIT" <hello@joinorbit.org>', // sender address
         to: email.toLowerCase(), // list of receivers
         subject: "Welcome to the ORBIT Waitlist! 🚀", // Subject line
@@ -108,66 +111,125 @@ app.post('/api/waitlist', async (req, res) => {
           <html>
           <head>
             <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <link rel="preconnect" href="https://fonts.googleapis.com">
             <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
           </head>
-          <body style="margin: 0; padding: 0; background-color: #0d0d14; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-            <div style="background-color: #0d0d14; padding: 40px 20px; color: #F0F0F5;">
-              <div style="max-width: 600px; margin: 0 auto; background: #161622; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; overflow: hidden; box-shadow: 0 24px 48px rgba(0,0,0,0.4);">
-                
-                <!-- Gradient Header Bar -->
-                <div style="height: 6px; background: linear-gradient(90deg, #FF6B6B 0%, #C4B5FD 50%, #5EEAD4 100%);"></div>
-                
-                <div style="padding: 48px 40px;">
-                  <!-- Brand Mark -->
-                  <div style="text-align: center; margin-bottom: 40px;">
-                    <h1 style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 38px; font-weight: 800; letter-spacing: 0.15em; background: linear-gradient(135deg, #FF6B6B 0%, #C4B5FD 50%, #5EEAD4 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: #C4B5FD;">ORBIT</h1>
-                  </div>
+          <body style="margin: 0; padding: 0; background-color: #08080f; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+            <div style="background-color: #08080f; padding: 48px 20px; color: #F0F0F5;">
+              <div style="max-width: 600px; margin: 0 auto;">
 
-                  <!-- Main Content -->
-                  <h2 style="font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 700; margin-bottom: 24px; color: #FFFFFF; text-align: center;">You're on the list! 🎉</h2>
+                <!-- ═══ HERO HEADER ═══ -->
+                <div style="background: linear-gradient(180deg, #1a1333 0%, #141020 60%, #0d0d18 100%); border-radius: 28px 28px 0 0; padding: 56px 40px 48px; text-align: center; position: relative; overflow: hidden;">
+                  <!-- Decorative gradient glow -->
+                  <div style="position: absolute; top: -60px; left: 50%; transform: translateX(-50%); width: 400px; height: 200px; background: radial-gradient(ellipse, rgba(196,181,253,0.15) 0%, transparent 70%); pointer-events: none;"></div>
                   
-                  <p style="font-size: 16px; line-height: 1.7; color: #D1D5DB; margin-bottom: 24px;">
-                    Hey there,
-                  </p>
-                  
-                  <p style="font-size: 16px; line-height: 1.7; color: #D1D5DB; margin-bottom: 32px;">
-                    Thanks for joining the ORBIT waitlist! We are absolutely thrilled to have you onboard. We'll notify you securely as soon as we officially launch.
-                  </p>
+                  <!-- Top gradient bar -->
+                  <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #FF6B6B 0%, #C4B5FD 40%, #5EEAD4 100%);"></div>
 
-                  <div style="background: rgba(196, 181, 253, 0.05); border: 1px solid rgba(196, 181, 253, 0.15); border-radius: 12px; padding: 28px; text-align: center; margin: 0 0 40px 0;">
-                    <p style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 22px; font-weight: 600; line-height: 1.4; background: linear-gradient(90deg, #C4B5FD 0%, #5EEAD4 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: #5EEAD4;">
-                      Get ready to connect offline<br/>and live more.
-                    </p>
-                  </div>
-
-                  <p style="font-size: 15px; line-height: 1.7; color: #9CA3B0; margin-bottom: 40px;">
-                    — Built with 🖤 by the ORBIT Team.
-                  </p>
-
-                  <!-- Footer -->
-                  <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 32px; text-align: center;">
-                    <p style="font-size: 13px; color: #6B7280; margin-bottom: 8px; font-family: 'Outfit', sans-serif; font-weight: 500; letter-spacing: 0.05em;">
-                      ORBIT — Connect Offline. Live More.
-                    </p>
-                    <a href="https://joinorbit.org" style="color: #C4B5FD; text-decoration: none; font-weight: 500; font-size: 14px;">joinorbit.org</a>
-                  </div>
+                  <!-- ORBIT Logo -->
+                  <h1 style="margin: 0 0 12px 0; font-family: 'Outfit', sans-serif; font-size: 44px; font-weight: 800; letter-spacing: 0.2em; background: linear-gradient(135deg, #FF6B6B 0%, #C4B5FD 45%, #5EEAD4 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: #C4B5FD;">ORBIT</h1>
+                  <p style="margin: 0; font-size: 13px; letter-spacing: 0.25em; text-transform: uppercase; color: #6B7280; font-weight: 500;">Connect Offline · Live More</p>
                 </div>
+
+                <!-- ═══ MAIN CARD BODY ═══ -->
+                <div style="background: #111119; border-left: 1px solid rgba(255,255,255,0.06); border-right: 1px solid rgba(255,255,255,0.06); padding: 48px 40px;">
+                  
+                  <!-- Waitlist Badge -->
+                  <div style="text-align: center; margin-bottom: 40px;">
+                    <div style="display: inline-block; background: linear-gradient(135deg, rgba(255,107,107,0.12) 0%, rgba(196,181,253,0.12) 50%, rgba(94,234,212,0.12) 100%); border: 1px solid rgba(196,181,253,0.2); border-radius: 50px; padding: 14px 32px;">
+                      <span style="font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 700; color: #FFFFFF;">🎉 You're on the waitlist!</span>
+                    </div>
+                  </div>
+
+                  <!-- Greeting -->
+                  <p style="font-size: 16px; line-height: 1.8; color: #e5e7eb; margin-bottom: 16px;">
+                    Hey there 👋
+                  </p>
+                  <p style="font-size: 16px; line-height: 1.8; color: #D1D5DB; margin-bottom: 36px;">
+                    Thank you for joining the ORBIT waitlist! We're building something truly unique — a world where real connections matter more than digital ones. You're now part of this movement.
+                  </p>
+
+                  <!-- ── Divider ── -->
+                  <div style="height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(196,181,253,0.2) 50%, transparent 100%); margin: 8px 0 40px 0;"></div>
+
+                  <!-- What's Coming Section -->
+                  <p style="font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: #7C3AED; margin-bottom: 24px;">WHAT'S COMING</p>
+
+                  <!-- Feature Cards -->
+                  <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 40px;">
+                    <tr>
+                      <td style="padding-bottom: 12px;">
+                        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 22px 24px; display: flex; align-items: center;">
+                          <span style="font-size: 24px; margin-right: 16px;">🌍</span>
+                          <div>
+                            <p style="margin: 0 0 4px 0; font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 15px; color: #FFFFFF;">Discover Real Events</p>
+                            <p style="margin: 0; font-size: 13px; color: #9CA3AF; line-height: 1.5;">Find authentic gatherings, meetups, and experiences happening around you.</p>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding-bottom: 12px;">
+                        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 22px 24px; display: flex; align-items: center;">
+                          <span style="font-size: 24px; margin-right: 16px;">🤝</span>
+                          <div>
+                            <p style="margin: 0 0 4px 0; font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 15px; color: #FFFFFF;">Build Real Connections</p>
+                            <p style="margin: 0; font-size: 13px; color: #9CA3AF; line-height: 1.5;">Meet like-minded people who share your passions and interests, offline.</p>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 22px 24px; display: flex; align-items: center;">
+                          <span style="font-size: 24px; margin-right: 16px;">✨</span>
+                          <div>
+                            <p style="margin: 0 0 4px 0; font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 15px; color: #FFFFFF;">Live Beyond the Screen</p>
+                            <p style="margin: 0; font-size: 13px; color: #9CA3AF; line-height: 1.5;">Step away from the algorithm and into moments that truly matter.</p>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+
+                  <!-- Quote Block -->
+                  <div style="background: linear-gradient(135deg, rgba(255,107,107,0.06) 0%, rgba(196,181,253,0.08) 50%, rgba(94,234,212,0.06) 100%); border: 1px solid rgba(196,181,253,0.12); border-radius: 20px; padding: 36px 32px; text-align: center; margin-bottom: 40px;">
+                    <p style="margin: 0 0 16px 0; font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 600; line-height: 1.4; background: linear-gradient(90deg, #FF6B6B 0%, #C4B5FD 50%, #5EEAD4 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: #C4B5FD;">
+                      "The best version of you<br/>is waiting offline."
+                    </p>
+                    <p style="margin: 0; font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; color: #6B7280; font-weight: 500;">— The Orbit Team</p>
+                  </div>
+
+                  <!-- Sign off -->
+                  <p style="font-size: 15px; line-height: 1.8; color: #9CA3AF; margin-bottom: 0;">
+                    We'll keep you posted on everything. Until then, stay curious and stay real. 🖤
+                  </p>
+                </div>
+
+                <!-- ═══ FOOTER ═══ -->
+                <div style="background: #0a0a12; border-radius: 0 0 28px 28px; border: 1px solid rgba(255,255,255,0.04); border-top: none; padding: 36px 40px; text-align: center;">
+                  <p style="margin: 0 0 8px 0; font-family: 'Outfit', sans-serif; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #4B5563; font-weight: 600;">ORBIT</p>
+                  <a href="https://joinorbit.org" style="color: #C4B5FD; text-decoration: none; font-weight: 500; font-size: 14px; letter-spacing: 0.02em;">joinorbit.org</a>
+                  <p style="margin: 16px 0 0 0; font-size: 11px; color: #374151;">© ${new Date().getFullYear()} ORBIT. All rights reserved.</p>
+                </div>
+
               </div>
             </div>
           </body>
           </html>
         `
+      }).then(info => {
+        console.log(`📧 Welcome email sent to ${email} (Message ID: ${info.messageId})`);
+      }).catch(emailErr => {
+        console.error('❌ Failed to trigger email via nodemailer:', emailErr);
       });
-
-      console.log(`📧 Welcome email sent to ${email} (Message ID: ${info.messageId})`);
-    } catch (emailErr) {
-      console.error('❌ Failed to trigger email via nodemailer:', emailErr);
+    } catch (configErr) {
+      console.error('❌ Nodemailer configuration error:', configErr);
     }
     // ──────────────────────────────────────────────────────────
 
-    res.json({ success: true, message: "You're on the list!", total: count });
   } catch (err) {
     console.error('❌ Error:', err);
     res.status(500).json({ error: 'Something went wrong. Please try again.' });
