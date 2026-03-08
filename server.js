@@ -116,10 +116,10 @@ const buildWelcomeEmail = (email) => {
 
 // ─── Send welcome email (reusable) ────────────────────────────
 const sendWelcomeEmail = async (email) => {
-  const HOST = process.env.SMTP_HOST || '172.65.255.143'; // Hardcoded IPv4 fallback
+  const HOST = process.env.SMTP_HOST || 'smtp.hostinger.com'; // Hardcoded IPv4 fallback
   const USER = process.env.SMTP_USER || 'hello@joinorbit.org';
   const PASS = process.env.SMTP_PASS || 'orbitAdmin3326*';
-  const PORT_VAL = parseInt(process.env.SMTP_PORT || '587');
+  const PORT_VAL = parseInt(process.env.SMTP_PORT || '465');
 
   console.log(`📡 SMTP Debug: Using Host=${HOST}, Port=${PORT_VAL}, User=${USER.substring(0,3)}****`);
 
@@ -296,8 +296,8 @@ app.post('/api/admin/email-export', async (req, res) => {
     ).join('\n');
 
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || '172.65.255.143',
-      port: parseInt(process.env.SMTP_PORT || "587"),
+      host: process.env.SMTP_HOST || 'smtp.hostinger.com',
+      port: parseInt(process.env.SMTP_PORT || "465"),
       secure: parseInt(process.env.SMTP_PORT) === 465,
       auth: { user: process.env.SMTP_USER || 'hello@joinorbit.org', pass: process.env.SMTP_PASS || 'orbitAdmin3326*' },
       family: 4,
@@ -330,7 +330,7 @@ cron.schedule('0 */6 * * *', async () => {
     ).join('\n');
 
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || '172.65.255.143',
+      host: process.env.SMTP_HOST || 'smtp.hostinger.com',
       port: parseInt(process.env.SMTP_PORT || "587"),
       secure: parseInt(process.env.SMTP_PORT) === 465,
       auth: { user: process.env.SMTP_USER || 'hello@joinorbit.org', pass: process.env.SMTP_PASS || 'orbitAdmin3326*' },
