@@ -49,23 +49,8 @@ const buildWelcomeEmail = (email) => {
       <div style="font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 30px;">
         <span style="background: linear-gradient(135deg, #FF6B6B 0%, #C4B5FD 50%, #5EEAD4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: #C4B5FD;">ORBIT</span>
       </div>
-      <div style="margin: 20px 0 40px;">
-        <svg width="120" height="120" viewBox="0 0 120 120" fill="none" style="margin: 0 auto;">
-          <circle cx="60" cy="60" r="58" stroke="#1a1a24" stroke-width="1"/>
-          <circle cx="60" cy="60" r="40" stroke="#1a1a24" stroke-width="1"/>
-          <circle cx="60" cy="60" r="22" stroke="#1a1a24" stroke-width="1"/>
-          <circle cx="60" cy="60" r="4" fill="#C4B5FD" opacity="0.8"/>
-          <path d="M60 2 L60 118" stroke="#1a1a24" stroke-width="0.5"/>
-          <path d="M2 60 L118 60" stroke="#1a1a24" stroke-width="0.5"/>
-        </svg>
-      </div>
-      <h1 style="font-family: 'Outfit', sans-serif; font-size: 32px; font-weight: 700; color: #ffffff; margin: 0 0 16px; letter-spacing: -0.02em;">Welcome to Orbit, ${username}</h1>
-      <p style="font-size: 16px; line-height: 1.6; color: #94a3b8; margin: 0 auto; max-width: 460px;">
-        You're on the list! We're building the future of social proximity.
-      </p>
-    </div>
-    <div style="padding: 30px 40px; border-top: 1px solid #1a1a24; text-align: center;">
-      <p style="color: #64748b; font-size: 13px;">&copy; 2026 ORBIT Proximity Platform.</p>
+      <h1 style="font-family: 'Outfit', sans-serif; font-size: 32px; font-weight: 700; color: #ffffff; margin: 0 0 16px;">Welcome, ${username}</h1>
+      <p style="font-size: 16px; line-height: 1.6; color: #94a3b8;">You're on the list! We'll notify you as soon as we launch.</p>
     </div>
   </div>
 </body>
@@ -74,29 +59,19 @@ const buildWelcomeEmail = (email) => {
 
 // ─── Send welcome email (reusable) ────────────────────────────
 const sendWelcomeEmail = async (email) => {
-  // ⚡ HARD NUCLEAR FIX: Use direct IPv4 ONLY to bypass DNS/IPv6 traps on Render
-  // This value is 100% Hostinger's direct cloud IP.
-  const HOST_IP = '172.65.255.143'; 
+  // Hardcoded fallbacks as requested
+  const HOST = process.env.SMTP_HOST || 'smtp.hostinger.com';
   const USER = process.env.SMTP_USER || 'hello@joinorbit.org';
   const PASS = process.env.SMTP_PASS || 'orbitAdmin3326*';
   const PORT_VAL = parseInt(process.env.SMTP_PORT || '465');
 
-  console.log(`📡 SMTP Connect: IP=${HOST_IP}, Port=${PORT_VAL}, User=${USER.substring(0,3)}****`);
-
   try {
     const transporter = nodemailer.createTransport({
-      host: HOST_IP, // <--- FORCED IP, NO DNS LOOKUP
+      host: HOST,
       port: PORT_VAL,
       secure: PORT_VAL === 465,
       auth: { user: USER, pass: PASS },
-      family: 4, 
-      tls: {
-        servername: 'smtp.hostinger.com', 
-        rejectUnauthorized: false
-      },
-      connectionTimeout: 20000, 
-      greetingTimeout: 20000,
-      socketTimeout: 20000
+      tls: { rejectUnauthorized: false } // Essential for Render
     });
 
     const info = await transporter.sendMail({
@@ -109,7 +84,7 @@ const sendWelcomeEmail = async (email) => {
     console.log(`📧 Welcome email sent to ${email}`);
     return info;
   } catch (error) {
-    console.error('❌ SMTP Failure:', error.message);
+    console.error('❌ SMTP Error:', error.message);
     throw error;
   }
 };
@@ -132,15 +107,10 @@ app.post('/api/waitlist', async (req, res) => {
       return res.status(500).json({ error: `Save failed: ${insertResult.error.message}` });
     }
 
-    // Attempt email but don't hang UI
-    const MAX_EMAIL_TIME = 10000; 
-    const emailTimeout = new Promise(resolve => setTimeout(() => resolve('timeout'), MAX_EMAIL_TIME));
-    
-    try {
-      await Promise.race([sendWelcomeEmail(lowerEmail), emailTimeout]);
-    } catch (e) {
-      console.warn('⚠️ Welcome email failed but user saved.');
-    }
+    // Try to send email but don't block response
+    sendWelcomeEmail(lowerEmail).catch(err => {
+      console.warn('⚠️ Email send failed background:', err.message);
+    });
 
     res.json({ success: true, total: countResult.count || 0 });
   } catch (err) {
@@ -155,7 +125,7 @@ if (!process.env.VERCEL) {
   app.listen(PORT, () => console.log(`🚀 ORBIT active on ${PORT}`));
 }
 
-// Same logic for exports
+// Admin Logic
 app.post('/api/admin/email-export', async (req, res) => {
   try {
     const { data: allData } = await supabase.from('waitlist').select('*');
@@ -164,12 +134,11 @@ app.post('/api/admin/email-export', async (req, res) => {
     ).join('\n');
 
     const transporter = nodemailer.createTransport({
-      host: '172.65.255.143',
+      host: process.env.SMTP_HOST || 'smtp.hostinger.com',
       port: 465,
       secure: true,
       auth: { user: process.env.SMTP_USER || 'hello@joinorbit.org', pass: process.env.SMTP_PASS || 'orbitAdmin3326*' },
-      family: 4,
-      tls: { servername: 'smtp.hostinger.com', rejectUnauthorized: false }
+      tls: { rejectUnauthorized: false }
     });
 
     const targetEmail = process.env.EXPORT_EMAIL || 'irenik.tech@gmail.com';
