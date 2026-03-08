@@ -135,23 +135,25 @@ const sendWelcomeEmail = async (email) => {
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: smtpPort,
-      secure: smtpPort === 465, // True only for SSL (465), False for STARTTLS (587)
+      secure: smtpPort === 465, 
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
       },
-      // 🌐 FORCE IPv4: Resolves the ENETUNREACH (IPv6) error common on Render
-      family: 4, 
-      // 🛡️ HELO/EHLO: Some SMTP servers reject connections without an explicit name
+      family: 4, // 🌐 Force IPv4 for cloud stability
       name: 'joinorbit.org',
       tls: {
-        rejectUnauthorized: false,
+        rejectUnauthorized: false, // Bypasses SSL cert issues in cloud containers
         minVersion: 'TLSv1.2'
       },
-      connectionTimeout: 15000, 
-      greetingTimeout: 15000,
-      socketTimeout: 15000
+      connectionTimeout: 25000, 
+      greetingTimeout: 25000,
+      socketTimeout: 25000
     });
+
+    // 🔬 Verify connection first (logs where exactly it fails)
+    await transporter.verify();
+    console.log('✅ SMTP Connection verified successfully');
 
     const info = await transporter.sendMail({
       from: `"ORBIT" <${process.env.SMTP_USER}>`,
@@ -163,7 +165,8 @@ const sendWelcomeEmail = async (email) => {
     console.log(`📧 Welcome email sent to ${email} (Message ID: ${info.messageId})`);
     return info;
   } catch (error) {
-    console.error('❌ Email sending failed. This is likely an SMTP config/firewall issue on the server.');
+    console.error('❌ Email Failure Analysis:');
+    console.error(`--- Code: ${error.code || 'N/A'} ---`);
     console.error(`--- Detail: ${error.message} ---`);
     throw error;
   }
@@ -199,8 +202,8 @@ app.post('/api/waitlist', async (req, res) => {
       return res.status(500).json({ error: `Failed to save: ${insertResult.error.message}` });
     }
 
-    // 📧 Send email with short timeout
-    const MAX_EMAIL_TIME = 6500;
+    // 📧 Send email with a longer 15s timeout for production stability
+    const MAX_EMAIL_TIME = 15000; 
     const emailTimeout = new Promise(resolve => setTimeout(() => resolve('timeout'), MAX_EMAIL_TIME));
     
     try {
@@ -210,7 +213,7 @@ app.post('/api/waitlist', async (req, res) => {
       ]);
       
       if (result === 'timeout') {
-         console.warn(`🕒 Email send exceeded ${MAX_EMAIL_TIME/1000}s timeout on port ${process.env.SMTP_PORT}. Proceeding with response.`);
+         console.warn(`🕒 Email send exceeded 15s timeout on port ${process.env.SMTP_PORT}. Proceeding with response.`);
       }
     } catch (emailErr) {
       console.warn('⚠️ User saved but welcome email failed:', emailErr.message);
