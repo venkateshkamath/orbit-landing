@@ -16,9 +16,14 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // ─── Supabase ─────────────────────────────────────────────
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://aayqbazqqfyetkwhhwnt.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_KEY || 'sb_publishable_xzWQowLPMrAPuExx_GYb0A_AX6NJRY0';
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_KEY;
+
+if (!SUPABASE_URL || !SUPABASE_KEY) {
+  console.error('❌ CRITICAL: SUPABASE_URL and SUPABASE_KEY must be provided in environment variables.');
+}
+
+const supabase = createClient(SUPABASE_URL || '', SUPABASE_KEY || '');
 
 app.use(cors());
 app.use(express.json());
@@ -35,8 +40,12 @@ if (!process.env.VERCEL) {
 // POST /api/admin/login — secure backend login
 app.post('/api/admin/login', (req, res) => {
   const { username, password } = req.body;
-  const ADMIN_USER = process.env.ADMIN_USER || 'orbitAdmin';
-  const ADMIN_PASS = process.env.ADMIN_PASS || 'orbitAdmin3326';
+  const ADMIN_USER = process.env.ADMIN_USER;
+  const ADMIN_PASS = process.env.ADMIN_PASS;
+
+  if (!ADMIN_USER || !ADMIN_PASS) {
+    return res.status(500).json({ success: false, error: 'Admin credentials not configured on server.' });
+  }
 
   if (username === ADMIN_USER && password === ADMIN_PASS) {
     res.json({ success: true, token: 'orbit_secure_session_token_' + Date.now() });
@@ -44,6 +53,167 @@ app.post('/api/admin/login', (req, res) => {
     res.status(401).json({ success: false, error: 'Invalid credentials' });
   }
 });
+
+
+// ─── Build welcome email HTML ────────────────────────────────
+const buildWelcomeEmail = (email) => {
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to ORBIT</title>
+</head>
+<body style="margin:0;padding:0;background-color:#020205;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;">
+
+  <div style="background-color:#020205;padding:40px 16px;">
+    <div style="max-width:540px;margin:0 auto;">
+
+      <!-- ═══ PREMIUM HEADER ═══ -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#090911;border:1px solid rgba(255,255,255,0.04);border-radius:24px 24px 0 0;overflow:hidden;">
+        <tr>
+          <td style="padding:60px 40px 50px;text-align:center;">
+            <!-- Logo Section -->
+            <div style="margin-bottom:12px;">
+              <span style="font-size:38px;font-weight:900;letter-spacing:0.22em;color:#FFFFFF;display:inline-block;padding-left:0.2em;">O R B I T</span>
+            </div>
+            <div style="width:50px;height:2px;background:linear-gradient(90deg, #FF6B6B, #C4B5FD, #5EEAD4);margin:0 auto 16px;"></div>
+            <p style="margin:0;font-size:10px;letter-spacing:0.4em;text-transform:uppercase;color:#4B5563;font-weight:700;">CONNECT OFFLINE · LIVE MORE</p>
+          </td>
+        </tr>
+      </table>
+
+      <!-- ═══ RADAR VISUAL ═══ -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#05050A;border-left:1px solid rgba(255,255,255,0.04);border-right:1px solid rgba(255,255,255,0.04);">
+        <tr>
+          <td style="padding:0 40px;text-align:center;">
+             <!-- Simplified Radar SVG for Email -->
+             <svg width="180" height="180" viewBox="0 0 180 180" style="margin:0 auto;display:block;">
+                <circle cx="90" cy="90" r="2" fill="#FFFFFF" fill-opacity="0.8">
+                  <animate attributeName="r" values="2;4;2" dur="3s" repeatCount="indefinite" />
+                </circle>
+                <circle cx="90" cy="90" r="25" stroke="#7C3AED" stroke-opacity="0.2" fill="none" />
+                <circle cx="90" cy="90" r="50" stroke="#7C3AED" stroke-opacity="0.1" fill="none" />
+                <circle cx="90" cy="90" r="75" stroke="#7C3AED" stroke-opacity="0.05" fill="none" />
+                <!-- Orbiting Nodes -->
+                <circle cx="130" cy="60" r="4" fill="#FF6B6B" fill-opacity="0.9" />
+                <circle cx="40" cy="110" r="5" fill="#5EEAD4" fill-opacity="0.8" />
+                <circle cx="100" cy="150" r="3" fill="#C4B5FD" fill-opacity="0.9" />
+             </svg>
+          </td>
+        </tr>
+      </table>
+
+      <!-- ═══ MAIN CONTENT ═══ -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#05050A;border-left:1px solid rgba(255,255,255,0.04);border-right:1px solid rgba(255,255,255,0.04);">
+        <tr>
+          <td style="padding:40px 45px 50px;">
+            <h2 style="margin:0 0 24px;font-size:22px;font-weight:700;color:#F3F4F6;text-align:center;">You're in the Orbit 🎉</h2>
+            
+            <p style="margin:0 0 16px;font-size:15px;font-weight:600;color:#D1D5DB;line-height:1.6;">
+              Hey ${email.split('@')[0]}
+            </p>
+            <p style="margin:0 0 28px;font-size:15px;line-height:1.8;color:#9CA3AF;font-weight:400;">
+              Welcome to the inner circle. We're building a world where real-world proximity sparks genuine human connection. You're among the first to witness the shift from screens to scenes.
+            </p>
+
+            <!-- Feature Checklist -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:30px;">
+              <tr>
+                <td style="padding-bottom:16px;">
+                  <table cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                      <td style="vertical-align:top;padding-top:4px;"><div style="width:6px;height:6px;background:#5EEAD4;border-radius:50%;margin-right:12px;"></div></td>
+                      <td style="font-size:14px;color:#D1D5DB;">Priority access to local proximity events.</td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding-bottom:16px;">
+                  <table cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                      <td style="vertical-align:top;padding-top:4px;"><div style="width:6px;height:6px;background:#C4B5FD;border-radius:50%;margin-right:12px;"></div></td>
+                      <td style="font-size:14px;color:#D1D5DB;">Instant discovery of like-minded communities nearby.</td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <table cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                      <td style="vertical-align:top;padding-top:4px;"><div style="width:6px;height:6px;background:#FF6B6B;border-radius:50%;margin-right:12px;"></div></td>
+                      <td style="font-size:14px;color:#D1D5DB;">The chance to reclaim shared physical space.</td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+
+            <p style="margin:0;font-size:14px;font-weight:500;color:#6B7280;font-style:italic;line-height:1.6;border-left:2px solid rgba(124, 58, 237, 0.3);padding-left:16px;">
+              "The best connections never happened behind a keyboard."
+            </p>
+          </td>
+        </tr>
+      </table>
+
+      <!-- ═══ PROFESSIONAL FOOTER ═══ -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#090911;border:1px solid rgba(255,255,255,0.04);border-top:none;border-radius:0 0 24px 24px;">
+        <tr>
+          <td style="padding:45px 40px;text-align:center;">
+            <p style="margin:0 0 10px;font-size:13px;font-weight:700;color:#F3F4F6;letter-spacing:0.05em;">O R B I T</p>
+            <p style="margin:0 0 20px;font-size:12px;color:#4B5563;line-height:1.6;max-width:300px;margin-left:auto;margin-right:auto;">
+              A movement towards meaningful human presence. Built for those who crave the real world.
+            </p>
+            
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="border-top:1px solid rgba(255,255,255,0.03);padding-top:24px;">
+                   <a href="https://joinorbit.org" style="color:#A78BFA;text-decoration:none;font-weight:600;font-size:13px;">Visit Website</a>
+                   <span style="color:#1F2937;margin:0 10px;">|</span>
+                   <span style="color:#374151;font-size:12px;">© ${new Date().getFullYear()} ORBIT</span>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+
+    </div>
+  </div>
+
+</body>
+</html>`;
+};
+
+// ─── Send welcome email (reusable) ────────────────────────────
+const sendWelcomeEmail = (email) => {
+  try {
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
+      secure: true,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+
+    transporter.sendMail({
+      from: '"ORBIT" <hello@joinorbit.org>',
+      to: email.toLowerCase(),
+      subject: "Welcome to the ORBIT Waitlist! 🚀",
+      html: buildWelcomeEmail(email),
+    }).then(info => {
+      console.log(`📧 Welcome email sent to ${email} (Message ID: ${info.messageId})`);
+    }).catch(emailErr => {
+      console.error('❌ Failed to trigger email via nodemailer:', emailErr);
+    });
+  } catch (configErr) {
+    console.error('❌ Nodemailer configuration error:', configErr);
+  }
+};
 
 // POST /api/waitlist — save email + city to Supabase
 app.post('/api/waitlist', async (req, res) => {
@@ -59,115 +229,33 @@ app.post('/api/waitlist', async (req, res) => {
       return res.status(400).json({ error: 'Please enter a valid email address.' });
     }
 
-    const { data: existing } = await supabase
-      .from('waitlist')
-      .select('email')
-      .eq('email', email.toLowerCase())
-      .maybeSingle();
+    const lowerEmail = email.toLowerCase();
 
-    if (existing) {
-      return res.status(409).json({ error: 'This email is already on the waitlist!' });
-    }
-
+    // ─── Normal flow (Optimized: single insert) ───────────────
     const normalizedCity = toTitleCase(city);
 
-    const { data, error } = await supabase
-      .from('waitlist')
-      .insert([{ email: email.toLowerCase(), city: normalizedCity, age }])
-      .select();
+    // Parallelize getting count and inserting to save time
+    const [insertResult, countResult] = await Promise.all([
+      supabase.from('waitlist').insert([{ email: lowerEmail, city: normalizedCity, age }]).select(),
+      supabase.from('waitlist').select('*', { count: 'exact', head: true })
+    ]);
 
-    if (error) {
-      console.error('❌ Supabase error:', error.message);
+    if (insertResult.error) {
+      if (insertResult.error.code === '23505') { // Unique violation
+        return res.status(409).json({ error: 'This email is already on the waitlist!' });
+      }
+      console.error('❌ Supabase error:', insertResult.error.message);
       return res.status(500).json({ error: 'Failed to save. Please try again.' });
     }
 
-    const { count } = await supabase
-      .from('waitlist')
-      .select('*', { count: 'exact', head: true });
+    console.log(`✅ New signup: ${lowerEmail} (Total: ${countResult.count})`);
 
-    console.log(`✅ New signup: ${email} from ${city} (Total: ${count})`);
+    // Send success response
+    res.json({ success: true, message: "You're on the list!", total: countResult.count });
 
-    // ─── Trigger Nodemailer Welcome Email ─────────────────────────
-    try {
-      const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST || 'smtp.hostinger.com',
-        port: process.env.SMTP_PORT || 465,
-        secure: true, // true for 465, false for other ports
-        auth: {
-          user: process.env.SMTP_USER || 'hello@joinorbit.org',
-          pass: process.env.SMTP_PASS || 'orbitAdmin3326*',
-        },
-      });
+    // Send email in background
+    setImmediate(() => sendWelcomeEmail(lowerEmail));
 
-      const info = await transporter.sendMail({
-        from: '"ORBIT" <hello@joinorbit.org>', // sender address
-        to: email.toLowerCase(), // list of receivers
-        subject: "Welcome to the ORBIT Waitlist! 🚀", // Subject line
-        html: `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="utf-8">
-            <link rel="preconnect" href="https://fonts.googleapis.com">
-            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
-          </head>
-          <body style="margin: 0; padding: 0; background-color: #0d0d14; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-            <div style="background-color: #0d0d14; padding: 40px 20px; color: #F0F0F5;">
-              <div style="max-width: 600px; margin: 0 auto; background: #161622; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; overflow: hidden; box-shadow: 0 24px 48px rgba(0,0,0,0.4);">
-                
-                <!-- Gradient Header Bar -->
-                <div style="height: 6px; background: linear-gradient(90deg, #FF6B6B 0%, #C4B5FD 50%, #5EEAD4 100%);"></div>
-                
-                <div style="padding: 48px 40px;">
-                  <!-- Brand Mark -->
-                  <div style="text-align: center; margin-bottom: 40px;">
-                    <h1 style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 38px; font-weight: 800; letter-spacing: 0.15em; background: linear-gradient(135deg, #FF6B6B 0%, #C4B5FD 50%, #5EEAD4 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: #C4B5FD;">ORBIT</h1>
-                  </div>
-
-                  <!-- Main Content -->
-                  <h2 style="font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 700; margin-bottom: 24px; color: #FFFFFF; text-align: center;">You're on the list! 🎉</h2>
-                  
-                  <p style="font-size: 16px; line-height: 1.7; color: #D1D5DB; margin-bottom: 24px;">
-                    Hey there,
-                  </p>
-                  
-                  <p style="font-size: 16px; line-height: 1.7; color: #D1D5DB; margin-bottom: 32px;">
-                    Thanks for joining the ORBIT waitlist! We are absolutely thrilled to have you onboard. We'll notify you securely as soon as we officially launch.
-                  </p>
-
-                  <div style="background: rgba(196, 181, 253, 0.05); border: 1px solid rgba(196, 181, 253, 0.15); border-radius: 12px; padding: 28px; text-align: center; margin: 0 0 40px 0;">
-                    <p style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 22px; font-weight: 600; line-height: 1.4; background: linear-gradient(90deg, #C4B5FD 0%, #5EEAD4 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: #5EEAD4;">
-                      Get ready to connect offline<br/>and live more.
-                    </p>
-                  </div>
-
-                  <p style="font-size: 15px; line-height: 1.7; color: #9CA3B0; margin-bottom: 40px;">
-                    — Built with 🖤 by the ORBIT Team.
-                  </p>
-
-                  <!-- Footer -->
-                  <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 32px; text-align: center;">
-                    <p style="font-size: 13px; color: #6B7280; margin-bottom: 8px; font-family: 'Outfit', sans-serif; font-weight: 500; letter-spacing: 0.05em;">
-                      ORBIT — Connect Offline. Live More.
-                    </p>
-                    <a href="https://joinorbit.org" style="color: #C4B5FD; text-decoration: none; font-weight: 500; font-size: 14px;">joinorbit.org</a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </body>
-          </html>
-        `
-      });
-
-      console.log(`📧 Welcome email sent to ${email} (Message ID: ${info.messageId})`);
-    } catch (emailErr) {
-      console.error('❌ Failed to trigger email via nodemailer:', emailErr);
-    }
-    // ──────────────────────────────────────────────────────────
-
-    res.json({ success: true, message: "You're on the list!", total: count });
   } catch (err) {
     console.error('❌ Error:', err);
     res.status(500).json({ error: 'Something went wrong. Please try again.' });
@@ -320,8 +408,8 @@ app.post('/api/admin/email-export', async (req, res) => {
 
     // Create Transporter (Requires env variables)
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.hostinger.com',
-      port: process.env.SMTP_PORT || 465,
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
       secure: true, // true for 465, false for other ports
       auth: {
         user: process.env.SMTP_USER,
@@ -329,7 +417,7 @@ app.post('/api/admin/email-export', async (req, res) => {
       },
     });
 
-    const targetEmail = 'harshithakulal1999@gmail.com';
+    const targetEmail = process.env.EXPORT_EMAIL
 
     // Verify SMTP config exists to prevent unhandled rejections if empty
     if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
@@ -385,19 +473,19 @@ cron.schedule('0 */6 * * *', async () => {
     const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
 
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.hostinger.com',
-      port: process.env.SMTP_PORT || 465,
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
       secure: true,
       auth: {
-        user: process.env.SMTP_USER || 'hello@joinorbit.org',
-        pass: process.env.SMTP_PASS || 'orbitAdmin3326*',
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
       },
     });
 
-    const targetEmail = 'irenik.tech@gmail.com';
+    const targetEmail = process.env.EXPORT_EMAIL || 'harshithakulal1999@gmail.com';
 
     await transporter.sendMail({
-      from: `"Orbit Waitlist" <${process.env.SMTP_USER || 'hello@joinorbit.org'}>`,
+      from: `"Orbit Waitlist" <${process.env.SMTP_USER}>`,
       to: targetEmail,
       subject: `Orbit Waitlist Scheduled Export - ${new Date().toISOString().split('T')[0]}`,
       text: 'Hello,\n\nAttached is the scheduled export of the Orbit waitlist.\n\nBest,\nOrbit Admin',

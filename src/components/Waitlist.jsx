@@ -38,6 +38,16 @@ export default function Waitlist({ onJoinWaitlist }) {
           <div className="waitlist__decor waitlist__decor--2"></div>
           <div className="waitlist__decor waitlist__decor--3"></div>
 
+          {/* Floating particles */}
+          <div className="waitlist__particle waitlist__particle--1"></div>
+          <div className="waitlist__particle waitlist__particle--2"></div>
+          <div className="waitlist__particle waitlist__particle--3"></div>
+          <div className="waitlist__particle waitlist__particle--4"></div>
+          <div className="waitlist__particle waitlist__particle--5"></div>
+          <div className="waitlist__particle waitlist__particle--6"></div>
+          <div className="waitlist__particle waitlist__particle--7"></div>
+          <div className="waitlist__particle waitlist__particle--8"></div>
+
           <div className="waitlist__content">
             <span className="section-label" style={{ background: 'rgba(255, 255, 255, 0.15)', color: '#7C3AED' }}>
               Join the Waitlist
