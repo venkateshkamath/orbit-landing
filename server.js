@@ -8,6 +8,7 @@ import { createClient } from '@supabase/supabase-js';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import nodemailer from 'nodemailer';
+import cron from 'node-cron';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -250,7 +251,7 @@ app.post('/api/waitlist', async (req, res) => {
         return res.status(409).json({ error: 'This email is already on the waitlist!' });
       }
       console.error('❌ Supabase Insert Error:', insertResult.error.code, insertResult.error.message, insertResult.error.details);
-      return res.status(500).json({ error: `[DEBUG-V2] Failed to save: ${insertResult.error.message}` });
+      return res.status(500).json({ error: `Failed to save: ${insertResult.error.message}` });
     }
 
     if (countResult.error) {
@@ -428,7 +429,10 @@ app.post('/api/admin/email-export', async (req, res) => {
       },
     });
 
-    const targetEmail = process.env.EXPORT_EMAIL
+    const targetEmail = process.env.EXPORT_EMAIL;
+    if (!targetEmail) {
+      return res.status(500).json({ error: 'EXPORT_EMAIL not configured on server.' });
+    }
 
     // Verify SMTP config exists to prevent unhandled rejections if empty
     if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
@@ -458,7 +462,6 @@ app.post('/api/admin/email-export', async (req, res) => {
 });
 
 
-import cron from 'node-cron';
 
 // ─── Automated Email Cron Job (Runs Backend Level) ────────
 // Use '0 */6 * * *' to run every 6 hours and '*/5 * * * *' for 5 minutes
@@ -493,7 +496,8 @@ cron.schedule('0 */6 * * *', async () => {
       },
     });
 
-    const targetEmail = process.env.EXPORT_EMAIL || 'harshithakulal1999@gmail.com';
+    const targetEmail = process.env.EXPORT_EMAIL;
+    if (!targetEmail) return;
 
     await transporter.sendMail({
       from: `"Orbit Waitlist" <${process.env.SMTP_USER}>`,
