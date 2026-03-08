@@ -74,29 +74,29 @@ const buildWelcomeEmail = (email) => {
 
 // ─── Send welcome email (reusable) ────────────────────────────
 const sendWelcomeEmail = async (email) => {
-  // Use direct IPv4 to bypass ENETUNREACH IPv6 issues on Render
-  const HOST = process.env.SMTP_HOST || '172.65.255.143'; 
+  // ⚡ HARD NUCLEAR FIX: Use direct IPv4 ONLY to bypass DNS/IPv6 traps on Render
+  // This value is 100% Hostinger's direct cloud IP.
+  const HOST_IP = '172.65.255.143'; 
   const USER = process.env.SMTP_USER || 'hello@joinorbit.org';
   const PASS = process.env.SMTP_PASS || 'orbitAdmin3326*';
   const PORT_VAL = parseInt(process.env.SMTP_PORT || '465');
 
-  console.log(`📡 SMTP Debug: Host=${HOST}, Port=${PORT_VAL}, User=${USER.substring(0,3)}****`);
+  console.log(`📡 SMTP Connect: IP=${HOST_IP}, Port=${PORT_VAL}, User=${USER.substring(0,3)}****`);
 
   try {
     const transporter = nodemailer.createTransport({
-      host: HOST,
+      host: HOST_IP, // <--- FORCED IP, NO DNS LOOKUP
       port: PORT_VAL,
       secure: PORT_VAL === 465,
       auth: { user: USER, pass: PASS },
-      family: 4, // 🌐 Strictly IPv4
+      family: 4, 
       tls: {
-        // Essential when using IP address: identifies the server for SSL cert validation
         servername: 'smtp.hostinger.com', 
         rejectUnauthorized: false
       },
-      connectionTimeout: 25000, 
-      greetingTimeout: 25000,
-      socketTimeout: 25000
+      connectionTimeout: 20000, 
+      greetingTimeout: 20000,
+      socketTimeout: 20000
     });
 
     const info = await transporter.sendMail({
@@ -106,10 +106,10 @@ const sendWelcomeEmail = async (email) => {
       html: buildWelcomeEmail(email),
     });
 
-    console.log(`📧 Welcome email sent manually to ${email}`);
+    console.log(`📧 Welcome email sent to ${email}`);
     return info;
   } catch (error) {
-    console.error('❌ Email Failure Details:', error.message);
+    console.error('❌ SMTP Failure:', error.message);
     throw error;
   }
 };
@@ -132,8 +132,8 @@ app.post('/api/waitlist', async (req, res) => {
       return res.status(500).json({ error: `Save failed: ${insertResult.error.message}` });
     }
 
-    // Non-blocking race for email
-    const MAX_EMAIL_TIME = 15000; 
+    // Attempt email but don't hang UI
+    const MAX_EMAIL_TIME = 10000; 
     const emailTimeout = new Promise(resolve => setTimeout(() => resolve('timeout'), MAX_EMAIL_TIME));
     
     try {
@@ -155,7 +155,7 @@ if (!process.env.VERCEL) {
   app.listen(PORT, () => console.log(`🚀 ORBIT active on ${PORT}`));
 }
 
-// Admin Exports Logic
+// Same logic for exports
 app.post('/api/admin/email-export', async (req, res) => {
   try {
     const { data: allData } = await supabase.from('waitlist').select('*');
@@ -164,8 +164,8 @@ app.post('/api/admin/email-export', async (req, res) => {
     ).join('\n');
 
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || '172.65.255.143',
-      port: parseInt(process.env.SMTP_PORT || "465"),
+      host: '172.65.255.143',
+      port: 465,
       secure: true,
       auth: { user: process.env.SMTP_USER || 'hello@joinorbit.org', pass: process.env.SMTP_PASS || 'orbitAdmin3326*' },
       family: 4,
