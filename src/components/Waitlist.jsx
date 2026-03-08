@@ -39,7 +39,7 @@ export default function Waitlist({ onJoinWaitlist }) {
           <div className="waitlist__decor waitlist__decor--3"></div>
 
           <div className="waitlist__content">
-            <span className="section-label" style={{ background: 'rgba(255, 255, 255, 0.15)', color: 'white' }}>
+            <span className="section-label" style={{ background: 'rgba(255, 255, 255, 0.15)', color: '#7C3AED' }}>
               Join the Waitlist
             </span>
             <h2 className="waitlist__title">

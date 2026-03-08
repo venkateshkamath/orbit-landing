@@ -6,10 +6,10 @@ import './FAQ.css';
 gsap.registerPlugin(ScrollTrigger);
 
 const faqs = [
-  {
-    q: 'Is ORBIT a dating app?',
-    a: 'Not at all! ORBIT is about building genuine friendships and community connections. Whether you\'re looking for hiking buddies, study partners, or just someone to grab coffee with — we\'ve got you covered.',
-  },
+  // {
+  //   q: 'Is ORBIT a dating app?',
+  //   a: 'Not at all! ORBIT is about building genuine friendships and community connections. Whether you\'re looking for hiking buddies, study partners, or just someone to grab coffee with — we\'ve got you covered.',
+  // },
   {
     q: 'How does ORBIT match people?',
     a: 'We use interest-based discovery, not algorithms. You tell us what you\'re into, and we show you events and people nearby who share your passions. No tricks, no manipulation.',
