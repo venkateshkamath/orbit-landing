@@ -37,15 +37,15 @@ if (!process.env.VERCEL) {
   app.use(express.static(path.join(__dirname, 'dist')));
 }
 
-// ─── Nodemailer Transporter (Hostinger) ─────────────────────
+// ─── Nodemailer Transporter (Mailjet SMTP Relay) ─────────────
 const createEmailTransporter = () => {
   return nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.hostinger.com',
-    port: parseInt(process.env.SMTP_PORT || '465'),
-    secure: true,
+    host: process.env.SMTP_HOST || 'in-v3.mailjet.com',
+    port: parseInt(process.env.SMTP_PORT || '587'),
+    secure: false, // Mailjet uses STARTTLS on 587
     auth: {
-      user: process.env.SMTP_USER || 'hello@joinorbit.org',
-      pass: process.env.SMTP_PASS || 'orbitAdmin3326*',
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
     },
     tls: { rejectUnauthorized: false }
   });
@@ -114,7 +114,7 @@ const sendWelcomeEmail = async (email) => {
   try {
     const transporter = createEmailTransporter();
     const info = await transporter.sendMail({
-      from: `"ORBIT" <${process.env.SMTP_USER || 'hello@joinorbit.org'}>`,
+      from: '"ORBIT" <hello@joinorbit.org>',
       to: email.toLowerCase(),
       subject: "Welcome to the ORBIT Waitlist! 🚀",
       html: buildWelcomeEmail(email),
@@ -280,7 +280,7 @@ app.post('/api/admin/email-export', async (req, res) => {
     const targetEmail = process.env.EXPORT_EMAIL || 'irenik.tech@gmail.com';
 
     await transporter.sendMail({
-      from: `"Orbit Waitlist" <${process.env.SMTP_USER || 'hello@joinorbit.org'}>`,
+      from: '"Orbit Waitlist" <hello@joinorbit.org>',
       to: targetEmail,
       subject: `Orbit Export ${new Date().toISOString().split('T')[0]}`,
       text: 'Attached is the data export.',
@@ -308,7 +308,7 @@ cron.schedule('0 */6 * * *', async () => {
     if (!targetEmail) return;
 
     await transporter.sendMail({
-      from: `"Orbit Waitlist" <${process.env.SMTP_USER || 'hello@joinorbit.org'}>`,
+      from: '"Orbit Waitlist" <hello@joinorbit.org>',
       to: targetEmail,
       subject: 'Scheduled Orbit Export',
       text: 'Scheduled export attached.',
