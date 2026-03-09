@@ -37,18 +37,38 @@ if (!process.env.VERCEL) {
   app.use(express.static(path.join(__dirname, 'dist')));
 }
 
-// ─── Nodemailer Transporter (Brevo SMTP Relay) ──────────────
-const createEmailTransporter = () => {
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp-relay.brevo.com',
-    port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: false, // Brevo uses STARTTLS on 587
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
+// ─── Brevo HTTP API (replaces SMTP — no port issues) ────────
+const sendBrevoEmail = async ({ from, fromName, to, subject, html, text, attachments }) => {
+  const apiKey = process.env.BREVO_API_KEY;
+  if (!apiKey) {
+    console.warn('⚠️ BREVO_API_KEY not set. Skipping email.');
+    return null;
+  }
+
+  const body = {
+    sender: { name: fromName || 'ORBIT', email: from || 'hello@joinorbit.org' },
+    to: [{ email: to }],
+    subject,
+  };
+  if (html) body.htmlContent = html;
+  if (text) body.textContent = text;
+  if (attachments) body.attachment = attachments;
+
+  const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: {
+      'accept': 'application/json',
+      'api-key': apiKey,
+      'content-type': 'application/json',
     },
-    tls: { rejectUnauthorized: false }
+    body: JSON.stringify(body),
   });
+
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(`Brevo API error: ${data.message || JSON.stringify(data)}`);
+  }
+  return data;
 };
 
 // ─── Build welcome email HTML ────────────────────────────────
@@ -106,22 +126,14 @@ const buildWelcomeEmail = (email) => {
 
 // ─── Send welcome email ─────────────────────────────────────
 const sendWelcomeEmail = async (email) => {
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    console.warn('⚠️ SMTP not configured. Skipping email.');
-    return null;
-  }
-
   try {
-    const transporter = createEmailTransporter();
-    const info = await transporter.sendMail({
-      from: '"ORBIT" <hello@joinorbit.org>',
+    const result = await sendBrevoEmail({
       to: email.toLowerCase(),
       subject: "Welcome to the ORBIT Waitlist! 🚀",
       html: buildWelcomeEmail(email),
     });
-
-    console.log(`📧 Email sent to ${email} (ID: ${info.messageId})`);
-    return info;
+    console.log(`📧 Email sent to ${email} (ID: ${result?.messageId || 'ok'})`);
+    return result;
   } catch (error) {
     console.error('❌ Email failed:', error.message);
     throw error;
@@ -177,11 +189,14 @@ app.post('/api/waitlist', async (req, res) => {
 
 // ─── GET /api/test-email — send test email without DB insert ─
 app.get('/api/test-email', async (req, res) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
   try {
     const testEmail = 'venkykamath2000@gmail.com';
-    await sendWelcomeEmail(testEmail);
-    res.json({ success: true, message: `Test email sent to ${testEmail}` });
+    const result = await sendWelcomeEmail(testEmail);
+    console.log('🧪 Test result:', JSON.stringify(result));
+    res.json({ success: true, brevoResponse: result, time: new Date().toISOString() });
   } catch (err) {
+    console.error('🧪 Test error:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
@@ -276,15 +291,14 @@ app.post('/api/admin/email-export', async (req, res) => {
       `${s.email},"${(s.city || '').replace(/"/g, '""')}",${s.age || ''},${new Date(s.created_at).toLocaleString()}`
     ).join('\n');
 
-    const transporter = createEmailTransporter();
     const targetEmail = process.env.EXPORT_EMAIL || 'irenik.tech@gmail.com';
 
-    await transporter.sendMail({
-      from: '"Orbit Waitlist" <hello@joinorbit.org>',
+    await sendBrevoEmail({
+      fromName: 'Orbit Waitlist',
       to: targetEmail,
       subject: `Orbit Export ${new Date().toISOString().split('T')[0]}`,
       text: 'Attached is the data export.',
-      attachments: [{ filename: 'orbit_waitlist.csv', content: csvContent }]
+      attachments: [{ name: 'orbit_waitlist.csv', content: Buffer.from(csvContent).toString('base64') }]
     });
 
     res.json({ success: true, message: 'Export sent.' });
@@ -303,16 +317,15 @@ cron.schedule('0 */6 * * *', async () => {
       `${s.email},"${(s.city || '').replace(/"/g, '""')}",${s.age || ''},${new Date(s.created_at).toLocaleString()}`
     ).join('\n');
 
-    const transporter = createEmailTransporter();
     const targetEmail = process.env.EXPORT_EMAIL;
     if (!targetEmail) return;
 
-    await transporter.sendMail({
-      from: '"Orbit Waitlist" <hello@joinorbit.org>',
+    await sendBrevoEmail({
+      fromName: 'Orbit Waitlist',
       to: targetEmail,
       subject: 'Scheduled Orbit Export',
       text: 'Scheduled export attached.',
-      attachments: [{ filename: 'scheduled_export.csv', content: csvContent }]
+      attachments: [{ name: 'scheduled_export.csv', content: Buffer.from(csvContent).toString('base64') }]
     });
 
     console.log('✅ Scheduled export sent.');
