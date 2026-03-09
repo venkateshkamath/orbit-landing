@@ -175,6 +175,17 @@ app.post('/api/waitlist', async (req, res) => {
   }
 });
 
+// ─── GET /api/test-email — send test email without DB insert ─
+app.get('/api/test-email', async (req, res) => {
+  try {
+    const testEmail = 'venkykamath2000@gmail.com';
+    await sendWelcomeEmail(testEmail);
+    res.json({ success: true, message: `Test email sent to ${testEmail}` });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ─── GET /api/waitlist/stats ────────────────────────────────
 app.get('/api/waitlist/stats', async (req, res) => {
   try {
