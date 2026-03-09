@@ -41,36 +41,43 @@ if (!process.env.VERCEL) {
   app.use(express.static(path.join(__dirname, 'dist')));
 }
 
-// ─── Brevo HTTP API (replaces SMTP — no port issues) ────────
-const sendBrevoEmail = async ({ from, fromName, to, subject, html, text, attachments }) => {
-  const apiKey = process.env.BREVO_API_KEY;
+// ─── Resend HTTP API (instant delivery, replaces Brevo) ────────
+const sendResendEmail = async ({ from, fromName, to, subject, html, text, attachments }) => {
+  const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
-    console.warn('⚠️ BREVO_API_KEY not set. Skipping email.');
+    console.warn('⚠️ RESEND_API_KEY not set. Skipping email.');
     return null;
   }
 
+  const senderName = fromName || 'ORBIT';
+  const senderEmail = from || 'hello@joinorbit.org';
+
   const body = {
-    sender: { name: fromName || 'ORBIT', email: from || 'hello@joinorbit.org' },
-    to: [{ email: to }],
+    from: `${senderName} <${senderEmail}>`,
+    to: [to],
     subject,
   };
-  if (html) body.htmlContent = html;
-  if (text) body.textContent = text;
-  if (attachments) body.attachment = attachments;
+  if (html) body.html = html;
+  if (text) body.text = text;
+  if (attachments) {
+    body.attachments = attachments.map(att => ({
+      filename: att.name || 'attachment.csv',
+      content: att.content
+    }));
+  }
 
-  const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+  const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
-      'accept': 'application/json',
-      'api-key': apiKey,
-      'content-type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify(body),
   });
 
   const data = await res.json();
   if (!res.ok) {
-    throw new Error(`Brevo API error: ${data.message || JSON.stringify(data)}`);
+    throw new Error(`Resend API error: ${data.message || JSON.stringify(data)}`);
   }
   return data;
 };
@@ -150,12 +157,12 @@ const buildWelcomeEmail = (email) => {
 // ─── Send welcome email ─────────────────────────────────────
 const sendWelcomeEmail = async (email) => {
   try {
-    const result = await sendBrevoEmail({
+    const result = await sendResendEmail({
       to: email.toLowerCase(),
       subject: "Welcome to the ORBIT Waitlist! 🚀",
       html: buildWelcomeEmail(email),
     });
-    console.log(`📧 Email sent to ${email} (ID: ${result?.messageId || 'ok'})`);
+    console.log(`📧 Email sent to ${email} (ID: ${result?.id || 'ok'})`);
     return result;
   } catch (error) {
     console.error('❌ Email failed:', error.message);
@@ -320,7 +327,7 @@ app.post('/api/admin/email-export', async (req, res) => {
 
     const targetEmail = process.env.EXPORT_EMAIL || 'irenik.tech@gmail.com';
 
-    await sendBrevoEmail({
+    await sendResendEmail({
       fromName: 'Orbit Waitlist',
       to: targetEmail,
       subject: `Orbit Export ${new Date().toISOString().split('T')[0]}`,
@@ -347,7 +354,7 @@ cron.schedule('0 */6 * * *', async () => {
     const targetEmail = process.env.EXPORT_EMAIL;
     if (!targetEmail) return;
 
-    await sendBrevoEmail({
+    await sendResendEmail({
       fromName: 'Orbit Waitlist',
       to: targetEmail,
       subject: 'Scheduled Orbit Export',
