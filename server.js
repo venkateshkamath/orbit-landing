@@ -22,8 +22,12 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // ─── Supabase ─────────────────────────────────────────────
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://aayqbazqqfyetkwhhwnt.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFheXFiYXpxcWZ5ZXRrd2hod250Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjQ4ODIwMywiZXhwIjoyMDg4MDY0MjAzfQ.8q4s4Cf05FkK8X_4pDftFOtMAzG6ZYIRZIdLd1kSG9A';
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_KEY;
+
+if (!SUPABASE_URL || !SUPABASE_KEY) {
+  console.warn('⚠️ SUPABASE_URL or SUPABASE_KEY is missing from environment variables!');
+}
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -125,6 +129,19 @@ const buildWelcomeEmail = (email) => {
         </p>
       </div>
     </div>
+    
+    <!-- Footer -->
+    <div style="padding: 30px 40px; border-top: 1px solid #1a1a24; text-align: center; background-color: #09090b;">
+      <div style="font-size: 14px; font-weight: 800; color: #ffffff; letter-spacing: 0.4em; margin-bottom: 12px; margin-left: 0.4em;">
+        O R B I T
+      </div>
+      <p style="font-size: 12px; line-height: 1.6; color: #64748b; margin: 0 auto 16px; max-width: 400px;">
+        A movement towards meaningful human presence. Built for those who crave the real world.
+      </p>
+      <p style="font-size: 12px; color: #475569; margin: 0;">
+        <a href="https://joinorbit.org" style="color: #5EEAD4; text-decoration: none;">Visit Website</a> &nbsp;|&nbsp; &copy; 2026 ORBIT
+      </p>
+    </div>
   </div>
 </body>
 </html>`;
@@ -149,8 +166,12 @@ const sendWelcomeEmail = async (email) => {
 // ─── POST /api/admin/login ──────────────────────────────────
 app.post('/api/admin/login', (req, res) => {
   const { username, password } = req.body;
-  const ADMIN_USER = process.env.ADMIN_USER || 'orbitAdmin';
-  const ADMIN_PASS = process.env.ADMIN_PASS || 'orbitAdmin3326';
+  const ADMIN_USER = process.env.ADMIN_USER;
+  const ADMIN_PASS = process.env.ADMIN_PASS;
+
+  if (!ADMIN_USER || !ADMIN_PASS) {
+    return res.status(500).json({ success: false, error: 'Admin credentials not configured on server' });
+  }
 
   if (username === ADMIN_USER && password === ADMIN_PASS) {
     res.json({ success: true, token: 'orbit_secure_session_token_' + Date.now() });
