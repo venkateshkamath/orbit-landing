@@ -114,7 +114,7 @@ const sendWelcomeEmail = async (email) => {
   try {
     const transporter = createEmailTransporter();
     const info = await transporter.sendMail({
-      from: `"ORBIT" <${process.env.SMTP_USER || 'hello@joinorbit.org'}>`,
+      from: '"ORBIT" <hello@joinorbit.org>',
       to: email.toLowerCase(),
       subject: "Welcome to the ORBIT Waitlist! 🚀",
       html: buildWelcomeEmail(email),
@@ -280,7 +280,7 @@ app.post('/api/admin/email-export', async (req, res) => {
     const targetEmail = process.env.EXPORT_EMAIL || 'irenik.tech@gmail.com';
 
     await transporter.sendMail({
-      from: `"Orbit Waitlist" <${process.env.SMTP_USER || 'hello@joinorbit.org'}>`,
+      from: '"Orbit Waitlist" <hello@joinorbit.org>',
       to: targetEmail,
       subject: `Orbit Export ${new Date().toISOString().split('T')[0]}`,
       text: 'Attached is the data export.',
@@ -308,7 +308,7 @@ cron.schedule('0 */6 * * *', async () => {
     if (!targetEmail) return;
 
     await transporter.sendMail({
-      from: `"Orbit Waitlist" <${process.env.SMTP_USER || 'hello@joinorbit.org'}>`,
+      from: '"Orbit Waitlist" <hello@joinorbit.org>',
       to: targetEmail,
       subject: 'Scheduled Orbit Export',
       text: 'Scheduled export attached.',
