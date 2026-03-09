@@ -78,46 +78,52 @@ const buildWelcomeEmail = (email) => {
 <html>
 <head>
   <meta charset="utf-8">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
-<body style="margin: 0; padding: 0; background-color: #0d0d14; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-  <div style="max-width: 600px; margin: 0 auto; background-color: #0d0d14; border: 1px solid #1a1a24; border-radius: 12px; overflow: hidden; margin-top: 40px;">
-    <div style="padding: 40px 40px 20px; text-align: center;">
-      <div style="font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 30px;">
-        <span style="background: linear-gradient(135deg, #FF6B6B 0%, #C4B5FD 50%, #5EEAD4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: #C4B5FD;">ORBIT</span>
+<body style="margin: 0; padding: 0; background-color: #030303; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #09090b; border: 1px solid #1a1a24; border-radius: 12px; overflow: hidden; margin-top: 40px;">
+    
+    <!-- Header -->
+    <div style="padding: 50px 40px; text-align: center; border-bottom: 1px solid #1a1a24;">
+      <div style="font-size: 32px; font-weight: 800; color: #ffffff; letter-spacing: 0.3em; margin-bottom: 15px; margin-left: 0.3em;">
+        ORBIT
       </div>
-      <div style="margin: 20px 0 40px;">
-        <svg width="120" height="120" viewBox="0 0 120 120" fill="none" style="margin: 0 auto;">
-          <circle cx="60" cy="60" r="58" stroke="#1a1a24" stroke-width="1"/>
-          <circle cx="60" cy="60" r="40" stroke="#1a1a24" stroke-width="1"/>
-          <circle cx="60" cy="60" r="22" stroke="#1a1a24" stroke-width="1"/>
-          <circle cx="60" cy="60" r="4" fill="#C4B5FD" opacity="0.8"/>
-          <path d="M60 2 L60 118" stroke="#1a1a24" stroke-width="0.5"/>
-          <path d="M2 60 L118 60" stroke="#1a1a24" stroke-width="0.5"/>
-        </svg>
+      <div style="height: 2px; width: 40px; background: linear-gradient(90deg, #FF6B6B, #C4B5FD, #5EEAD4); margin: 0 auto 15px;"></div>
+      <div style="font-size: 10px; font-weight: 600; color: #64748b; letter-spacing: 0.3em; text-transform: uppercase;">
+        Connect Offline &middot; Live More
       </div>
-      <h1 style="font-family: 'Outfit', sans-serif; font-size: 32px; font-weight: 700; color: #ffffff; margin: 0 0 16px; letter-spacing: -0.02em;">You're in Orbit, ${username}</h1>
-      <p style="font-size: 16px; line-height: 1.6; color: #94a3b8; margin: 0 auto; max-width: 460px;">
-        Welcome to the next generation of social proximity. We're building a world where connection is measured by distance, not just data.
+    </div>
+    
+    <!-- Body -->
+    <div style="padding: 40px;">
+      <h1 style="font-size: 22px; font-weight: 700; color: #ffffff; margin: 0 0 25px;">You're in the Orbit 🎉</h1>
+      
+      <p style="font-size: 15px; font-weight: 600; color: #e2e8f0; margin: 0 0 20px;">Hey ${username}</p>
+      
+      <p style="font-size: 15px; line-height: 1.6; color: #94a3b8; margin: 0 0 30px;">
+        Welcome to the inner circle. We're building a world where real-world proximity sparks genuine human connection. You're among the first to witness the shift from screens to scenes.
       </p>
-    </div>
-    <div style="padding: 0 40px 40px;">
-      <div style="background: linear-gradient(180deg, #16161f 0%, #0d0d14 100%); border: 1px solid #1a1a24; border-radius: 12px; padding: 32px; text-align: center;">
-        <div style="display: inline-block; padding: 6px 12px; border-radius: 20px; background-color: rgba(94, 234, 212, 0.1); color: #5EEAD4; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 20px;">
-          Early Access Secured
+      
+      <div style="margin-bottom: 35px;">
+        <div style="margin-bottom: 12px;">
+          <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background-color: #5EEAD4; margin-right: 12px; margin-bottom: 2px;"></span>
+          <span style="font-size: 14px; color: #cbd5e1;">Priority access to local proximity events.</span>
         </div>
-        <p style="color: #cbd5e1; font-size: 15px; line-height: 1.6; margin: 0 0 24px;">
-          We'll notify you as soon as we launch in your city. Get ready to experience what's happening right around you, in real-time.
-        </p>
-        <a href="https://joinorbit.org" style="display: inline-block; background: linear-gradient(135deg, #FF6B6B 0%, #C4B5FD 100%); color: #ffffff; padding: 14px 28px; border-radius: 8px; font-family: 'Outfit', sans-serif; font-weight: 600; text-decoration: none; font-size: 15px; box-shadow: 0 4px 12px rgba(255, 107, 107, 0.2);">
-          Explore the Vision
-        </a>
+        <div style="margin-bottom: 12px;">
+          <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background-color: #C4B5FD; margin-right: 12px; margin-bottom: 2px;"></span>
+          <span style="font-size: 14px; color: #cbd5e1;">Instant discovery of like-minded communities nearby.</span>
+        </div>
+        <div style="margin-bottom: 12px;">
+          <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background-color: #FF6B6B; margin-right: 12px; margin-bottom: 2px;"></span>
+          <span style="font-size: 14px; color: #cbd5e1;">The chance to reclaim shared physical space.</span>
+        </div>
       </div>
-    </div>
-    <div style="padding: 30px 40px; border-top: 1px solid #1a1a24; text-align: center;">
-      <p style="color: #64748b; font-size: 13px; margin: 0;">&copy; 2026 ORBIT Proximity Platform. All rights reserved.</p>
+      
+      <div style="border-left: 2px solid #1a1a24; padding-left: 15px; margin-bottom: 20px;">
+        <p style="font-size: 14px; font-style: italic; color: #64748b; margin: 0;">
+          "The best connections never happened behind a keyboard."
+        </p>
+      </div>
     </div>
   </div>
 </body>
