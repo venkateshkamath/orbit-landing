@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
+    "@sendgrid/mail": "^8.1.6",
     "@supabase/supabase-js": "^2.98.0",
     "@vitejs/plugin-react": "^5.1.1",
     "cors": "^2.8.6",
