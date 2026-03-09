@@ -209,10 +209,12 @@ app.post('/api/waitlist', async (req, res) => {
       return res.status(500).json({ error: `Failed to save: ${insertResult.error.message}` });
     }
 
-    // Send email in background
-    sendWelcomeEmail(lowerEmail).catch(err => {
-      console.warn('⚠️ User saved, email failed:', err.message);
-    });
+    // Send email (MUST be awaited on Vercel/Serverless, or it kills the process before completing)
+    try {
+      await sendWelcomeEmail(lowerEmail);
+    } catch (err) {
+      console.warn('⚠️ User saved, but email failed (e.g., quota/sandbox):', err.message);
+    }
 
     res.json({ success: true, message: "You're on the list!", total: countResult.count || 0 });
   } catch (err) {
