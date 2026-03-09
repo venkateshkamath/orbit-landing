@@ -8,28 +8,28 @@ gsap.registerPlugin(ScrollTrigger);
 const images = [
   {
     id: 1,
-    src: 'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=1200&q=80',
+    src: 'https://images.pexels.com/photos/4453153/pexels-photo-4453153.jpeg',
     alt: 'Friends laughing together at sunset',
     caption: 'Reclaim your evening',
     span: 'large', 
   },
   {
     id: 2,
-    src: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80',
+    src: 'https://images.pexels.com/photos/1267697/pexels-photo-1267697.jpeg',
     alt: 'People connecting over coffee',
     caption: 'Share real moments',
     span: 'wide', 
   },
   {
     id: 3,
-    src: 'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&w=800&q=80',
+    src: 'https://imgs.search.brave.com/ppWMma3glcQ1TjGnP5EzAL-7_TklDlPS54reeb6XmaQ/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/cHJlbWl1bS1waG90/by9ncm91cC1mb3Vy/LWluZGlhbi1mcmll/bmRzLW91dGRvb3Jz/LXNtaWxpbmctbGF1/Z2hpbmctdHJlZV81/Mzg3Ni0xMDc3MzQ3/LmpwZz9zZW10PWFp/c19oeWJyaWQmdz03/NDAmcT04MA',
     alt: 'Group having fun outdoors',
     caption: 'Find your tribe',
     span: 'small',
   },
   {
     id: 4,
-    src: 'https://images.unsplash.com/photo-1536640712-4d4c36ff0e4e?auto=format&fit=crop&w=800&q=80',
+    src: 'https://images.pexels.com/photos/8818592/pexels-photo-8818592.jpeg',
     alt: 'Friends at cafe laughing',
     caption: 'Laugh louder',
     span: 'small', 

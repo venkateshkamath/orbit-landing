@@ -7,38 +7,38 @@ gsap.registerPlugin(ScrollTrigger);
 
 const testimonials = [
   {
-    name: 'Aria Chen',
-    handle: '@ariachen',
-    text: 'I moved to a new city and felt super isolated. ORBIT connected me with a hiking group and now we meet every weekend. Best app ever!',
+    name: 'Anish Shetty',
+    handle: '@anishshetty',
+    text: 'I wasn’t expecting much when I first tried ORBIT, but it actually helped me connect with people who share the same interests as me. The events feel natural and not forced like most networking apps.',
     avatar: 'A',
     gradient: 'linear-gradient(135deg, #FF6B6B, #FFB347)',
   },
   {
-    name: 'Marcus J.',
-    handle: '@marcusj_',
-    text: 'As someone who works from home, ORBIT has been a game changer. I actually have a social life again — genuine friends, not just online ones.',
-    avatar: 'M',
+    name: `Sneha D'Souza`,
+    handle: '@sneha_dsouza',
+    text: 'What I like most about ORBIT is how easy it is to discover things happening around you. I’ve already joined a couple of small events and met some really nice people.',
+    avatar: 'S',
     gradient: 'linear-gradient(135deg, #C4B5FD, #818CF8)',
   },
   {
-    name: 'Priya Nakamura',
-    handle: '@priya.n',
-    text: 'The local events feature is *chef\'s kiss*. Found a pottery class, a book club, and a coffee tasting — all within my first week.',
-    avatar: 'P',
+    name: 'Rohit Pai',
+    handle: '@rohitpai',
+    text: 'Most apps focus on chatting online, but ORBIT actually helps you meet people in real life. It feels refreshing and much more meaningful.',
+    avatar: 'R',
     gradient: 'linear-gradient(135deg, #5EEAD4, #34D399)',
   },
   {
-    name: 'Devon Park',
-    handle: '@devonpark',
-    text: 'No cringe ice-breakers, no algorithm tricks. ORBIT just puts you in the right place at the right time with the right people.',
-    avatar: 'D',
+    name: 'Aman Gatty',
+    handle: '@amangatty',
+    text: 'I joined ORBIT just out of curiosity, but it quickly became something I use regularly. It’s simple, well designed, and makes socializing feel effortless.',
+    avatar: 'A',
     gradient: 'linear-gradient(135deg, #FFB347, #F59E0B)',
   },
 ];
 
 const stats = [
-  { value: '2.4K+', label: 'Waitlist signups' },
-  { value: '50+', label: 'Cities planned' },
+  { value: '300+', label: 'Waitlist signups' },
+  { value: '5+', label: 'Cities planned' },
   { value: '89%', label: 'Want offline connections' },
   { value: '∞', label: 'Real memories to make' },
 ];
@@ -114,13 +114,13 @@ export default function Community() {
                 </div>
               </div>
               <p className="community__card-text">{t.text}</p>
-              <div className="community__card-stars">
+              {/* <div className="community__card-stars">
                 {[...Array(5)].map((_, i) => (
                   <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill="#FFB347" stroke="none">
                     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                   </svg>
                 ))}
-              </div>
+              </div> */}
             </div>
           ))}
         </div>
