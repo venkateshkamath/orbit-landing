@@ -98,6 +98,16 @@ export default function FAQ() {
 
   return (
     <section ref={sectionRef} className="faq" id="faq">
+      <div className="hero__bg--discover">
+        <div className="hero__gradient hero__gradient--1"></div>
+        <div className="hero__gradient hero__gradient--2"></div>
+        <div className="hero__gradient hero__gradient--3"></div>
+        <div className="hero__dot hero__dot--1"></div>
+        <div className="hero__dot hero__dot--2"></div>
+        <div className="hero__dot hero__dot--3"></div>
+        <div className="hero__dot hero__dot--4"></div>
+        <div className="hero__dot hero__dot--5"></div>
+      </div>
       <div className="container">
         <div className="faq__header">
           <span className="section-label">FAQ</span>

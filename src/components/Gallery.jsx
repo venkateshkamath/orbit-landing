@@ -76,7 +76,6 @@ export default function Gallery() {
 
       <div className="container">
         <div className="gallery__header">
-          <span className="section-label">Real Life</span>
           <h2 className="gallery__title">
             Stop Scrolling.<br />
             <span className="gradient-text">Start Living.</span>

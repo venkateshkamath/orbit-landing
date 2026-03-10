@@ -81,7 +81,7 @@ export default function Features() {
         </div>
 
         <div className="features__grid">
-          {features.map((feature, i) => (
+          {features.map(( feature, i) => (
             <div
               key={feature.title}
               ref={el => cardsRef.current[i] = el}

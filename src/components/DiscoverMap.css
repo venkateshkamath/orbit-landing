@@ -95,6 +95,40 @@ body.dark .orbit-left p{
   color:#94a3b8;
 }
 
+/* =========================
+   DISCOVER TEXT STYLES
+========================= */
+
+.orbit-subtitle{
+  font-size:1.05rem;
+  color:var(--color-text-secondary);
+  max-width:520px;
+  line-height:1.7;
+}
+
+/* DISCOVERY RADIUS LABEL */
+
+.radius-label{
+  font-size:0.85rem;
+  letter-spacing:0.08em;
+  font-weight:600;
+  text-transform:uppercase;
+  color:var(--color-text-secondary);
+}
+
+/* SLIDER SCALE TEXT */
+
+.radius-scale-text{
+  font-size:0.8rem;
+  color:var(--color-text-secondary);
+}
+
+/* "within your radius" text */
+
+.radius-count-text{
+  font-size:1rem;
+  color:var(--color-text-secondary);
+}
 
 /* =========================
    SLIDER
@@ -117,6 +151,8 @@ body.dark .orbit-left p{
   font-weight:600;
 }
 
+/* BASE SLIDER */
+
 .radius-slider{
   width:100%;
   height:3px;
@@ -125,13 +161,31 @@ body.dark .orbit-left p{
   outline:none;
 }
 
-body.light .radius-slider{
-  background:#cbd5e1;
+/* TRACK COLOR (same as Code 1) */
+
+.radius-slider::-webkit-slider-runnable-track{
+  height:3px;
+  background:#374151;
+  border-radius:10px;
 }
 
-body.dark .radius-slider{
-  background:#334155;
+.radius-slider::-moz-range-track{
+  height:3px;
+  background:#374151;
+  border-radius:10px;
 }
+
+/* DARK MODE TRACK */
+
+body.dark .radius-slider::-webkit-slider-runnable-track{
+  background:white;
+}
+
+body.dark .radius-slider::-moz-range-track{
+  background:white;
+}
+
+/* SLIDER BALL (Code 2 style) */
 
 .radius-slider::-webkit-slider-thumb{
   appearance:none;
@@ -141,26 +195,49 @@ body.dark .radius-slider{
   background:white;
   border:3px solid #6366f1;
   cursor:pointer;
+
+  margin-top:-9.5px;
+
   box-shadow:0 0 0 6px rgba(99,102,241,0.15);
 }
+
+.radius-slider::-moz-range-thumb{
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  background:white;
+  border:3px solid #6366f1;
+  cursor:pointer;
+
+  box-shadow:0 0 0 6px rgba(99,102,241,0.15);
+}
+
+/* SCALE TEXT BELOW SLIDER */
 
 .radius-scale{
   display:flex;
   justify-content:space-between;
+  align-items:center;
   margin-top:8px;
   font-size:12px;
+  width:100%;
 }
 
-.radius-count{
-  margin-top:18px;
-  font-size:14px;
+.radius-scale span{
+  font-weight:500;
 }
 
-.radius-count span{
-  color:#6366f1;
-  font-weight:600;
+/* light mode */
+
+body.light .radius-scale span{
+  color:#475569;
 }
 
+/* dark mode */
+
+body.dark .radius-scale span{
+  color:#cbd5f5;
+}
 
 /* =========================
    RADAR
