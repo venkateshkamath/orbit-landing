@@ -39,7 +39,9 @@ function getRadarPosition(distance) {
   const maxRadarRadius = 45;
   const minRadarRadius = 12;
 
-  const normalized = distance / 3000;
+  const maxDistance = 3000;
+
+  const normalized = distance / maxDistance;
 
   const radarRadius =
     minRadarRadius + normalized * (maxRadarRadius - minRadarRadius);

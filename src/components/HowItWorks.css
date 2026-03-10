@@ -250,27 +250,122 @@
   color: var(--color-text-secondary);
   line-height: 1.65;
 }
+/* ============================================
+   Responsive
+============================================ */
 
-/* Responsive */
 @media (max-width: 768px) {
-  .how__connector {
-    left: 20px;
+
+  .how {
+    padding: var(--space-4xl) 0;
   }
 
+  .how__header {
+    margin-bottom: var(--space-3xl);
+  }
+
+  .how__title {
+    font-size: clamp(1.8rem, 6vw, 2.4rem);
+  }
+
+  .how__subtitle {
+    font-size: 0.95rem;
+    max-width: 90%;
+  }
+
+  .how__steps {
+    gap: var(--space-xl);
+  }
+
+  /* move timeline line left */
+
+  .how__connector {
+    left: 22px;
+  }
+
+  /* full width steps */
+
   .how__step {
-    width: 100%;
-    padding-left: 60px !important;
+    width:100%;
+  padding-left:3.5rem !important;
+  box-sizing:border-box;
     padding-right: 0 !important;
     flex-direction: row !important;
     text-align: left !important;
+    align-self: flex-start !important;
   }
 
-  .how__step .how__step-marker {
+  /* marker positioning */
+
+  .how__step-marker {
     left: 0 !important;
     right: auto !important;
+    width: 34px;
+    height: 34px;
   }
 
-  .how__step .how__step-icon {
-    margin-left: 0 !important;
+  .how__step-number {
+    font-size: 0.7rem;
   }
+
+  /* card spacing */
+
+  .how__step-card {
+    padding: var(--space-lg) var(--space-md);
+  }
+
+  .how__step-icon {
+    width: 40px;
+    height: 40px;
+    margin-bottom: var(--space-sm);
+  }
+
+  .how__step-title {
+    font-size: 1rem;
+  }
+
+  .how__step-desc {
+    font-size: 0.85rem;
+  }
+
+}
+
+
+/* Small phones */
+
+@media (max-width: 480px) {
+
+  .how__title {
+    font-size: 1.6rem;
+  }
+
+  .how__subtitle {
+    font-size: 0.9rem;
+  }
+
+  .how__connector {
+    left: 18px;
+  }
+
+  .how__step {
+    padding-left: 60px !important;
+  }
+
+  .how__step-marker {
+    width: 30px;
+    height: 30px;
+  }
+
+  .how__step-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+}
+.how{
+  overflow-x:hidden;
+}
+
+.hero__bg--discover{
+  overflow:hidden;
 }

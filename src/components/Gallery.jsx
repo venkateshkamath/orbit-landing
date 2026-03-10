@@ -22,7 +22,7 @@ const images = [
   },
   {
     id: 3,
-    src: 'https://imgs.search.brave.com/ppWMma3glcQ1TjGnP5EzAL-7_TklDlPS54reeb6XmaQ/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/cHJlbWl1bS1waG90/by9ncm91cC1mb3Vy/LWluZGlhbi1mcmll/bmRzLW91dGRvb3Jz/LXNtaWxpbmctbGF1/Z2hpbmctdHJlZV81/Mzg3Ni0xMDc3MzQ3/LmpwZz9zZW10PWFp/c19oeWJyaWQmdz03/NDAmcT04MA',
+    src: 'https://img.freepik.com/premium-photo/group-four-indian-friends-outdoors-smiling-laughing-tree_53876-1077347.jpg',
     alt: 'Group having fun outdoors',
     caption: 'Find your tribe',
     span: 'small',
