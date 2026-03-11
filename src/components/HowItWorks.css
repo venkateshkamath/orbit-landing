@@ -10,11 +10,11 @@
 
 /* reuse hero background */
 
-.hero__bg--discover{
-  position:absolute;
-  inset:0;
-  z-index:0;
-  pointer-events:none;
+.hero__bg--discover {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
 }
 
 .hero__gradient {
@@ -58,35 +58,40 @@
 }
 
 .hero__dot--1 {
-  width: 8px; height: 8px;
+  width: 8px;
+  height: 8px;
   background: var(--color-accent-coral);
   top: 20%;
   left: 15%;
 }
 
 .hero__dot--2 {
-  width: 6px; height: 6px;
+  width: 6px;
+  height: 6px;
   background: var(--color-accent-lavender);
   top: 30%;
   right: 20%;
 }
 
 .hero__dot--3 {
-  width: 10px; height: 10px;
+  width: 10px;
+  height: 10px;
   background: var(--color-accent-teal);
   bottom: 30%;
   left: 25%;
 }
 
 .hero__dot--4 {
-  width: 5px; height: 5px;
+  width: 5px;
+  height: 5px;
   background: var(--color-accent-amber);
   top: 50%;
   right: 12%;
 }
 
 .hero__dot--5 {
-  width: 7px; height: 7px;
+  width: 7px;
+  height: 7px;
   background: var(--color-accent-coral);
   bottom: 20%;
   right: 30%;
@@ -94,22 +99,22 @@
 
 /* Adjust gradient placement for blending */
 
-.hero__bg--discover .hero__gradient--1{
-  top:-25%;
-  right:-15%;
-  opacity:0.25;
+.hero__bg--discover .hero__gradient--1 {
+  top: -25%;
+  right: -15%;
+  opacity: 0.25;
 }
 
-.hero__bg--discover .hero__gradient--2{
-  bottom:-10%;
-  left:-20%;
-  opacity:0.18;
+.hero__bg--discover .hero__gradient--2 {
+  bottom: -10%;
+  left: -20%;
+  opacity: 0.18;
 }
 
-.hero__bg--discover .hero__gradient--3{
-  top:45%;
-  left:60%;
-  opacity:0.15;
+.hero__bg--discover .hero__gradient--3 {
+  top: 45%;
+  left: 60%;
+  opacity: 0.15;
 }
 
 .how__header {
@@ -152,7 +157,12 @@
 .how__connector-line {
   width: 100%;
   height: 100%;
-  background: linear-gradient(to bottom, var(--color-accent-coral), var(--color-accent-lavender), var(--color-accent-teal));
+  background: linear-gradient(
+    to bottom,
+    var(--color-accent-coral),
+    var(--color-accent-lavender),
+    var(--color-accent-teal)
+  );
   border-radius: var(--radius-pill);
   transform-origin: top;
   opacity: 0.3;
@@ -232,7 +242,7 @@
   align-items: center;
   justify-content: center;
   margin-bottom: var(--space-md);
-  color: #7C3AED;
+  color: #7c3aed;
 }
 
 .how__step--left .how__step-icon {
@@ -255,7 +265,6 @@
 ============================================ */
 
 @media (max-width: 768px) {
-
   .how {
     padding: var(--space-4xl) 0;
   }
@@ -286,9 +295,9 @@
   /* full width steps */
 
   .how__step {
-    width:100%;
-  padding-left:3.5rem !important;
-  box-sizing:border-box;
+    width: 100%;
+    padding-left: 3.5rem !important;
+    box-sizing: border-box;
     padding-right: 0 !important;
     flex-direction: row !important;
     text-align: left !important;
@@ -327,14 +336,11 @@
   .how__step-desc {
     font-size: 0.85rem;
   }
-
 }
-
 
 /* Small phones */
 
 @media (max-width: 480px) {
-
   .how__title {
     font-size: 1.6rem;
   }
@@ -360,12 +366,11 @@
     width: 36px;
     height: 36px;
   }
-
 }
-.how{
-  overflow-x:hidden;
+.how {
+  overflow-x: hidden;
 }
 
-.hero__bg--discover{
-  overflow:hidden;
+.hero__bg--discover {
+  overflow: hidden;
 }

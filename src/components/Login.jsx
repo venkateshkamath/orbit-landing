@@ -17,11 +17,11 @@ export default function Login({ onLogin }) {
       const res = await fetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username, password }),
       });
 
       const data = await res.json();
-      
+
       if (data.success) {
         localStorage.setItem('orbit_token', data.token);
         onLogin();
@@ -50,9 +50,9 @@ export default function Login({ onLogin }) {
         <form onSubmit={handleSubmit} className="login-form">
           <div className="input-group">
             <User className="input-icon" size={20} />
-            <input 
-              type="text" 
-              placeholder="Username" 
+            <input
+              type="text"
+              placeholder="Username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
@@ -61,9 +61,9 @@ export default function Login({ onLogin }) {
 
           <div className="input-group">
             <Lock className="input-icon" size={20} />
-            <input 
-              type="password" 
-              placeholder="Password" 
+            <input
+              type="password"
+              placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required

@@ -1,14 +1,35 @@
 import { useEffect, useState, useRef } from 'react';
-import { 
-  Users, MapPin, TrendingUp, Activity, RefreshCw, 
-  Download, ChevronLeft, Calendar, Search, 
-  Globe, MoreHorizontal 
+import {
+  Users,
+  MapPin,
+  TrendingUp,
+  Activity,
+  RefreshCw,
+  Download,
+  ChevronLeft,
+  Calendar,
+  Search,
+  Globe,
+  MoreHorizontal,
 } from 'lucide-react';
-import { 
-  AreaChart, Area, XAxis, YAxis, 
-  Tooltip, ResponsiveContainer, PieChart, Pie, Cell 
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
 } from 'recharts';
-import { MapContainer, TileLayer, CircleMarker, Tooltip as MapTooltip, useMap } from 'react-leaflet';
+import {
+  MapContainer,
+  TileLayer,
+  CircleMarker,
+  Tooltip as MapTooltip,
+  useMap,
+} from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import './Dashboard.css';
 
@@ -21,7 +42,9 @@ const GEO_CACHE_KEY = 'orbit_geo_cache';
 function loadGeoCache() {
   try {
     return JSON.parse(localStorage.getItem(GEO_CACHE_KEY) || '{}');
-  } catch { return {}; }
+  } catch {
+    return {};
+  }
 }
 
 function saveGeoCache(cache) {
@@ -59,7 +82,7 @@ async function geocodeAllCities(cityStats) {
       results.push({ ...city, lat: coords.lat, lng: coords.lng });
     }
     // Wait 1.1s between requests to respect Nominatim's rate limit
-    await new Promise(r => setTimeout(r, 1100));
+    await new Promise((r) => setTimeout(r, 1100));
   }
   return results;
 }
@@ -69,7 +92,7 @@ function FitBounds({ markers }) {
   const map = useMap();
   useEffect(() => {
     if (markers.length > 0) {
-      const bounds = markers.map(m => [m.lat, m.lng]);
+      const bounds = markers.map((m) => [m.lat, m.lng]);
       map.fitBounds(bounds, { padding: [50, 50], maxZoom: 5 });
     }
   }, [markers, map]);
@@ -100,25 +123,25 @@ export default function Dashboard() {
     }
   };
 
-  useEffect(() => { 
-    fetchStats(); 
+  useEffect(() => {
+    fetchStats();
   }, []);
 
   const exportToCSV = () => {
     if (!stats || !stats.recentSignups) return;
-    
+
     const headers = ['Email', 'City', 'Age', 'Joined Date'];
-    const rows = stats.recentSignups.map(s => [
+    const rows = stats.recentSignups.map((s) => [
       s.email,
       `"${(s.city || 'Unknown').replace(/"/g, '""')}"`,
       s.age || 'N/A',
-      new Date(s.created_at).toLocaleString()
+      new Date(s.created_at).toLocaleString(),
     ]);
-    
-    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+
+    const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
-    
+
     const link = document.createElement('a');
     link.href = url;
     link.setAttribute('download', `orbit_waitlist_${new Date().toISOString().split('T')[0]}.csv`);
@@ -131,7 +154,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (!stats?.cityStats?.length) return;
     setGeoLoading(true);
-    geocodeAllCities(stats.cityStats).then(markers => {
+    geocodeAllCities(stats.cityStats).then((markers) => {
       setGeoMarkers(markers);
       setGeoLoading(false);
     });
@@ -146,14 +169,14 @@ export default function Dashboard() {
     );
   }
 
-  const filteredSignups = (stats?.recentSignups || []).filter(s =>
-    s.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    s.city.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredSignups = (stats?.recentSignups || []).filter(
+    (s) =>
+      s.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      s.city.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const latestGrowth = stats?.growthData?.length > 0
-    ? stats.growthData[stats.growthData.length - 1].count
-    : 0;
+  const latestGrowth =
+    stats?.growthData?.length > 0 ? stats.growthData[stats.growthData.length - 1].count : 0;
 
   return (
     <div className="dashboard-container">
@@ -165,12 +188,17 @@ export default function Dashboard() {
             Back to Site
           </a>
           <div className="title-group">
-            <h1>ORBIT Analytics <span className="version-badge">v2</span></h1>
+            <h1>
+              ORBIT Analytics <span className="version-badge">v2</span>
+            </h1>
             <p>Real-time campaign performance & user acquisition</p>
           </div>
         </div>
         <div className="header-actions">
-          <button className={`btn-refresh ${refreshing ? 'spinning' : ''}`} onClick={() => fetchStats(false)}>
+          <button
+            className={`btn-refresh ${refreshing ? 'spinning' : ''}`}
+            onClick={() => fetchStats(false)}
+          >
             <RefreshCw size={18} />
             {refreshing ? 'Syncing…' : 'Refresh Data'}
           </button>
@@ -184,10 +212,38 @@ export default function Dashboard() {
       {/* ── Stats Cards ───────────────────────────── */}
       <main className="dashboard-grid">
         <section className="stats-row">
-          <StatCard title="Total Waitlist"   value={stats?.totalCount || 0}    change="+12.5%" trend="up"   icon={<Users size={24}/>}      color="coral"/>
-          <StatCard title="Active Cities"    value={stats?.cityStats?.length || 0} change="+2 new" trend="up"   icon={<MapPin size={24}/>}     color="lavender"/>
-          <StatCard title="Avg. Conv Rate"   value="3.2%"                     change="-0.4%"  trend="down" icon={<Activity size={24}/>}   color="teal"/>
-          <StatCard title="Growth Velocity"  value={`${latestGrowth}/day`}    change="+4.2%"  trend="up"   icon={<TrendingUp size={24}/>} color="amber"/>
+          <StatCard
+            title="Total Waitlist"
+            value={stats?.totalCount || 0}
+            change="+12.5%"
+            trend="up"
+            icon={<Users size={24} />}
+            color="coral"
+          />
+          <StatCard
+            title="Active Cities"
+            value={stats?.cityStats?.length || 0}
+            change="+2 new"
+            trend="up"
+            icon={<MapPin size={24} />}
+            color="lavender"
+          />
+          <StatCard
+            title="Avg. Conv Rate"
+            value="3.2%"
+            change="-0.4%"
+            trend="down"
+            icon={<Activity size={24} />}
+            color="teal"
+          />
+          <StatCard
+            title="Growth Velocity"
+            value={`${latestGrowth}/day`}
+            change="+4.2%"
+            trend="up"
+            icon={<TrendingUp size={24} />}
+            color="amber"
+          />
         </section>
 
         {/* ── Charts ──────────────────────────────── */}
@@ -201,14 +257,34 @@ export default function Dashboard() {
               <AreaChart data={stats?.growthData || []}>
                 <defs>
                   <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%"  stopColor="#C4B5FD" stopOpacity={0.35}/>
-                    <stop offset="95%" stopColor="#C4B5FD" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#C4B5FD" stopOpacity={0.35} />
+                    <stop offset="95%" stopColor="#C4B5FD" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="date" stroke="#6B7280" fontSize={12} tickLine={false} axisLine={false}/>
-                <YAxis stroke="#6B7280" fontSize={12} tickLine={false} axisLine={false}/>
-                <Tooltip contentStyle={{ background:'#1C1C2E', border:'1px solid rgba(255,255,255,0.08)', borderRadius:12, color:'#F0F0F5' }}/>
-                <Area type="monotone" dataKey="count" stroke="#C4B5FD" strokeWidth={3} fillOpacity={1} fill="url(#grad)"/>
+                <XAxis
+                  dataKey="date"
+                  stroke="#6B7280"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <YAxis stroke="#6B7280" fontSize={12} tickLine={false} axisLine={false} />
+                <Tooltip
+                  contentStyle={{
+                    background: '#1C1C2E',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    borderRadius: 12,
+                    color: '#F0F0F5',
+                  }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="count"
+                  stroke="#C4B5FD"
+                  strokeWidth={3}
+                  fillOpacity={1}
+                  fill="url(#grad)"
+                />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -216,22 +292,38 @@ export default function Dashboard() {
           <div className="chart-card mini-chart">
             <div className="card-header">
               <h3>City Distribution</h3>
-              <Globe size={18} color="#9CA3B0"/>
+              <Globe size={18} color="#9CA3B0" />
             </div>
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
-                <Pie data={stats?.cityStats || []} cx="50%" cy="50%" innerRadius={50} outerRadius={70} paddingAngle={4} dataKey="count" nameKey="city">
+                <Pie
+                  data={stats?.cityStats || []}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={50}
+                  outerRadius={70}
+                  paddingAngle={4}
+                  dataKey="count"
+                  nameKey="city"
+                >
                   {(stats?.cityStats || []).map((_, i) => (
-                    <Cell key={i} fill={COLORS[i % COLORS.length]}/>
+                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip contentStyle={{ background:'#1C1C2E', border:'1px solid rgba(255,255,255,0.08)', borderRadius:12, color:'#F0F0F5' }}/>
+                <Tooltip
+                  contentStyle={{
+                    background: '#1C1C2E',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    borderRadius: 12,
+                    color: '#F0F0F5',
+                  }}
+                />
               </PieChart>
             </ResponsiveContainer>
             <div className="pie-legend-scroll">
               {(stats?.cityStats || []).map((c, i) => (
                 <div key={c.city} className="legend-item">
-                  <span className="dot" style={{ background: COLORS[i % COLORS.length] }}/>
+                  <span className="dot" style={{ background: COLORS[i % COLORS.length] }} />
                   <span className="label">{c.city}</span>
                   <span className="val">{c.count}</span>
                 </div>
@@ -246,9 +338,12 @@ export default function Dashboard() {
             <div className="card-header">
               <div className="header-info">
                 <h3>Global Heatmap</h3>
-                <p>Live signup origins across the globe {geoLoading && <span className="geo-status">· Geocoding cities…</span>}</p>
+                <p>
+                  Live signup origins across the globe{' '}
+                  {geoLoading && <span className="geo-status">· Geocoding cities…</span>}
+                </p>
               </div>
-              <Globe size={18} color="#9CA3B0"/>
+              <Globe size={18} color="#9CA3B0" />
             </div>
             <div className="map-viewport">
               <MapContainer
@@ -285,7 +380,8 @@ export default function Dashboard() {
                         offset={[0, -radius]}
                         className="orbit-map-tooltip"
                       >
-                        <strong>{marker.city}</strong><br />
+                        <strong>{marker.city}</strong>
+                        <br />
                         {marker.count} signup{marker.count !== 1 ? 's' : ''}
                       </MapTooltip>
                     </CircleMarker>
@@ -299,7 +395,9 @@ export default function Dashboard() {
                 </div>
                 <div className="map-stat">
                   <h4>Cities Reached</h4>
-                  <p>{geoMarkers.length} of {stats?.cityStats?.length || 0}</p>
+                  <p>
+                    {geoMarkers.length} of {stats?.cityStats?.length || 0}
+                  </p>
                 </div>
                 <div className="map-stat">
                   <h4>Live Tracking</h4>
@@ -320,8 +418,13 @@ export default function Dashboard() {
               <div className="header-search">
                 <h3>Recent Signups</h3>
                 <div className="search-bar">
-                  <Search size={16}/>
-                  <input type="text" placeholder="Search by email or city…" value={searchTerm} onChange={e => setSearchTerm(e.target.value)}/>
+                  <Search size={16} />
+                  <input
+                    type="text"
+                    placeholder="Search by email or city…"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
                 </div>
               </div>
             </div>
@@ -338,7 +441,7 @@ export default function Dashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredSignups.map(s => (
+                  {filteredSignups.map((s) => (
                     <tr key={s.id}>
                       <td className="email-cell">
                         <div className="avatar">{s.email[0].toUpperCase()}</div>
@@ -347,15 +450,34 @@ export default function Dashboard() {
                       <td>{s.city}</td>
                       <td>{s.age || '—'}</td>
                       <td className="date-cell">
-                        <Calendar size={14}/>
-                        {new Date(s.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit' })}
+                        <Calendar size={14} />
+                        {new Date(s.created_at).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
                       </td>
-                      <td><span className="status-badge verified">Verified</span></td>
-                      <td><button className="btn-more"><MoreHorizontal size={14}/></button></td>
+                      <td>
+                        <span className="status-badge verified">Verified</span>
+                      </td>
+                      <td>
+                        <button className="btn-more">
+                          <MoreHorizontal size={14} />
+                        </button>
+                      </td>
                     </tr>
                   ))}
                   {filteredSignups.length === 0 && (
-                    <tr><td colSpan={6} style={{textAlign:'center',padding:40,color:'#6B7280'}}>No signups found.</td></tr>
+                    <tr>
+                      <td
+                        colSpan={6}
+                        style={{ textAlign: 'center', padding: 40, color: '#6B7280' }}
+                      >
+                        No signups found.
+                      </td>
+                    </tr>
                   )}
                 </tbody>
               </table>
@@ -368,15 +490,15 @@ export default function Dashboard() {
               <div className="status-dot online"></div>
             </div>
             <div className="health-metrics">
-              <HealthItem label="API Latency"   value="48ms" status="excellent"/>
-              <HealthItem label="Supabase Sync" value="Live" status="good"/>
-              <HealthItem label="Uptime"        value="99.9%" status="good"/>
+              <HealthItem label="API Latency" value="48ms" status="excellent" />
+              <HealthItem label="Supabase Sync" value="Live" status="good" />
+              <HealthItem label="Uptime" value="99.9%" status="good" />
               <div className="server-info">
                 <p>Node.js v22 · Express</p>
                 <div className="bar-group">
-                  <div className="bar active" style={{width:'60%'}}/>
-                  <div className="bar" style={{width:'20%'}}/>
-                  <div className="bar" style={{width:'20%'}}/>
+                  <div className="bar active" style={{ width: '60%' }} />
+                  <div className="bar" style={{ width: '20%' }} />
+                  <div className="bar" style={{ width: '20%' }} />
                 </div>
                 <span>Server utilization: 42%</span>
               </div>
@@ -412,9 +534,7 @@ function HealthItem({ label, value, status }) {
         <span className="health-label">{label}</span>
         <span className="health-value">{value}</span>
       </div>
-      <div className={`health-bar ${status}`}/>
+      <div className={`health-bar ${status}`} />
     </div>
   );
 }
-
-

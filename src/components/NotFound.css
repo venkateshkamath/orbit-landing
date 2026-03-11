@@ -103,9 +103,15 @@
 }
 
 @keyframes float {
-  0% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-15px) rotate(5deg); }
-  100% { transform: translateY(0px) rotate(0deg); }
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-15px) rotate(5deg);
+  }
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
 }
 
 .not-found-title {
@@ -153,7 +159,7 @@
   border-radius: var(--radius-pill);
   font-weight: 600;
   font-size: 1.125rem;
-  color: #FFFFFF;
+  color: #ffffff;
   text-decoration: none;
   background: var(--color-accent-gradient);
   border: none;

@@ -5,35 +5,43 @@ import './Gallery.css';
 
 gsap.registerPlugin(ScrollTrigger);
 
+const IMAGE_SOURCES = {
+  sunsetFriends: 'https://images.pexels.com/photos/4453153/pexels-photo-4453153.jpeg',
+  coffeeConnect: 'https://images.pexels.com/photos/1267697/pexels-photo-1267697.jpeg',
+  outdoorGroup:
+    'https://images.unsplash.com/photo-1511895426328-dc8714191300?q=80&w=1000&auto=format&fit=crop',
+  cafeLaughs: 'https://images.pexels.com/photos/8818592/pexels-photo-8818592.jpeg',
+};
+
 const images = [
   {
     id: 1,
-    src: 'https://images.pexels.com/photos/4453153/pexels-photo-4453153.jpeg',
+    src: IMAGE_SOURCES.sunsetFriends,
     alt: 'Friends laughing together at sunset',
     caption: 'Reclaim your evening',
-    span: 'large', 
+    span: 'large',
   },
   {
     id: 2,
-    src: 'https://images.pexels.com/photos/1267697/pexels-photo-1267697.jpeg',
+    src: IMAGE_SOURCES.coffeeConnect,
     alt: 'People connecting over coffee',
     caption: 'Share real moments',
-    span: 'wide', 
+    span: 'wide',
   },
   {
     id: 3,
-    src: 'https://img.freepik.com/premium-photo/group-four-indian-friends-outdoors-smiling-laughing-tree_53876-1077347.jpg',
+    src: IMAGE_SOURCES.outdoorGroup,
     alt: 'Group having fun outdoors',
     caption: 'Find your tribe',
     span: 'small',
   },
   {
     id: 4,
-    src: 'https://images.pexels.com/photos/8818592/pexels-photo-8818592.jpeg',
+    src: IMAGE_SOURCES.cafeLaughs,
     alt: 'Friends at cafe laughing',
     caption: 'Laugh louder',
-    span: 'small', 
-  }
+    span: 'small',
+  },
 ];
 
 export default function Gallery() {
@@ -42,27 +50,45 @@ export default function Gallery() {
   useEffect(() => {
     const ctx = gsap.context(() => {
       // Header animation
-      gsap.fromTo('.gallery__header', {
-        y: 40, opacity: 0,
-      }, {
-        y: 0, opacity: 1, duration: 1, ease: 'power3.out',
-        scrollTrigger: {
-          trigger: '.gallery__header',
-          start: 'top 85%',
+      gsap.fromTo(
+        '.gallery__header',
+        {
+          y: 40,
+          opacity: 0,
+        },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 1,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: '.gallery__header',
+            start: 'top 85%',
+          },
         }
-      });
+      );
 
       // Bento box stagger animation
-      gsap.fromTo('.bento-item', {
-        y: 40, opacity: 0, scale: 0.95
-      }, {
-        y: 0, opacity: 1, scale: 1, duration: 0.6,
-        stagger: 0.1, ease: 'power3.out',
-        scrollTrigger: {
-          trigger: '.bento-grid',
-          start: 'top 90%',
+      gsap.fromTo(
+        '.bento-item',
+        {
+          y: 40,
+          opacity: 0,
+          scale: 0.95,
+        },
+        {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          duration: 0.6,
+          stagger: 0.1,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: '.bento-grid',
+            start: 'top 90%',
+          },
         }
-      });
+      );
     }, sectionRef);
 
     return () => ctx.revert();
@@ -77,11 +103,13 @@ export default function Gallery() {
       <div className="container">
         <div className="gallery__header">
           <h2 className="gallery__title">
-            Stop Scrolling.<br />
+            Stop Scrolling.
+            <br />
             <span className="gradient-text">Start Living.</span>
           </h2>
           <p className="gallery__subtitle">
-            ORBIT is about the moments that happen when you finally put your phone down and look up. Discover the beauty of offline connections.
+            ORBIT is about the moments that happen when you finally put your phone down and look up.
+            Discover the beauty of offline connections.
           </p>
         </div>
 
@@ -93,8 +121,17 @@ export default function Gallery() {
                 <div className="bento-overlay">
                   <div className="bento-overlay__content">
                     <span className="bento-overlay__icon">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                      <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                       </svg>
                     </span>
                     <p className="bento-caption">{img.caption}</p>

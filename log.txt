@@ -1,0 +1,5 @@
+bb3a459 Changes for mobile responsiveness
+2d0334d Content Updates + Added Proximity Feature
+efe0bb7 Content Updates + Added Proximity Feature
+89a6bcc Changed the images and wordings + Added a new compoent for proximity
+6b77fa8 Merge pull request #15 from venkateshkamath/main

@@ -10,17 +10,24 @@ export default function Footer() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.fromTo('.footer__inner > *', {
-        y: 20, opacity: 0,
-      }, {
-        y: 0, opacity: 1, duration: 0.6,
-        stagger: 0.1,
-        scrollTrigger: {
-          trigger: footerRef.current,
-          start: 'top 95%',
-          toggleActions: 'play none none reverse',
+      gsap.fromTo(
+        '.footer__inner > *',
+        {
+          y: 20,
+          opacity: 0,
+        },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.6,
+          stagger: 0.1,
+          scrollTrigger: {
+            trigger: footerRef.current,
+            start: 'top 95%',
+            toggleActions: 'play none none reverse',
+          },
         }
-      });
+      );
     }, footerRef);
 
     return () => ctx.revert();
@@ -35,11 +42,22 @@ export default function Footer() {
           </div>
           <p className="footer__tagline">
             Connecting people in the real world.
-            <br />One orbit at a time.
+            <br />
+            One orbit at a time.
           </p>
           <div className="footer__contact">
             <a href="mailto:hello@joinorbit.org" className="footer__contact-link">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '8px', verticalAlign: 'text-bottom'}}>
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{ marginRight: '8px', verticalAlign: 'text-bottom' }}
+              >
                 <rect width="20" height="16" x="2" y="4" rx="2"></rect>
                 <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
               </svg>
@@ -57,7 +75,8 @@ export default function Footer() {
 
       <div className="footer__bottom container">
         <p className="footer__copyright">
-          © {new Date().getFullYear()} ORBIT. All rights reserved. Made with ❤️ for real connections.
+          © {new Date().getFullYear()} ORBIT. All rights reserved. Made with ❤️ for real
+          connections.
         </p>
       </div>
     </footer>

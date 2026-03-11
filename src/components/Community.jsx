@@ -28,10 +28,10 @@ const testimonials = [
     gradient: 'linear-gradient(135deg, #5EEAD4, #34D399)',
   },
   {
-    name: 'Aman Gatty',
-    handle: '@amangatty',
+    name: 'Karan Patel',
+    handle: '@karanp',
     text: 'I joined ORBIT just out of curiosity, but it quickly became something I use regularly. It’s simple, well designed, and makes socializing feel effortless.',
-    avatar: 'A',
+    avatar: 'K',
     gradient: 'linear-gradient(135deg, #FFB347, #F59E0B)',
   },
 ];
@@ -48,40 +48,63 @@ export default function Community() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.fromTo('.community__header', {
-        y: 40, opacity: 0,
-      }, {
-        y: 0, opacity: 1, duration: 0.8,
-        scrollTrigger: {
-          trigger: '.community__header',
-          start: 'top 85%',
-          toggleActions: 'play none none reverse',
+      gsap.fromTo(
+        '.community__header',
+        {
+          y: 40,
+          opacity: 0,
+        },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.8,
+          scrollTrigger: {
+            trigger: '.community__header',
+            start: 'top 85%',
+            toggleActions: 'play none none reverse',
+          },
         }
-      });
+      );
 
-      gsap.fromTo('.community__card', {
-        y: 40, opacity: 0, scale: 0.96,
-      }, {
-        y: 0, opacity: 1, scale: 1, duration: 0.6,
-        stagger: 0.12,
-        scrollTrigger: {
-          trigger: '.community__grid',
-          start: 'top 85%',
-          toggleActions: 'play none none reverse',
+      gsap.fromTo(
+        '.community__card',
+        {
+          y: 40,
+          opacity: 0,
+          scale: 0.96,
+        },
+        {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          duration: 0.6,
+          stagger: 0.12,
+          scrollTrigger: {
+            trigger: '.community__grid',
+            start: 'top 85%',
+            toggleActions: 'play none none reverse',
+          },
         }
-      });
+      );
 
-      gsap.fromTo('.community__stat', {
-        y: 20, opacity: 0,
-      }, {
-        y: 0, opacity: 1, duration: 0.5,
-        stagger: 0.1,
-        scrollTrigger: {
-          trigger: '.community__stats',
-          start: 'top 90%',
-          toggleActions: 'play none none reverse',
+      gsap.fromTo(
+        '.community__stat',
+        {
+          y: 20,
+          opacity: 0,
+        },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.5,
+          stagger: 0.1,
+          scrollTrigger: {
+            trigger: '.community__stats',
+            start: 'top 90%',
+            toggleActions: 'play none none reverse',
+          },
         }
-      });
+      );
     }, sectionRef);
 
     return () => ctx.revert();
@@ -93,7 +116,8 @@ export default function Community() {
         <div className="community__header">
           <span className="section-label">Community</span>
           <h2 className="community__title">
-            People are already<br />
+            People are already
+            <br />
             <span className="gradient-text">buzzing about ORBIT</span>
           </h2>
           <p className="community__subtitle">

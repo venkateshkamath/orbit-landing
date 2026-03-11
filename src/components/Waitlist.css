@@ -9,16 +9,16 @@
 
 .waitlist__card {
   position: relative;
-  background: linear-gradient(145deg, #1A1A2E 0%, #16162a 50%, #1e1440 100%);
+  background: linear-gradient(145deg, #1a1a2e 0%, #16162a 50%, #1e1440 100%);
   border-radius: var(--radius-2xl);
   padding: var(--space-4xl) var(--space-3xl);
   overflow: hidden;
   text-align: center;
 }
 
-[data-theme="dark"] .waitlist__card {
-  background: #1C1C2E;
-  border: 1px solid rgba(255,255,255,0.06);
+[data-theme='dark'] .waitlist__card {
+  background: #1c1c2e;
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 /* Decorative gradients */
@@ -67,60 +67,89 @@
 }
 
 .waitlist__particle--1 {
-  width: 4px; height: 4px;
-  background: #FF6B6B;
-  top: 20%; left: 10%;
+  width: 4px;
+  height: 4px;
+  background: #ff6b6b;
+  top: 20%;
+  left: 10%;
   animation-delay: 0s;
 }
 .waitlist__particle--2 {
-  width: 3px; height: 3px;
-  background: #C4B5FD;
-  top: 30%; right: 15%;
+  width: 3px;
+  height: 3px;
+  background: #c4b5fd;
+  top: 30%;
+  right: 15%;
   animation-delay: 1s;
 }
 .waitlist__particle--3 {
-  width: 5px; height: 5px;
-  background: #5EEAD4;
-  bottom: 25%; left: 20%;
+  width: 5px;
+  height: 5px;
+  background: #5eead4;
+  bottom: 25%;
+  left: 20%;
   animation-delay: 2s;
 }
 .waitlist__particle--4 {
-  width: 3px; height: 3px;
-  background: #FFB347;
-  top: 60%; right: 10%;
+  width: 3px;
+  height: 3px;
+  background: #ffb347;
+  top: 60%;
+  right: 10%;
   animation-delay: 3s;
 }
 .waitlist__particle--5 {
-  width: 4px; height: 4px;
-  background: #C4B5FD;
-  bottom: 15%; right: 25%;
+  width: 4px;
+  height: 4px;
+  background: #c4b5fd;
+  bottom: 15%;
+  right: 25%;
   animation-delay: 4s;
 }
 .waitlist__particle--6 {
-  width: 3px; height: 3px;
-  background: #FF6B6B;
-  top: 15%; left: 40%;
+  width: 3px;
+  height: 3px;
+  background: #ff6b6b;
+  top: 15%;
+  left: 40%;
   animation-delay: 0.5s;
 }
 .waitlist__particle--7 {
-  width: 4px; height: 4px;
-  background: #5EEAD4;
-  top: 45%; right: 35%;
+  width: 4px;
+  height: 4px;
+  background: #5eead4;
+  top: 45%;
+  right: 35%;
   animation-delay: 2.5s;
 }
 .waitlist__particle--8 {
-  width: 2px; height: 2px;
-  background: #C4B5FD;
-  bottom: 40%; left: 35%;
+  width: 2px;
+  height: 2px;
+  background: #c4b5fd;
+  bottom: 40%;
+  left: 35%;
   animation-delay: 1.5s;
 }
 
 @keyframes float-particle {
-  0% { opacity: 0; transform: translateY(0) scale(0.5); }
-  20% { opacity: 0.8; }
-  50% { opacity: 0.6; transform: translateY(-30px) scale(1); }
-  80% { opacity: 0.3; }
-  100% { opacity: 0; transform: translateY(-60px) scale(0.5); }
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.5);
+  }
+  20% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 0.6;
+    transform: translateY(-30px) scale(1);
+  }
+  80% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-60px) scale(0.5);
+  }
 }
 
 .waitlist__content {
@@ -132,7 +161,7 @@
 }
 
 .waitlist__content .section-label::before {
-  background: #7C3AED;
+  background: #7c3aed;
 }
 
 .waitlist__title {
@@ -200,7 +229,7 @@
   gap: var(--space-sm);
   padding: 12px 24px;
   background: white;
-  color: #1A1A2E;
+  color: #1a1a2e;
   font-size: 0.88rem;
   font-weight: 600;
   border-radius: var(--radius-pill);
@@ -210,7 +239,7 @@
 
 .waitlist__btn:hover:not(:disabled) {
   background: var(--color-accent-lavender);
-  color: #1A1A2E;
+  color: #1a1a2e;
   transform: translateY(-1px);
 }
 
@@ -232,13 +261,15 @@
   width: 18px;
   height: 18px;
   border: 2px solid rgba(26, 26, 46, 0.2);
-  border-top-color: #1A1A2E;
+  border-top-color: #1a1a2e;
   border-radius: var(--radius-full);
   animation: spin 0.6s linear infinite;
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Success state */
@@ -253,7 +284,7 @@
   width: 56px;
   height: 56px;
   border-radius: var(--radius-full);
-  background: linear-gradient(135deg, #34D399, #5EEAD4);
+  background: linear-gradient(135deg, #34d399, #5eead4);
   display: flex;
   align-items: center;
   justify-content: center;

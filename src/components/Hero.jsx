@@ -32,48 +32,111 @@ export default function Hero({ onJoinWaitlist }) {
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
-      tl.fromTo(badgeRef.current,
+      tl.fromTo(
+        badgeRef.current,
         { y: 20, opacity: 0, scale: 0.9 },
         { y: 0, opacity: 1, scale: 1, duration: 0.6, delay: 0.4 }
       )
-      .fromTo(titleRef.current.children,
-        { y: 60, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.8, stagger: 0.12 },
-        '-=0.3'
-      )
-      .fromTo(subtitleRef.current,
-        { y: 30, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.6 },
-        '-=0.4'
-      )
-      .fromTo(ctaRef.current.children,
-        { y: 20, opacity: 0, scale: 0.95 },
-        { y: 0, opacity: 1, scale: 1, duration: 0.5, stagger: 0.1 },
-        '-=0.3'
-      )
-      .fromTo(visualRef.current,
-        { y: 40, opacity: 0, scale: 0.9 },
-        { y: 0, opacity: 1, scale: 1, duration: 1 },
-        '-=0.4'
-      );
+        .fromTo(
+          titleRef.current.children,
+          { y: 60, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.8, stagger: 0.12 },
+          '-=0.3'
+        )
+        .fromTo(
+          subtitleRef.current,
+          { y: 30, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.6 },
+          '-=0.4'
+        )
+        .fromTo(
+          ctaRef.current.children,
+          { y: 20, opacity: 0, scale: 0.95 },
+          { y: 0, opacity: 1, scale: 1, duration: 0.5, stagger: 0.1 },
+          '-=0.3'
+        )
+        .fromTo(
+          visualRef.current,
+          { y: 40, opacity: 0, scale: 0.9 },
+          { y: 0, opacity: 1, scale: 1, duration: 1 },
+          '-=0.4'
+        );
 
       // Orbit ring rotations
-      gsap.to('.orbit-ring--1', { rotation: 360, duration: 18, repeat: -1, ease: 'none', transformOrigin: 'center center' });
-      gsap.to('.orbit-ring--2', { rotation: -360, duration: 24, repeat: -1, ease: 'none', transformOrigin: 'center center' });
-      gsap.to('.orbit-ring--3', { rotation: 360, duration: 30, repeat: -1, ease: 'none', transformOrigin: 'center center' });
+      gsap.to('.orbit-ring--1', {
+        rotation: 360,
+        duration: 18,
+        repeat: -1,
+        ease: 'none',
+        transformOrigin: 'center center',
+      });
+      gsap.to('.orbit-ring--2', {
+        rotation: -360,
+        duration: 24,
+        repeat: -1,
+        ease: 'none',
+        transformOrigin: 'center center',
+      });
+      gsap.to('.orbit-ring--3', {
+        rotation: 360,
+        duration: 30,
+        repeat: -1,
+        ease: 'none',
+        transformOrigin: 'center center',
+      });
 
       // Pulse the center
       gsap.to('.orbit-center', {
-        scale: 1.1, duration: 2, repeat: -1, yoyo: true, ease: 'sine.inOut',
+        scale: 1.1,
+        duration: 2,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut',
       });
 
       // Counter-rotate the person icons so they stay upright
-      gsap.to('.orbit-person--1', { rotation: -360, duration: 18, repeat: -1, ease: 'none', transformOrigin: 'center center' });
-      gsap.to('.orbit-person--2', { rotation: 360, duration: 24, repeat: -1, ease: 'none', transformOrigin: 'center center' });
-      gsap.to('.orbit-person--3', { rotation: -360, duration: 30, repeat: -1, ease: 'none', transformOrigin: 'center center' });
-      gsap.to('.orbit-person--4', { rotation: -360, duration: 18, repeat: -1, ease: 'none', transformOrigin: 'center center' });
-      gsap.to('.orbit-person--5', { rotation: 360, duration: 24, repeat: -1, ease: 'none', transformOrigin: 'center center' });
-      gsap.to('.orbit-person--6', { rotation: -360, duration: 30, repeat: -1, ease: 'none', transformOrigin: 'center center' });
+      gsap.to('.orbit-person--1', {
+        rotation: -360,
+        duration: 18,
+        repeat: -1,
+        ease: 'none',
+        transformOrigin: 'center center',
+      });
+      gsap.to('.orbit-person--2', {
+        rotation: 360,
+        duration: 24,
+        repeat: -1,
+        ease: 'none',
+        transformOrigin: 'center center',
+      });
+      gsap.to('.orbit-person--3', {
+        rotation: -360,
+        duration: 30,
+        repeat: -1,
+        ease: 'none',
+        transformOrigin: 'center center',
+      });
+      gsap.to('.orbit-person--4', {
+        rotation: -360,
+        duration: 18,
+        repeat: -1,
+        ease: 'none',
+        transformOrigin: 'center center',
+      });
+      gsap.to('.orbit-person--5', {
+        rotation: 360,
+        duration: 24,
+        repeat: -1,
+        ease: 'none',
+        transformOrigin: 'center center',
+      });
+      gsap.to('.orbit-person--6', {
+        rotation: -360,
+        duration: 30,
+        repeat: -1,
+        ease: 'none',
+        transformOrigin: 'center center',
+      });
 
       // Floating dots
       const dots = heroRef.current.querySelectorAll('.hero__dot');
@@ -121,18 +184,29 @@ export default function Hero({ onJoinWaitlist }) {
         </h1>
 
         <p ref={subtitleRef} className="hero__subtitle" style={{ opacity: 0 }}>
-          ORBIT helps you discover local events, meet like-minded people,
-          and build friendships that exist beyond the screen.
+          ORBIT helps you discover local events, meet like-minded people, and build friendships that
+          exist beyond the screen.
         </p>
 
         <div ref={ctaRef} className="hero__cta-group">
           <button className="hero__cta hero__cta--primary" onClick={onJoinWaitlist}>
             Join the Waitlist
             <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
-              <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path
+                d="M3 8h10M9 4l4 4-4 4"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </button>
-          <button className="hero__cta hero__cta--secondary" onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}>
+          <button
+            className="hero__cta hero__cta--secondary"
+            onClick={() =>
+              document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })
+            }
+          >
             See How it Works
           </button>
         </div>
@@ -148,43 +222,70 @@ export default function Hero({ onJoinWaitlist }) {
 
             {/* Ring 1 - smallest */}
             <div className="orbit-ring orbit-ring--1">
-              <div className="orbit-person orbit-person--1" style={{ top: 0, left: '50%', transform: 'translate(-50%, -50%)' }}>
+              <div
+                className="orbit-person orbit-person--1"
+                style={{ top: 0, left: '50%', transform: 'translate(-50%, -50%)' }}
+              >
                 <span style={{ background: 'linear-gradient(135deg, #FF6B6B, #FFB347)' }}>A</span>
               </div>
-              <div className="orbit-person orbit-person--4" style={{ bottom: 0, left: '50%', transform: 'translate(-50%, 50%)' }}>
+              <div
+                className="orbit-person orbit-person--4"
+                style={{ bottom: 0, left: '50%', transform: 'translate(-50%, 50%)' }}
+              >
                 <span style={{ background: 'linear-gradient(135deg, #FFB347, #F59E0B)' }}>R</span>
               </div>
             </div>
 
             {/* Ring 2 - medium */}
             <div className="orbit-ring orbit-ring--2">
-              <div className="orbit-person orbit-person--2" style={{ top: '15%', right: 0, transform: 'translate(50%, -50%)' }}>
+              <div
+                className="orbit-person orbit-person--2"
+                style={{ top: '15%', right: 0, transform: 'translate(50%, -50%)' }}
+              >
                 <span style={{ background: 'linear-gradient(135deg, #C4B5FD, #818CF8)' }}>M</span>
               </div>
-              <div className="orbit-person orbit-person--5" style={{ bottom: '15%', left: 0, transform: 'translate(-50%, 50%)' }}>
+              <div
+                className="orbit-person orbit-person--5"
+                style={{ bottom: '15%', left: 0, transform: 'translate(-50%, 50%)' }}
+              >
                 <span style={{ background: 'linear-gradient(135deg, #5EEAD4, #34D399)' }}>P</span>
               </div>
             </div>
 
             {/* Ring 3 - largest */}
             <div className="orbit-ring orbit-ring--3">
-              <div className="orbit-person orbit-person--3" style={{ top: '50%', right: 0, transform: 'translate(50%, -50%)' }}>
+              <div
+                className="orbit-person orbit-person--3"
+                style={{ top: '50%', right: 0, transform: 'translate(50%, -50%)' }}
+              >
                 <span style={{ background: 'linear-gradient(135deg, #5EEAD4, #A78BFA)' }}>D</span>
               </div>
-              <div className="orbit-person orbit-person--6" style={{ top: '50%', left: 0, transform: 'translate(-50%, -50%)' }}>
+              <div
+                className="orbit-person orbit-person--6"
+                style={{ top: '50%', left: 0, transform: 'translate(-50%, -50%)' }}
+              >
                 <span style={{ background: 'linear-gradient(135deg, #FF6B6B, #C4B5FD)' }}>S</span>
               </div>
             </div>
 
             {/* Decorative floating dots on orbits */}
             <div className="orbit-ring orbit-ring--1">
-              <div className="orbit-dot" style={{ top: '50%', right: 0, background: '#FF6B6B' }}></div>
+              <div
+                className="orbit-dot"
+                style={{ top: '50%', right: 0, background: '#FF6B6B' }}
+              ></div>
             </div>
             <div className="orbit-ring orbit-ring--2">
-              <div className="orbit-dot" style={{ bottom: 0, left: '50%', background: '#C4B5FD' }}></div>
+              <div
+                className="orbit-dot"
+                style={{ bottom: 0, left: '50%', background: '#C4B5FD' }}
+              ></div>
             </div>
             <div className="orbit-ring orbit-ring--3">
-              <div className="orbit-dot" style={{ top: 0, left: '30%', background: '#5EEAD4' }}></div>
+              <div
+                className="orbit-dot"
+                style={{ top: 0, left: '30%', background: '#5EEAD4' }}
+              ></div>
             </div>
           </div>
           <div className="hero__visual-glow"></div>
@@ -192,13 +293,37 @@ export default function Hero({ onJoinWaitlist }) {
           {/* social proof */}
           <div className="hero__social-proof">
             <div className="hero__avatars">
-              <div className="hero__avatar" style={{ background: 'linear-gradient(135deg, #FF6B6B, #FFB347)' }}>V</div>
-              <div className="hero__avatar" style={{ background: 'linear-gradient(135deg, #C4B5FD, #818CF8)' }}>A</div>
-              <div className="hero__avatar" style={{ background: 'linear-gradient(135deg, #5EEAD4, #34D399)' }}>S</div>
-              <div className="hero__avatar" style={{ background: 'linear-gradient(135deg, #FFB347, #F59E0B)' }}>R</div>
-              <div className="hero__avatar hero__avatar--count">+{Math.floor(waitlistCount/1000)}k</div>
+              <div
+                className="hero__avatar"
+                style={{ background: 'linear-gradient(135deg, #FF6B6B, #FFB347)' }}
+              >
+                V
+              </div>
+              <div
+                className="hero__avatar"
+                style={{ background: 'linear-gradient(135deg, #C4B5FD, #818CF8)' }}
+              >
+                A
+              </div>
+              <div
+                className="hero__avatar"
+                style={{ background: 'linear-gradient(135deg, #5EEAD4, #34D399)' }}
+              >
+                S
+              </div>
+              <div
+                className="hero__avatar"
+                style={{ background: 'linear-gradient(135deg, #FFB347, #F59E0B)' }}
+              >
+                R
+              </div>
+              <div className="hero__avatar hero__avatar--count">
+                +{Math.floor(waitlistCount / 1000)}k
+              </div>
             </div>
-            <p className="hero__social-text">{waitlistCount.toLocaleString()} people on the waitlist</p>
+            <p className="hero__social-text">
+              {waitlistCount.toLocaleString()} people on the waitlist
+            </p>
           </div>
         </div>
       </div>

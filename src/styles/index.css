@@ -4,18 +4,18 @@
 
 :root {
   /* Colors */
-  --color-bg: #FAFAFA;
-  --color-bg-alt: #F5F3F0;
-  --color-bg-card: #FFFFFF;
-  --color-text-primary: #1A1A2E;
-  --color-text-secondary: #6B7280;
-  --color-text-muted: #9CA3AF;
-  --color-accent-coral: #FF6B6B;
-  --color-accent-amber: #FFB347;
-  --color-accent-lavender: #C4B5FD;
-  --color-accent-teal: #5EEAD4;
-  --color-accent-gradient: linear-gradient(135deg, #FF6B6B 0%, #C4B5FD 50%, #5EEAD4 100%);
-  --color-accent-gradient-reverse: linear-gradient(135deg, #5EEAD4 0%, #C4B5FD 50%, #FF6B6B 100%);
+  --color-bg: #fafafa;
+  --color-bg-alt: #f5f3f0;
+  --color-bg-card: #ffffff;
+  --color-text-primary: #1a1a2e;
+  --color-text-secondary: #6b7280;
+  --color-text-muted: #9ca3af;
+  --color-accent-coral: #ff6b6b;
+  --color-accent-amber: #ffb347;
+  --color-accent-lavender: #c4b5fd;
+  --color-accent-teal: #5eead4;
+  --color-accent-gradient: linear-gradient(135deg, #ff6b6b 0%, #c4b5fd 50%, #5eead4 100%);
+  --color-accent-gradient-reverse: linear-gradient(135deg, #5eead4 0%, #c4b5fd 50%, #ff6b6b 100%);
   --color-border: rgba(0, 0, 0, 0.06);
   --color-border-hover: rgba(0, 0, 0, 0.12);
 
@@ -57,13 +57,13 @@
 }
 
 /* Dark Theme — only surfaces, text, borders change. Accent colors stay identical. */
-[data-theme="dark"] {
-  --color-bg: #0F0F1A;
+[data-theme='dark'] {
+  --color-bg: #0f0f1a;
   --color-bg-alt: #161625;
-  --color-bg-card: #1C1C2E;
-  --color-text-primary: #F0F0F5;
-  --color-text-secondary: #9CA3B0;
-  --color-text-muted: #6B7280;
+  --color-bg-card: #1c1c2e;
+  --color-text-primary: #f0f0f5;
+  --color-text-secondary: #9ca3b0;
+  --color-text-muted: #6b7280;
   --color-border: rgba(255, 255, 255, 0.08);
   --color-border-hover: rgba(255, 255, 255, 0.15);
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
@@ -74,7 +74,9 @@
 }
 
 /* Reset */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -92,10 +94,17 @@ body {
   color: var(--color-text-primary);
   line-height: 1.6;
   overflow-x: hidden;
-  transition: background-color 0.4s ease, color 0.4s ease;
+  transition:
+    background-color 0.4s ease,
+    color 0.4s ease;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-heading);
   font-weight: 700;
   line-height: 1.15;
@@ -168,7 +177,7 @@ input {
   border-radius: var(--radius-pill);
   font-size: 0.8rem;
   font-weight: 500;
-  color: #7C3AED;
+  color: #7c3aed;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   margin-bottom: var(--space-lg);
@@ -179,5 +188,5 @@ input {
   width: 6px;
   height: 6px;
   border-radius: var(--radius-full);
-  background: #7C3AED;
+  background: #7c3aed;
 }

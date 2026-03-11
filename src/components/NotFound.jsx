@@ -23,16 +23,16 @@ export default function NotFound() {
           <div className="not-found-icon-wrapper">
             <Compass size={64} className="not-found-icon" />
           </div>
-          
+
           <h1 className="not-found-title">
             <span className="bg-gradient text-transparent bg-clip-text">404</span>
           </h1>
-          
+
           <h2 className="not-found-subtitle">Lost in Space</h2>
-          
+
           <p className="not-found-text">
-            It looks like you've drifted off course. The page you're searching for 
-            doesn't exist or has been moved to a different orbit.
+            It looks like you've drifted off course. The page you're searching for doesn't exist or
+            has been moved to a different orbit.
           </p>
 
           <Link to="/" className="not-found-button">

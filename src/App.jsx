@@ -24,7 +24,7 @@ gsap.registerPlugin(ScrollTrigger);
 function LandingPage({ onJoinWaitlist }) {
   useEffect(() => {
     // Smooth scroll for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
       anchor.addEventListener('click', (e) => {
         e.preventDefault();
         const target = document.querySelector(anchor.getAttribute('href'));
@@ -33,7 +33,7 @@ function LandingPage({ onJoinWaitlist }) {
     });
 
     // Cleanup ScrollTrigger on unmount
-    return () => ScrollTrigger.getAll().forEach(t => t.kill());
+    return () => ScrollTrigger.getAll().forEach((t) => t.kill());
   }, []);
 
   return (
@@ -43,7 +43,7 @@ function LandingPage({ onJoinWaitlist }) {
         <Hero onJoinWaitlist={onJoinWaitlist} />
         <Gallery />
         <Features />
-        <DiscoverMap></DiscoverMap>
+        <DiscoverMap />
         <HowItWorks />
         <Community />
         <FAQ />
@@ -65,15 +65,11 @@ export default function App() {
     <Router>
       <Routes>
         <Route path="/" element={<LandingPage onJoinWaitlist={openModal} />} />
-        <Route 
-          path="/orbit-admin" 
+        <Route
+          path="/orbit-admin"
           element={
-            isAuthenticated ? (
-              <Dashboard />
-            ) : (
-              <Login onLogin={() => setIsAuthenticated(true)} />
-            )
-          } 
+            isAuthenticated ? <Dashboard /> : <Login onLogin={() => setIsAuthenticated(true)} />
+          }
         />
         {/* Redirect old dashboard link to admin */}
         <Route path="/dashboard" element={<Navigate to="/orbit-admin" replace />} />

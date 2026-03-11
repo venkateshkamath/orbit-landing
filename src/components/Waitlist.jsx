@@ -8,26 +8,32 @@ gsap.registerPlugin(ScrollTrigger);
 export default function Waitlist({ onJoinWaitlist }) {
   const sectionRef = useRef(null);
 
-
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.fromTo('.waitlist__card', {
-        y: 50, opacity: 0, scale: 0.97,
-      }, {
-        y: 0, opacity: 1, scale: 1, duration: 0.9,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: '.waitlist__card',
-          start: 'top 85%',
-          toggleActions: 'play none none reverse',
+      gsap.fromTo(
+        '.waitlist__card',
+        {
+          y: 50,
+          opacity: 0,
+          scale: 0.97,
+        },
+        {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          duration: 0.9,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: '.waitlist__card',
+            start: 'top 85%',
+            toggleActions: 'play none none reverse',
+          },
         }
-      });
+      );
     }, sectionRef);
 
     return () => ctx.revert();
   }, []);
-
-
 
   return (
     <section ref={sectionRef} className="waitlist" id="waitlist">
@@ -49,21 +55,29 @@ export default function Waitlist({ onJoinWaitlist }) {
           <div className="waitlist__particle waitlist__particle--8"></div>
 
           <div className="waitlist__content">
-            <span className="section-label" style={{ background: 'rgba(255, 255, 255, 0.15)', color: '#7C3AED' }}>
+            <span
+              className="section-label"
+              style={{ background: 'rgba(255, 255, 255, 0.15)', color: '#7C3AED' }}
+            >
               Join the Waitlist
             </span>
             <h2 className="waitlist__title">
-              Be among the first to <br />experience ORBIT.
+              Be among the first to <br />
+              experience ORBIT.
             </h2>
-            <p className="waitlist__subtitle">
-              Join our waitlist and help shape the future of real-world connections
-            </p>
+            <p className="waitlist__subtitle">Help shape the future of real-world connections</p>
 
             {/* CTA button to open modal */}
             <button className="waitlist__btn" onClick={onJoinWaitlist} id="waitlist-submit">
               Get Early Access
               <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
-                <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <path
+                  d="M3 8h10M9 4l4 4-4 4"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
             </button>
 
