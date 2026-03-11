@@ -106,6 +106,16 @@ export default function HowItWorks() {
 
   return (
     <section ref={sectionRef} className="how" id="how-it-works">
+      <div className="hero__bg--discover">
+        <div className="hero__gradient hero__gradient--1"></div>
+        <div className="hero__gradient hero__gradient--2"></div>
+        <div className="hero__gradient hero__gradient--3"></div>
+        <div className="hero__dot hero__dot--1"></div>
+        <div className="hero__dot hero__dot--2"></div>
+        <div className="hero__dot hero__dot--3"></div>
+        <div className="hero__dot hero__dot--4"></div>
+        <div className="hero__dot hero__dot--5"></div>
+      </div>
       <div className="container">
         <div className="how__header">
           <span className="section-label">How it Works</span>

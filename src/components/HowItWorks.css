@@ -4,8 +4,117 @@
 
 .how {
   padding: var(--space-5xl) 0;
-  background: var(--color-bg-alt);
+  background: transparent;
   position: relative;
+}
+
+/* reuse hero background */
+
+.hero__bg--discover {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.hero__gradient {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.35;
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.hero__gradient--1 {
+  width: 500px;
+  height: 500px;
+  background: var(--color-accent-lavender);
+  top: -10%;
+  right: -5%;
+}
+
+.hero__gradient--2 {
+  width: 400px;
+  height: 400px;
+  background: var(--color-accent-coral);
+  bottom: 10%;
+  left: -10%;
+  opacity: 0.2;
+}
+
+.hero__gradient--3 {
+  width: 300px;
+  height: 300px;
+  background: var(--color-accent-teal);
+  top: 40%;
+  left: 50%;
+  opacity: 0.15;
+}
+
+.hero__dot {
+  position: absolute;
+  border-radius: var(--radius-full);
+}
+
+.hero__dot--1 {
+  width: 8px;
+  height: 8px;
+  background: var(--color-accent-coral);
+  top: 20%;
+  left: 15%;
+}
+
+.hero__dot--2 {
+  width: 6px;
+  height: 6px;
+  background: var(--color-accent-lavender);
+  top: 30%;
+  right: 20%;
+}
+
+.hero__dot--3 {
+  width: 10px;
+  height: 10px;
+  background: var(--color-accent-teal);
+  bottom: 30%;
+  left: 25%;
+}
+
+.hero__dot--4 {
+  width: 5px;
+  height: 5px;
+  background: var(--color-accent-amber);
+  top: 50%;
+  right: 12%;
+}
+
+.hero__dot--5 {
+  width: 7px;
+  height: 7px;
+  background: var(--color-accent-coral);
+  bottom: 20%;
+  right: 30%;
+}
+
+/* Adjust gradient placement for blending */
+
+.hero__bg--discover .hero__gradient--1 {
+  top: -25%;
+  right: -15%;
+  opacity: 0.25;
+}
+
+.hero__bg--discover .hero__gradient--2 {
+  bottom: -10%;
+  left: -20%;
+  opacity: 0.18;
+}
+
+.hero__bg--discover .hero__gradient--3 {
+  top: 45%;
+  left: 60%;
+  opacity: 0.15;
 }
 
 .how__header {
@@ -48,7 +157,12 @@
 .how__connector-line {
   width: 100%;
   height: 100%;
-  background: linear-gradient(to bottom, var(--color-accent-coral), var(--color-accent-lavender), var(--color-accent-teal));
+  background: linear-gradient(
+    to bottom,
+    var(--color-accent-coral),
+    var(--color-accent-lavender),
+    var(--color-accent-teal)
+  );
   border-radius: var(--radius-pill);
   transform-origin: top;
   opacity: 0.3;
@@ -123,12 +237,16 @@
   width: 48px;
   height: 48px;
   border-radius: var(--radius-lg);
-  background: linear-gradient(135deg, rgba(196, 181, 253, 0.12), rgba(94, 234, 212, 0.12));
+  background: linear-gradient(
+    135deg,
+    rgba(196, 181, 253, 0.12),
+    rgba(94, 234, 212, 0.12)
+  );
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: var(--space-md);
-  color: #7C3AED;
+  color: #7c3aed;
 }
 
 .how__step--left .how__step-icon {
@@ -146,27 +264,117 @@
   color: var(--color-text-secondary);
   line-height: 1.65;
 }
+/* ============================================
+   Responsive
+============================================ */
 
-/* Responsive */
 @media (max-width: 768px) {
-  .how__connector {
-    left: 20px;
+  .how {
+    padding: var(--space-4xl) 0;
   }
+
+  .how__header {
+    margin-bottom: var(--space-3xl);
+  }
+
+  .how__title {
+    font-size: clamp(1.8rem, 6vw, 2.4rem);
+  }
+
+  .how__subtitle {
+    font-size: 0.95rem;
+    max-width: 90%;
+  }
+
+  .how__steps {
+    gap: var(--space-xl);
+  }
+
+  /* move timeline line left */
+
+  .how__connector {
+    left: 22px;
+  }
+
+  /* full width steps */
 
   .how__step {
     width: 100%;
-    padding-left: 60px !important;
+    padding-left: 3.5rem !important;
+    box-sizing: border-box;
     padding-right: 0 !important;
     flex-direction: row !important;
     text-align: left !important;
+    align-self: flex-start !important;
   }
 
-  .how__step .how__step-marker {
+  /* marker positioning */
+
+  .how__step-marker {
     left: 0 !important;
     right: auto !important;
+    width: 34px;
+    height: 34px;
   }
 
-  .how__step .how__step-icon {
-    margin-left: 0 !important;
+  .how__step-number {
+    font-size: 0.7rem;
   }
+
+  /* card spacing */
+
+  .how__step-card {
+    padding: var(--space-lg) var(--space-md);
+  }
+
+  .how__step-icon {
+    width: 40px;
+    height: 40px;
+    margin-bottom: var(--space-sm);
+  }
+
+  .how__step-title {
+    font-size: 1rem;
+  }
+
+  .how__step-desc {
+    font-size: 0.85rem;
+  }
+}
+
+/* Small phones */
+
+@media (max-width: 480px) {
+  .how__title {
+    font-size: 1.6rem;
+  }
+
+  .how__subtitle {
+    font-size: 0.9rem;
+  }
+
+  .how__connector {
+    left: 18px;
+  }
+
+  .how__step {
+    padding-left: 60px !important;
+  }
+
+  .how__step-marker {
+    width: 30px;
+    height: 30px;
+  }
+
+  .how__step-icon {
+    width: 36px;
+    height: 36px;
+  }
+}
+.how {
+  overflow-x: hidden;
+}
+
+.hero__bg--discover {
+  overflow: hidden;
 }

@@ -1,0 +1,412 @@
+/* =========================
+ORBIT DISCOVERY SECTION
+========================= */
+
+.orbit-section {
+  position: relative;
+  padding: 8rem 0;
+  overflow: hidden;
+  background: transparent;
+}
+
+/* =========================
+LAYOUT
+========================= */
+
+.orbit-container {
+  position: relative;
+  z-index: 2;
+
+  width: 100%;
+  max-width: 75rem;
+  margin: 0 auto;
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+
+  gap: 6.25rem;
+  align-items: center;
+
+  padding-inline: 1.25rem;
+}
+
+/* =========================
+TEXT
+========================= */
+
+.orbit-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.orbit-left h2 {
+  font-size: 4rem;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.0625rem;
+}
+
+body.light .orbit-left h2 {
+  color: #0f172a;
+}
+
+body.dark .orbit-left h2 {
+  color: white;
+}
+
+.orbit-subtitle {
+  margin-top: 1.125rem;
+  color: var(--color-text-secondary);
+  font-size: 1.125rem;
+  line-height: 1.6;
+  max-width: 26.25rem;
+  text-align: center;
+}
+
+body.light .orbit-subtitle {
+  color: #64748b;
+}
+
+body.dark .orbit-subtitle {
+  color: #94a3b8;
+}
+
+/* =========================
+DISCOVERY RADIUS
+========================= */
+
+.radius-box {
+  margin-top: 2.5rem;
+  width: 100%;
+  max-width: 26.25rem;
+}
+
+.radius-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.625rem;
+}
+
+.radius-label {
+  font-size: 0.875rem;
+  letter-spacing: 0.0625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.radius-value {
+  font-weight: 600;
+}
+
+/* =========================
+SLIDER
+========================= */
+
+.radius-slider {
+  width: 100%;
+  height: 0.1875rem;
+  appearance: none;
+  border-radius: 0.625rem;
+  outline: none;
+}
+
+/* TRACK */
+
+.radius-slider::-webkit-slider-runnable-track {
+  height: 0.1875rem;
+  background: #94a3b8;
+  border-radius: 0.625rem;
+}
+
+.radius-slider::-moz-range-track {
+  height: 0.1875rem;
+  background: #94a3b8;
+  border-radius: 0.625rem;
+}
+
+body.dark .radius-slider::-webkit-slider-runnable-track {
+  background: white;
+}
+
+body.dark .radius-slider::-moz-range-track {
+  background: white;
+}
+
+/* THUMB */
+
+.radius-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 1.375rem;
+  height: 1.375rem;
+  border-radius: 50%;
+  background: white;
+  border: 0.1875rem solid #6366f1;
+  cursor: pointer;
+  margin-top: -0.5625rem;
+  box-shadow: 0 0 0 0.375rem rgba(99, 102, 241, 0.15);
+}
+
+.radius-slider::-moz-range-thumb {
+  width: 1.375rem;
+  height: 1.375rem;
+  border-radius: 50%;
+  background: white;
+  border: 0.1875rem solid #6366f1;
+  cursor: pointer;
+  box-shadow: 0 0 0 0.375rem rgba(99, 102, 241, 0.15);
+}
+
+/* =========================
+SCALE TEXT
+========================= */
+
+.radius-scale {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.375rem;
+  font-size: 0.75rem;
+}
+
+.radius-scale-text {
+  color: #64748b;
+}
+
+/* =========================
+PEOPLE COUNT
+========================= */
+
+.radius-count {
+  margin-top: 1rem;
+  font-size: 0.9375rem;
+  text-align: center;
+  color: #64748b;
+}
+
+.radius-count-text {
+  color: #64748b;
+}
+
+/* =========================
+RADAR
+========================= */
+
+.orbit-right {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.radar {
+  width: 28.75rem;
+  height: 28.75rem;
+  border-radius: 1.875rem;
+  position: relative;
+  overflow: hidden;
+}
+
+body.light .radar {
+  background: linear-gradient(145deg, #f8fafc, #eef2ff);
+  box-shadow: 0 1.25rem 2.5rem rgba(15, 23, 42, 0.12);
+}
+
+body.dark .radar {
+  background: linear-gradient(145deg, #0f172a, #020617);
+  box-shadow: 0 1.875rem 5rem rgba(0, 0, 0, 0.7);
+}
+
+/* =========================
+RADAR GRID
+========================= */
+
+.radar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background-image:
+    linear-gradient(rgba(99, 102, 241, 0.15) 0.0625rem, transparent 0.0625rem),
+    linear-gradient(
+      90deg,
+      rgba(99, 102, 241, 0.15) 0.0625rem,
+      transparent 0.0625rem
+    );
+
+  background-size: 2.5rem 2.5rem;
+}
+
+/* =========================
+RINGS
+========================= */
+
+.ring {
+  position: absolute;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+body.light .ring {
+  border: 0.09375rem solid rgba(99, 102, 241, 0.25);
+}
+
+body.dark .ring {
+  border: 0.09375rem solid rgba(129, 140, 248, 0.18);
+}
+
+.ring1 {
+  width: 6.25rem;
+  height: 6.25rem;
+}
+.ring2 {
+  width: 11.25rem;
+  height: 11.25rem;
+}
+.ring3 {
+  width: 16.25rem;
+  height: 16.25rem;
+}
+.ring4 {
+  width: 21.25rem;
+  height: 21.25rem;
+}
+
+/* =========================
+YOU
+========================= */
+
+.you {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: 2.875rem;
+  height: 2.875rem;
+
+  border-radius: 50%;
+  background: #6366f1;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: white;
+  font-weight: 700;
+
+  box-shadow:
+    0 0 0 0.625rem rgba(99, 102, 241, 0.18),
+    0 0 1.875rem rgba(99, 102, 241, 0.55);
+}
+
+/* =========================
+PEOPLE
+========================= */
+
+.person {
+  position: absolute;
+
+  width: 2.875rem;
+  height: 2.875rem;
+
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-weight: 600;
+  color: white;
+
+  transform: translate(-50%, -50%);
+  transition: all 0.35s ease;
+
+  box-shadow:
+    0 0 0 0.375rem rgba(99, 102, 241, 0.15),
+    0 0 1.125rem rgba(99, 102, 241, 0.45);
+}
+
+.person.hide {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.4);
+}
+
+.person.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* =========================
+DISTANCE TAG
+========================= */
+
+.distance {
+  position: absolute;
+  top: 3.125rem;
+  background: #111827;
+  color: #e5e7eb;
+  padding: 0.1875rem 0.5625rem;
+  border-radius: 0.875rem;
+  font-size: 0.75rem;
+}
+
+/* =========================
+BADGE
+========================= */
+
+.nearby-badge {
+  position: absolute;
+  top: 1.125rem;
+  right: 1.125rem;
+
+  background: #111827;
+
+  padding: 0.375rem 0.875rem;
+  border-radius: 1.25rem;
+
+  font-size: 0.8125rem;
+  color: #cbd5f5;
+
+  border: 0.0625rem solid rgba(255, 255, 255, 0.08);
+}
+
+/* =========================
+RESPONSIVE
+========================= */
+
+@media (max-width: 48rem) {
+  .orbit-section {
+    padding: 5rem 1.25rem;
+  }
+
+  .orbit-container {
+    grid-template-columns: 1fr;
+    gap: 3.125rem;
+    justify-items: center;
+  }
+
+  .radius-box {
+    max-width: 21.25rem;
+  }
+
+  .radar {
+    width: 20rem;
+    height: 20rem;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 30rem) {
+  .orbit-left h2 {
+    font-size: 2.25rem;
+  }
+
+  .radar {
+    width: 17.5rem;
+    height: 17.5rem;
+  }
+}

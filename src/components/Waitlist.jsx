@@ -53,10 +53,10 @@ export default function Waitlist({ onJoinWaitlist }) {
               Join the Waitlist
             </span>
             <h2 className="waitlist__title">
-              Ready to leave<br />the algorithm behind?
+              Be among the first to <br />experience ORBIT.
             </h2>
             <p className="waitlist__subtitle">
-              Be among the first to experience ORBIT. Join our waitlist and help shape the future of real-world connections.
+              Join our waitlist and help shape the future of real-world connections
             </p>
 
             {/* CTA button to open modal */}
