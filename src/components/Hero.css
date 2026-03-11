@@ -9,7 +9,6 @@
   align-items: center;
   justify-content: center;
   padding: calc(80px + var(--space-4xl)) 0 var(--space-4xl);
-  overflow-x: hidden;
 }
 
 /* Background decorations */
