@@ -13,21 +13,21 @@ const NAMES = [
   "Kabir",
   "Nisha",
   "Siddharth",
-  "Ananya"
+  "Ananya",
 ];
 
 const GRADIENTS = [
   "linear-gradient(135deg,#FF6B6B,#FFB347)",
   "linear-gradient(135deg,#C4B5FD,#818CF8)",
   "linear-gradient(135deg,#5EEAD4,#34D399)",
-  "linear-gradient(135deg,#FFB347,#F59E0B)"
+  "linear-gradient(135deg,#FFB347,#F59E0B)",
 ];
 
 const DISTANCE_RANGES = [
   [900, 1100],
   [1400, 1600],
   [1900, 2100],
-  [2500, 2700]
+  [2500, 2700],
 ];
 
 function randomBetween(min, max) {
@@ -35,7 +35,6 @@ function randomBetween(min, max) {
 }
 
 function getRadarPosition(distance) {
-
   const maxRadarRadius = 45;
   const minRadarRadius = 12;
 
@@ -52,13 +51,10 @@ function getRadarPosition(distance) {
   const y = 50 + radarRadius * Math.sin(angle);
 
   return { top: `${y}%`, left: `${x}%` };
-
 }
 
 function generatePeople() {
-
   return DISTANCE_RANGES.map((range, i) => {
-
     const distance = randomBetween(range[0], range[1]);
     const name = NAMES[Math.floor(Math.random() * NAMES.length)];
     const gradient = GRADIENTS[i % GRADIENTS.length];
@@ -70,15 +66,12 @@ function generatePeople() {
       gradient,
       initial: name.charAt(0),
       distance,
-      ...position
-    }
-
-  })
-
+      ...position,
+    };
+  });
 }
 
 export default function DiscoverMap() {
-
   const sectionRef = useRef(null);
 
   const [radius, setRadius] = useState(300);
@@ -88,13 +81,12 @@ export default function DiscoverMap() {
     setPeople(generatePeople());
   }, []);
 
-  const visiblePeople = people.filter(p => p.distance <= radius);
+  const visiblePeople = people.filter((p) => p.distance <= radius);
 
   useEffect(() => {
-
     const ctx = gsap.context(() => {
-
-      gsap.fromTo(".orbit-left",
+      gsap.fromTo(
+        ".orbit-left",
         { y: 40, opacity: 0 },
         {
           y: 0,
@@ -103,11 +95,13 @@ export default function DiscoverMap() {
           scrollTrigger: {
             trigger: ".orbit-left",
             start: "top 85%",
-            toggleActions: "play none none reverse"
-          }
-        });
+            toggleActions: "play none none reverse",
+          },
+        },
+      );
 
-      gsap.fromTo(".radar",
+      gsap.fromTo(
+        ".radar",
         { scale: 0.92, opacity: 0 },
         {
           scale: 1,
@@ -117,41 +111,34 @@ export default function DiscoverMap() {
           scrollTrigger: {
             trigger: ".radar",
             start: "top 85%",
-            toggleActions: "play none none reverse"
-          }
-        });
-
+            toggleActions: "play none none reverse",
+          },
+        },
+      );
     }, sectionRef);
 
     return () => ctx.revert();
-
   }, []);
 
   return (
-
     <section ref={sectionRef} className="orbit-section">
-
       <div className="orbit-container">
-
         <div className="orbit-left">
-
           <h2 className="features__title">
-            See who's nearby.<br />
+            See who's nearby.
+            <br />
             <span className="gradient-text">Right now.</span>
           </h2>
 
           <p className="orbit-subtitle">
-  ORBIT shows you real people nearby, who share your interests.
-</p>
+            ORBIT shows you real people nearby, who share your interests.
+          </p>
 
           <div className="radius-box">
-
             <div className="radius-header">
               <span className="radius-label">Discovery Radius</span>
 
-              <span className="radius-value gradient-text">
-                {radius}m
-              </span>
+              <span className="radius-value gradient-text">{radius}m</span>
             </div>
 
             <input
@@ -165,24 +152,21 @@ export default function DiscoverMap() {
             />
 
             <div className="radius-scale">
-  <span className="radius-scale-text">100m</span>
-  <span className="radius-scale-text">3km</span>
-</div>
+              <span className="radius-scale-text">100m</span>
+              <span className="radius-scale-text">3km</span>
+            </div>
 
             <p className="radius-count">
-  <span className="gradient-text">{visiblePeople.length} people</span>
-  <span className="radius-count-text"> within your radius</span>
-</p>
-
+              <span className="gradient-text">
+                {visiblePeople.length} people
+              </span>
+              <span className="radius-count-text"> within your radius</span>
+            </p>
           </div>
-
         </div>
 
-
         <div className="orbit-right">
-
           <div className="radar">
-
             <div className="ring ring1"></div>
             <div className="ring ring2"></div>
             <div className="ring ring3"></div>
@@ -190,8 +174,7 @@ export default function DiscoverMap() {
 
             <div className="you">You</div>
 
-            {people.map(person => {
-
+            {people.map((person) => {
               const visible = person.distance <= radius;
 
               return (
@@ -201,35 +184,22 @@ export default function DiscoverMap() {
                   style={{
                     top: person.top,
                     left: person.left,
-                    background: person.gradient
+                    background: person.gradient,
                   }}
                 >
-
                   {person.initial}
 
-                  {visible &&
-                    <div className="distance">
-                      {person.distance}m
-                    </div>
-                  }
-
+                  {visible && (
+                    <div className="distance">{person.distance}m</div>
+                  )}
                 </div>
-              )
-
+              );
             })}
 
-            <div className="nearby-badge">
-              ● {visiblePeople.length} nearby
-            </div>
-
+            <div className="nearby-badge">● {visiblePeople.length} nearby</div>
           </div>
-
         </div>
-
       </div>
-
     </section>
-
-  )
-
+  );
 }
