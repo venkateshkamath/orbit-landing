@@ -43,7 +43,7 @@ function LandingPage({ onJoinWaitlist }) {
         <Hero onJoinWaitlist={onJoinWaitlist} />
         <Gallery />
         <Features />
-        <DiscoverMap></DiscoverMap>
+        <DiscoverMap/>
         <HowItWorks />
         <Community />
         <FAQ />
