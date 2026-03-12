@@ -304,9 +304,11 @@ app.get('/api/waitlist/stats', async (req, res) => {
       cityStats,
       growthData,
       recentSignups: allData.slice(0, 50).map(r => ({
+        id: r.id,
         email: r.email,
         city: toTitleCase(r.city || 'Unknown'),
-        time: new Date(r.created_at).toLocaleString()
+        age: r.age,
+        created_at: r.created_at
       }))
     });
   } catch (err) {
