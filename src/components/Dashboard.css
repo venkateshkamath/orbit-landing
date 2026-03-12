@@ -451,6 +451,35 @@
   outline: none;
 }
 
+.advanced-filters {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.filter-select {
+  background: #151525;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #9ca3b0;
+  padding: 8px 16px;
+  border-radius: 100px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+  outline: none;
+}
+
+.filter-select:hover {
+  border-color: rgba(196, 181, 253, 0.3);
+  color: #f0f0f5;
+}
+
+.filter-select option {
+  background: #1c1c2e;
+  color: #f0f0f5;
+}
+
 .table-container {
   overflow-x: auto;
   margin-top: 10px;

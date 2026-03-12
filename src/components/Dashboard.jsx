@@ -104,6 +104,8 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterCity, setFilterCity] = useState('all');
+  const [filterAge, setFilterAge] = useState('all');
   const [geoMarkers, setGeoMarkers] = useState([]);
   const [geoLoading, setGeoLoading] = useState(false);
 
@@ -169,11 +171,18 @@ export default function Dashboard() {
     );
   }
 
-  const filteredSignups = (stats?.recentSignups || []).filter(
-    (s) =>
+  const filteredSignups = (stats?.recentSignups || []).filter((s) => {
+    const matchesSearch =
       s.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.city.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+      s.city.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCity = filterCity === 'all' || s.city === filterCity;
+    const matchesAge = filterAge === 'all' || s.age === filterAge;
+    return matchesSearch && matchesCity && matchesAge;
+  });
+
+  // Extract unique filter options from data
+  const uniqueCities = [...new Set((stats?.cityStats || []).map((s) => s.city))].sort();
+  const ageOptions = ['16-25', '26-35', '36-45', '46-60', '60+'];
 
   const latestGrowth =
     stats?.growthData?.length > 0 ? stats.growthData[stats.growthData.length - 1].count : 0;
@@ -214,7 +223,7 @@ export default function Dashboard() {
         <section className="stats-row">
           <StatCard
             title="Total Waitlist"
-            value={stats?.totalCount || 0}
+            value={stats?.totalSignups || stats?.totalCount || 0}
             change="+12.5%"
             trend="up"
             icon={<Users size={24} />}
@@ -417,14 +426,26 @@ export default function Dashboard() {
             <div className="card-header">
               <div className="header-search">
                 <h3>Recent Signups</h3>
-                <div className="search-bar">
-                  <Search size={16} />
-                  <input
-                    type="text"
-                    placeholder="Search by email or city…"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
+                <div className="advanced-filters">
+                  <div className="search-bar">
+                    <Search size={16} />
+                    <input
+                      type="text"
+                      placeholder="Search email or city…"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
+                  
+                  <select className="filter-select" value={filterCity} onChange={(e) => setFilterCity(e.target.value)}>
+                    <option value="all">All Regions</option>
+                    {uniqueCities.map((c) => <option key={c} value={c}>{c}</option>)}
+                  </select>
+
+                  <select className="filter-select" value={filterAge} onChange={(e) => setFilterAge(e.target.value)}>
+                    <option value="all">All Ages</option>
+                    {ageOptions.map((a) => <option key={a} value={a}>{a}</option>)}
+                  </select>
                 </div>
               </div>
             </div>
@@ -444,20 +465,24 @@ export default function Dashboard() {
                   {filteredSignups.map((s) => (
                     <tr key={s.id}>
                       <td className="email-cell">
-                        <div className="avatar">{s.email[0].toUpperCase()}</div>
-                        {s.email}
+                        <div className="avatar" style={{ background: COLORS[(s.id || 0) % COLORS.length] }}>
+                          {s.email[0].toUpperCase()}
+                        </div>
+                        <span className="email-text">{s.email}</span>
                       </td>
                       <td>{s.city}</td>
-                      <td>{s.age || '—'}</td>
+                      <td>
+                        <div className="age-cell">{s.age === '34-35' ? '26-35' : s.age || '—'}</div>
+                      </td>
                       <td className="date-cell">
                         <Calendar size={14} />
-                        {new Date(s.created_at).toLocaleDateString('en-US', {
+                        {s.created_at ? new Date(s.created_at).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric',
                           year: 'numeric',
                           hour: '2-digit',
                           minute: '2-digit',
-                        })}
+                        }) : '—'}
                       </td>
                       <td>
                         <span className="status-badge verified">Verified</span>

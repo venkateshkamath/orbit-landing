@@ -1,2 +1,0 @@
-origin	https://github.com/venkateshkamath/orbit-landing.git (fetch)
-origin	https://github.com/venkateshkamath/orbit-landing.git (push)

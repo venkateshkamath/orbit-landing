@@ -1,7 +1,7 @@
-import { useEffect, useRef } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import './Community.css';
+import { useEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import "./Community.css";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -28,10 +28,10 @@ const testimonials = [
     gradient: 'linear-gradient(135deg, #5EEAD4, #34D399)',
   },
   {
-    name: 'Karan Patel',
-    handle: '@karanp',
+    name: 'Aman Gatty',
+    handle: '@amangatty',
     text: 'I joined ORBIT just out of curiosity, but it quickly became something I use regularly. It’s simple, well designed, and makes socializing feel effortless.',
-    avatar: 'K',
+    avatar: 'A',
     gradient: 'linear-gradient(135deg, #FFB347, #F59E0B)',
   },
 ];
@@ -121,7 +121,8 @@ export default function Community() {
             <span className="gradient-text">buzzing about ORBIT</span>
           </h2>
           <p className="community__subtitle">
-            Hear from early adopters who can't wait to reconnect with the real world.
+            Hear from early adopters who can't wait to reconnect with the real
+            world.
           </p>
         </div>
 
@@ -129,7 +130,10 @@ export default function Community() {
           {testimonials.map((t) => (
             <div key={t.handle} className="community__card">
               <div className="community__card-header">
-                <div className="community__card-avatar" style={{ background: t.gradient }}>
+                <div
+                  className="community__card-avatar"
+                  style={{ background: t.gradient }}
+                >
                   {t.avatar}
                 </div>
                 <div>
@@ -138,13 +142,6 @@ export default function Community() {
                 </div>
               </div>
               <p className="community__card-text">{t.text}</p>
-              {/* <div className="community__card-stars">
-                {[...Array(5)].map((_, i) => (
-                  <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill="#FFB347" stroke="none">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                  </svg>
-                ))}
-              </div> */}
             </div>
           ))}
         </div>

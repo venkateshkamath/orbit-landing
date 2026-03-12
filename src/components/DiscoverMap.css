@@ -18,16 +18,16 @@ LAYOUT
   z-index: 2;
 
   width: 100%;
-  max-width: 1200px;
+  max-width: 75rem;
   margin: 0 auto;
 
   display: grid;
   grid-template-columns: 1fr 1fr;
 
-  gap: 100px;
+  gap: 6.25rem;
   align-items: center;
 
-  padding-inline: 20px;
+  padding-inline: 1.25rem;
 }
 
 /* =========================
@@ -45,7 +45,7 @@ TEXT
   font-size: 4rem;
   font-weight: 800;
   line-height: 1.15;
-  letter-spacing: -1px;
+  letter-spacing: -0.0625rem;
 }
 
 body.light .orbit-left h2 {
@@ -57,11 +57,11 @@ body.dark .orbit-left h2 {
 }
 
 .orbit-subtitle {
-  margin-top: 18px;
+  margin-top: 1.125rem;
   color: var(--color-text-secondary);
   font-size: 1.125rem;
   line-height: 1.6;
-  max-width: 420px;
+  max-width: 26.25rem;
   text-align: center;
 }
 
@@ -78,20 +78,20 @@ DISCOVERY RADIUS
 ========================= */
 
 .radius-box {
-  margin-top: 40px;
+  margin-top: 2.5rem;
   width: 100%;
-  max-width: 420px;
+  max-width: 26.25rem;
 }
 
 .radius-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 0.625rem;
 }
 
 .radius-label {
   font-size: 0.875rem;
-  letter-spacing: 1px;
+  letter-spacing: 0.0625rem;
   font-weight: 600;
   text-transform: uppercase;
   color: #64748b;
@@ -107,24 +107,24 @@ SLIDER
 
 .radius-slider {
   width: 100%;
-  height: 3px;
+  height: 0.1875rem;
   appearance: none;
-  border-radius: 10px;
+  border-radius: 0.625rem;
   outline: none;
 }
 
 /* TRACK */
 
 .radius-slider::-webkit-slider-runnable-track {
-  height: 3px;
+  height: 0.1875rem;
   background: #94a3b8;
-  border-radius: 10px;
+  border-radius: 0.625rem;
 }
 
 .radius-slider::-moz-range-track {
-  height: 3px;
+  height: 0.1875rem;
   background: #94a3b8;
-  border-radius: 10px;
+  border-radius: 0.625rem;
 }
 
 body.dark .radius-slider::-webkit-slider-runnable-track {
@@ -139,24 +139,24 @@ body.dark .radius-slider::-moz-range-track {
 
 .radius-slider::-webkit-slider-thumb {
   appearance: none;
-  width: 22px;
-  height: 22px;
+  width: 1.375rem;
+  height: 1.375rem;
   border-radius: 50%;
   background: white;
-  border: 3px solid #6366f1;
+  border: 0.1875rem solid #6366f1;
   cursor: pointer;
-  margin-top: -9px;
-  box-shadow: 0 0 0 6px rgba(99, 102, 241, 0.15);
+  margin-top: -0.5625rem;
+  box-shadow: 0 0 0 0.375rem rgba(99, 102, 241, 0.15);
 }
 
 .radius-slider::-moz-range-thumb {
-  width: 22px;
-  height: 22px;
+  width: 1.375rem;
+  height: 1.375rem;
   border-radius: 50%;
   background: white;
-  border: 3px solid #6366f1;
+  border: 0.1875rem solid #6366f1;
   cursor: pointer;
-  box-shadow: 0 0 0 6px rgba(99, 102, 241, 0.15);
+  box-shadow: 0 0 0 0.375rem rgba(99, 102, 241, 0.15);
 }
 
 /* =========================
@@ -166,7 +166,7 @@ SCALE TEXT
 .radius-scale {
   display: flex;
   justify-content: space-between;
-  margin-top: 6px;
+  margin-top: 0.375rem;
   font-size: 0.75rem;
 }
 
@@ -179,7 +179,7 @@ PEOPLE COUNT
 ========================= */
 
 .radius-count {
-  margin-top: 16px;
+  margin-top: 1rem;
   font-size: 0.9375rem;
   text-align: center;
   color: #64748b;
@@ -201,21 +201,21 @@ RADAR
 }
 
 .radar {
-  width: 460px;
-  height: 460px;
-  border-radius: 30px;
+  width: 28.75rem;
+  height: 28.75rem;
+  border-radius: 1.875rem;
   position: relative;
   overflow: hidden;
 }
 
 body.light .radar {
   background: linear-gradient(145deg, #f8fafc, #eef2ff);
-  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.12);
+  box-shadow: 0 1.25rem 2.5rem rgba(15, 23, 42, 0.12);
 }
 
 body.dark .radar {
   background: linear-gradient(145deg, #0f172a, #020617);
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 1.875rem 5rem rgba(0, 0, 0, 0.7);
 }
 
 /* =========================
@@ -223,15 +223,19 @@ RADAR GRID
 ========================= */
 
 .radar::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
 
   background-image:
-    linear-gradient(rgba(99, 102, 241, 0.15) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(99, 102, 241, 0.15) 1px, transparent 1px);
+    linear-gradient(rgba(99, 102, 241, 0.15) 0.0625rem, transparent 0.0625rem),
+    linear-gradient(
+      90deg,
+      rgba(99, 102, 241, 0.15) 0.0625rem,
+      transparent 0.0625rem
+    );
 
-  background-size: 40px 40px;
+  background-size: 2.5rem 2.5rem;
 }
 
 /* =========================
@@ -374,35 +378,35 @@ BADGE
 RESPONSIVE
 ========================= */
 
-@media (max-width: 768px) {
+@media (max-width: 48rem) {
   .orbit-section {
-    padding: 80px 20px;
+    padding: 5rem 1.25rem;
   }
 
   .orbit-container {
     grid-template-columns: 1fr;
-    gap: 50px;
+    gap: 3.125rem;
     justify-items: center;
   }
 
   .radius-box {
-    max-width: 340px;
+    max-width: 21.25rem;
   }
 
   .radar {
-    width: 320px;
-    height: 320px;
+    width: 20rem;
+    height: 20rem;
     margin: 0 auto;
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 30rem) {
   .orbit-left h2 {
     font-size: 2.25rem;
   }
 
   .radar {
-    width: 280px;
-    height: 280px;
+    width: 17.5rem;
+    height: 17.5rem;
   }
 }

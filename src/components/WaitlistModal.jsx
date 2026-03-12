@@ -53,7 +53,7 @@ export default function WaitlistModal({ isOpen, onClose }) {
           const res = await fetch(
             `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(val)}&format=json&featuretype=city&limit=5`,
             {
-              headers: { 'Accept-Language': 'en-US,en;q=0.9' },
+              headers: { 'User-Agent': 'OrbitLandingPage/1.0', 'Accept-Language': 'en-US,en;q=0.9' },
             }
           );
           const data = await res.json();
