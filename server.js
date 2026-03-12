@@ -14,6 +14,7 @@ import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import nodemailer from 'nodemailer';
 import cron from 'node-cron';
+import compression from 'compression';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -31,6 +32,7 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+app.use(compression());
 app.use(cors());
 app.use(express.json());
 
