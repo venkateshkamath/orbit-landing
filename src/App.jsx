@@ -48,7 +48,7 @@ function LandingPage({ onJoinWaitlist }) {
         <Hero onJoinWaitlist={onJoinWaitlist} />
         <Gallery />
         <Features />
-        <Suspense fallback={<div className="orbit-section" style={{ height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading Map...</div>}>
+        <Suspense fallback={<div className="orbit-section map-fallback-loader">Loading Map...</div>}>
           <DiscoverMap />
         </Suspense>
         <HowItWorks />
@@ -70,7 +70,7 @@ export default function App() {
 
   return (
     <Router>
-      <Suspense fallback={<div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666' }}>Loading...</div>}>
+      <Suspense fallback={<div className="app-loading-fallback">Loading...</div>}>
         <Routes>
           <Route path="/" element={<LandingPage onJoinWaitlist={openModal} />} />
           <Route

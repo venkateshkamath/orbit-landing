@@ -36,6 +36,15 @@ import './Dashboard.css';
 // ORBIT Brand Colors (from website design system)
 const COLORS = ['#FF6B6B', '#C4B5FD', '#5EEAD4', '#FFB347', '#818CF8'];
 
+// Normalise age-range values coming from the API.
+// The backend sometimes stores "34-35" which should map to the "26-35" bucket.
+const AGE_CORRECTIONS = { '34-35': '26-35' };
+
+function normalizeAge(raw) {
+  if (!raw) return null;
+  return AGE_CORRECTIONS[raw] || raw;
+}
+
 // ─── Dynamic Geocoding via OpenStreetMap Nominatim (free, no API key) ───
 const GEO_CACHE_KEY = 'orbit_geo_cache';
 
@@ -472,7 +481,7 @@ export default function Dashboard() {
                       </td>
                       <td>{s.city}</td>
                       <td>
-                        <div className="age-cell">{s.age === '34-35' ? '26-35' : s.age || '—'}</div>
+                        <div className="age-cell">{normalizeAge(s.age) || '—'}</div>
                       </td>
                       <td className="date-cell">
                         <Calendar size={14} />
