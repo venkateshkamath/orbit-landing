@@ -29,3 +29,9 @@ dist-ssr
 
 # Agent
 .gemini/
+
+# Development text files
+branch.txt
+log.txt
+remote.txt
+status.txt
