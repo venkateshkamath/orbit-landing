@@ -190,3 +190,19 @@ input {
   border-radius: var(--radius-full);
   background: #7c3aed;
 }
+
+/* App-level Suspense Fallbacks */
+.app-loading-fallback {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+}
+
+.map-fallback-loader {
+  height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
