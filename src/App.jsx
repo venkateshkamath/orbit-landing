@@ -18,12 +18,13 @@ import FAQ from "./components/FAQ";
 import Waitlist from "./components/Waitlist";
 import Footer from "./components/Footer";
 import WaitlistModal from "./components/WaitlistModal";
-import DiscoverMap from "./components/DiscoverMap";
+// import DiscoverMap from "./components/DiscoverMap"; (now lazy loaded)
 import { lazy, Suspense } from "react";
 
 const Dashboard = lazy(() => import("./components/Dashboard"));
 const Login = lazy(() => import("./components/Login"));
 const NotFound = lazy(() => import("./components/NotFound"));
+const DiscoverMap = lazy(() => import("./components/DiscoverMap"));
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -49,7 +50,9 @@ function LandingPage({ onJoinWaitlist }) {
         <Hero onJoinWaitlist={onJoinWaitlist} />
         <Gallery />
         <Features />
-        <DiscoverMap />
+        <Suspense fallback={<div className="orbit-section" style={{ height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading Map...</div>}>
+          <DiscoverMap />
+        </Suspense>
         <HowItWorks />
         <Community />
         <FAQ />

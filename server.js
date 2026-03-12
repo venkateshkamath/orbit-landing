@@ -40,7 +40,16 @@ const toTitleCase = (str) =>
   str.trim().replace(/\s+/g, ' ').replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
 
 if (!process.env.VERCEL) {
-  app.use(express.static(path.join(__dirname, 'dist')));
+  // Use long-term caching for static assets (JS, CSS, images) but no-cache for HTML
+  app.use(express.static(path.join(__dirname, 'dist'), {
+    maxAge: '1y',
+    immutable: true,
+    setHeaders: (res, path) => {
+      if (path.endsWith('.html')) {
+        res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+      }
+    }
+  }));
 }
 
 // ─── Resend HTTP API (instant delivery, replaces Brevo) ────────
@@ -236,6 +245,20 @@ app.get('/api/test-email', async (req, res) => {
   } catch (err) {
     console.error('🧪 Test error:', err.message);
     res.status(500).json({ error: err.message });
+  }
+});
+ 
+// ─── GET /api/waitlist/count ────────────────────────────────
+app.get('/api/waitlist/count', async (req, res) => {
+  try {
+    const { count, error } = await supabase
+      .from('waitlist')
+      .select('*', { count: 'exact', head: true });
+
+    if (error) throw error;
+    res.json({ count: count || 0 });
+  } catch (err) {
+    res.status(500).json({ count: 0, error: err.message });
   }
 });
 
