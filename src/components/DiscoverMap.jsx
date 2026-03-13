@@ -158,7 +158,7 @@ export default function DiscoverMap() {
 
             <p className="radius-count">
               <span className="gradient-text">
-                {visiblePeople.length} people
+                {visiblePeople.length} {visiblePeople.length === 1 ? 'person' : 'people'}
               </span>
               <span className="radius-count-text"> within your radius</span>
             </p>

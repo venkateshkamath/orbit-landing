@@ -9,7 +9,7 @@ export default function Hero({ onJoinWaitlist }) {
   const ctaRef = useRef(null);
   const badgeRef = useRef(null);
   const visualRef = useRef(null);
-  const [waitlistCount, setWaitlistCount] = useState(2438); // Base "vibe" count
+  const [waitlistCount, setWaitlistCount] = useState(328); // Base "vibe" count
 
   useEffect(() => {
     // Fetch live count from our Supabase-backed server
@@ -196,7 +196,7 @@ export default function Hero({ onJoinWaitlist }) {
               <div className="hero__avatar" style={{ background: 'linear-gradient(135deg, #C4B5FD, #818CF8)' }}>A</div>
               <div className="hero__avatar" style={{ background: 'linear-gradient(135deg, #5EEAD4, #34D399)' }}>S</div>
               <div className="hero__avatar" style={{ background: 'linear-gradient(135deg, #FFB347, #F59E0B)' }}>R</div>
-              <div className="hero__avatar hero__avatar--count">+{Math.floor(waitlistCount/1000)}k</div>
+              <div className="hero__avatar hero__avatar--count">+{Math.floor(waitlistCount/100)}00</div>
             </div>
             <p className="hero__social-text">{waitlistCount.toLocaleString()} people on the waitlist</p>
           </div>

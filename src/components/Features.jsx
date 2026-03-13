@@ -96,8 +96,7 @@ export default function Features() {
             <span className="gradient-text">connect offline</span>
           </h2>
           <p className="features__subtitle">
-            ORBIT is built for real-world connections. No algorithms deciding
-            your friendships — just genuine moments.
+            Orbit matches you by what you love doing — hiking, photography, beach walks, street food — and finds people nearby who share it. No swiping. No guessing.
           </p>
         </div>
 

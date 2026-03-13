@@ -15,32 +15,32 @@ const imageUrls = [
 const images = [
   {
     id: 1,
-    src: imageUrls[0],
-    alt: "Friends laughing together at sunset",
-    caption: "Reclaim your evening",
-    span: "large",
+    src: 'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=1200&q=80',
+    alt: 'Friends laughing together at sunset',
+    caption: 'Reclaim your evening',
+    span: 'large', 
   },
   {
     id: 2,
-    src: imageUrls[1],
-    alt: "People connecting over coffee",
-    caption: "Share real moments",
-    span: "wide",
+    src: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80',
+    alt: 'People connecting over coffee',
+    caption: 'Share real moments',
+    span: 'wide', 
   },
   {
     id: 3,
-    src: imageUrls[2],
-    alt: "Group having fun outdoors",
-    caption: "Find your tribe",
-    span: "small",
+    src: 'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&w=800&q=80',
+    alt: 'Group having fun outdoors',
+    caption: 'Find your tribe',
+    span: 'small',
   },
   {
     id: 4,
-    src: imageUrls[3],
-    alt: "Friends at cafe laughing",
-    caption: "Laugh louder",
-    span: "small",
-  },
+    src: 'https://images.unsplash.com/photo-1536640712-4d4c36ff0e4e?auto=format&fit=crop&w=800&q=80',
+    alt: 'Friends at cafe laughing',
+    caption: 'Laugh louder',
+    span: 'small', 
+  }
 ];
 
 export default function Gallery() {
@@ -102,13 +102,12 @@ export default function Gallery() {
       <div className="container">
         <div className="gallery__header">
           <h2 className="gallery__title">
-            Stop Scrolling.
+            Find Your People
             <br />
-            <span className="gradient-text">Start Living.</span>
+            <span className="gradient-text">Closer Than You Think.</span>
           </h2>
           <p className="gallery__subtitle">
-            ORBIT is about the moments that happen when you finally put your
-            phone down and look up. Discover the beauty of offline connections.
+            Orbit is about the moments that happen when you put your phone down and look up. Find like-minded people. Build your orbit. Go meet them. Real people. Real places. Real experiences.
           </p>
         </div>
 
