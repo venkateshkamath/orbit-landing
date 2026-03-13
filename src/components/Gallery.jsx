@@ -1,39 +1,46 @@
-import { useEffect, useRef } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import './Gallery.css';
+import { useEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import "./Gallery.css";
 
 gsap.registerPlugin(ScrollTrigger);
+
+const imageUrls = [
+  "https://images.pexels.com/photos/4453153/pexels-photo-4453153.jpeg",
+  "https://images.pexels.com/photos/1267697/pexels-photo-1267697.jpeg",
+  "https://img.freepik.com/premium-photo/group-four-indian-friends-outdoors-smiling-laughing-tree_53876-1077347.jpg",
+  "https://images.pexels.com/photos/8818592/pexels-photo-8818592.jpeg",
+];
 
 const images = [
   {
     id: 1,
-    src: 'https://images.pexels.com/photos/4453153/pexels-photo-4453153.jpeg',
-    alt: 'Friends laughing together at sunset',
-    caption: 'Reclaim your evening',
-    span: 'large', 
+    src: imageUrls[0],
+    alt: "Friends laughing together at sunset",
+    caption: "Reclaim your evening",
+    span: "large",
   },
   {
     id: 2,
-    src: 'https://images.pexels.com/photos/1267697/pexels-photo-1267697.jpeg',
-    alt: 'People connecting over coffee',
-    caption: 'Share real moments',
-    span: 'wide', 
+    src: imageUrls[1],
+    alt: "People connecting over coffee",
+    caption: "Share real moments",
+    span: "wide",
   },
   {
     id: 3,
-    src: 'https://imgs.search.brave.com/ppWMma3glcQ1TjGnP5EzAL-7_TklDlPS54reeb6XmaQ/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/cHJlbWl1bS1waG90/by9ncm91cC1mb3Vy/LWluZGlhbi1mcmll/bmRzLW91dGRvb3Jz/LXNtaWxpbmctbGF1/Z2hpbmctdHJlZV81/Mzg3Ni0xMDc3MzQ3/LmpwZz9zZW10PWFp/c19oeWJyaWQmdz03/NDAmcT04MA',
-    alt: 'Group having fun outdoors',
-    caption: 'Find your tribe',
-    span: 'small',
+    src: imageUrls[2],
+    alt: "Group having fun outdoors",
+    caption: "Find your tribe",
+    span: "small",
   },
   {
     id: 4,
-    src: 'https://images.pexels.com/photos/8818592/pexels-photo-8818592.jpeg',
-    alt: 'Friends at cafe laughing',
-    caption: 'Laugh louder',
-    span: 'small', 
-  }
+    src: imageUrls[3],
+    alt: "Friends at cafe laughing",
+    caption: "Laugh louder",
+    span: "small",
+  },
 ];
 
 export default function Gallery() {
@@ -42,27 +49,45 @@ export default function Gallery() {
   useEffect(() => {
     const ctx = gsap.context(() => {
       // Header animation
-      gsap.fromTo('.gallery__header', {
-        y: 40, opacity: 0,
-      }, {
-        y: 0, opacity: 1, duration: 1, ease: 'power3.out',
-        scrollTrigger: {
-          trigger: '.gallery__header',
-          start: 'top 85%',
-        }
-      });
+      gsap.fromTo(
+        ".gallery__header",
+        {
+          y: 40,
+          opacity: 0,
+        },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 1,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: ".gallery__header",
+            start: "top 85%",
+          },
+        },
+      );
 
       // Bento box stagger animation
-      gsap.fromTo('.bento-item', {
-        y: 40, opacity: 0, scale: 0.95
-      }, {
-        y: 0, opacity: 1, scale: 1, duration: 0.6,
-        stagger: 0.1, ease: 'power3.out',
-        scrollTrigger: {
-          trigger: '.bento-grid',
-          start: 'top 90%',
-        }
-      });
+      gsap.fromTo(
+        ".bento-item",
+        {
+          y: 40,
+          opacity: 0,
+          scale: 0.95,
+        },
+        {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          duration: 0.6,
+          stagger: 0.1,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: ".bento-grid",
+            start: "top 90%",
+          },
+        },
+      );
     }, sectionRef);
 
     return () => ctx.revert();
@@ -76,13 +101,14 @@ export default function Gallery() {
 
       <div className="container">
         <div className="gallery__header">
-          <span className="section-label">Real Life</span>
           <h2 className="gallery__title">
-            Stop Scrolling.<br />
+            Stop Scrolling.
+            <br />
             <span className="gradient-text">Start Living.</span>
           </h2>
           <p className="gallery__subtitle">
-            ORBIT is about the moments that happen when you finally put your phone down and look up. Discover the beauty of offline connections.
+            ORBIT is about the moments that happen when you finally put your
+            phone down and look up. Discover the beauty of offline connections.
           </p>
         </div>
 
@@ -94,8 +120,17 @@ export default function Gallery() {
                 <div className="bento-overlay">
                   <div className="bento-overlay__content">
                     <span className="bento-overlay__icon">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                      <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                       </svg>
                     </span>
                     <p className="bento-caption">{img.caption}</p>

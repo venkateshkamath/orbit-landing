@@ -14,6 +14,7 @@ import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import nodemailer from 'nodemailer';
 import cron from 'node-cron';
+import compression from 'compression';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -31,6 +32,7 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+app.use(compression());
 app.use(cors());
 app.use(express.json());
 
@@ -38,7 +40,16 @@ const toTitleCase = (str) =>
   str.trim().replace(/\s+/g, ' ').replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
 
 if (!process.env.VERCEL) {
-  app.use(express.static(path.join(__dirname, 'dist')));
+  // Use long-term caching for static assets (JS, CSS, images) but no-cache for HTML
+  app.use(express.static(path.join(__dirname, 'dist'), {
+    maxAge: '1y',
+    immutable: true,
+    setHeaders: (res, path) => {
+      if (path.endsWith('.html')) {
+        res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+      }
+    }
+  }));
 }
 
 // ─── Resend HTTP API (instant delivery, replaces Brevo) ────────
@@ -236,6 +247,20 @@ app.get('/api/test-email', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+ 
+// ─── GET /api/waitlist/count ────────────────────────────────
+app.get('/api/waitlist/count', async (req, res) => {
+  try {
+    const { count, error } = await supabase
+      .from('waitlist')
+      .select('*', { count: 'exact', head: true });
+
+    if (error) throw error;
+    res.json({ count: count || 0 });
+  } catch (err) {
+    res.status(500).json({ count: 0, error: err.message });
+  }
+});
 
 // ─── GET /api/waitlist/stats ────────────────────────────────
 app.get('/api/waitlist/stats', async (req, res) => {
@@ -279,9 +304,11 @@ app.get('/api/waitlist/stats', async (req, res) => {
       cityStats,
       growthData,
       recentSignups: allData.slice(0, 50).map(r => ({
+        id: r.id,
         email: r.email,
         city: toTitleCase(r.city || 'Unknown'),
-        time: new Date(r.created_at).toLocaleString()
+        age: r.age,
+        created_at: r.created_at
       }))
     });
   } catch (err) {
@@ -308,7 +335,7 @@ app.get('/api/health', (req, res) => {
 
 // ─── SPA fallback + listen ──────────────────────────────────
 if (!process.env.VERCEL) {
-  app.get('{*path}', (req, res) => {
+  app.get(/.*/, (req, res) => {
     res.sendFile(path.join(__dirname, 'dist', 'index.html'));
   });
 

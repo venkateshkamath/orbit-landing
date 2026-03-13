@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import "./DiscoverMap.css";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const NAMES = [
   "Arjun",
@@ -10,14 +13,21 @@ const NAMES = [
   "Kabir",
   "Nisha",
   "Siddharth",
-  "Ananya"
+  "Ananya",
+];
+
+const GRADIENTS = [
+  "linear-gradient(135deg,#FF6B6B,#FFB347)",
+  "linear-gradient(135deg,#C4B5FD,#818CF8)",
+  "linear-gradient(135deg,#5EEAD4,#34D399)",
+  "linear-gradient(135deg,#FFB347,#F59E0B)",
 ];
 
 const DISTANCE_RANGES = [
   [900, 1100],
   [1400, 1600],
   [1900, 2100],
-  [2500, 2700]
+  [2500, 2700],
 ];
 
 function randomBetween(min, max) {
@@ -25,11 +35,12 @@ function randomBetween(min, max) {
 }
 
 function getRadarPosition(distance) {
-
   const maxRadarRadius = 45;
   const minRadarRadius = 12;
 
-  const normalized = distance / 3000;
+  const maxDistance = 3000;
+
+  const normalized = distance / maxDistance;
 
   const radarRadius =
     minRadarRadius + normalized * (maxRadarRadius - minRadarRadius);
@@ -39,35 +50,28 @@ function getRadarPosition(distance) {
   const x = 50 + radarRadius * Math.cos(angle);
   const y = 50 + radarRadius * Math.sin(angle);
 
-  return {
-    top: `${y}%`,
-    left: `${x}%`
-  };
-
+  return { top: `${y}%`, left: `${x}%` };
 }
 
 function generatePeople() {
-
   return DISTANCE_RANGES.map((range, i) => {
-
     const distance = randomBetween(range[0], range[1]);
     const name = NAMES[Math.floor(Math.random() * NAMES.length)];
+    const gradient = GRADIENTS[i % GRADIENTS.length];
     const position = getRadarPosition(distance);
 
     return {
       id: i,
       name,
+      gradient,
       initial: name.charAt(0),
       distance,
-      ...position
-    }
-
-  })
-
+      ...position,
+    };
+  });
 }
 
 export default function DiscoverMap() {
-
   const sectionRef = useRef(null);
 
   const [radius, setRadius] = useState(300);
@@ -77,55 +81,66 @@ export default function DiscoverMap() {
     setPeople(generatePeople());
   }, []);
 
-  const visiblePeople = people.filter(p => p.distance <= radius);
+  const visiblePeople = people.filter((p) => p.distance <= radius);
 
   useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        ".orbit-left",
+        { y: 40, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.8,
+          scrollTrigger: {
+            trigger: ".orbit-left",
+            start: "top 85%",
+            toggleActions: "play none none reverse",
+          },
+        },
+      );
 
-    const dots = sectionRef.current.querySelectorAll(".hero__dot");
+      gsap.fromTo(
+        ".radar",
+        { scale: 0.92, opacity: 0 },
+        {
+          scale: 1,
+          opacity: 1,
+          duration: 0.9,
+          delay: 0.15,
+          scrollTrigger: {
+            trigger: ".radar",
+            start: "top 85%",
+            toggleActions: "play none none reverse",
+          },
+        },
+      );
+    }, sectionRef);
 
-    dots.forEach((dot, i) => {
-
-      gsap.to(dot, {
-        y: 20 + i * 8,
-        x: 15 + i * 5,
-        duration: 5 + i,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-        delay: i * 0.4
-      });
-
-    });
-
+    return () => ctx.revert();
   }, []);
 
   return (
     <section ref={sectionRef} className="orbit-section">
-      {/* Background reused from HERO */}
-      <div className="hero__bg hero__bg--discover">
-        <div className="hero__gradient hero__gradient--1"></div>
-        <div className="hero__gradient hero__gradient--2"></div>
-        <div className="hero__gradient hero__gradient--3"></div>
-        <div className="hero__dot hero__dot--1"></div>
-        <div className="hero__dot hero__dot--2"></div>
-        <div className="hero__dot hero__dot--3"></div>
-        <div className="hero__dot hero__dot--4"></div>
-        <div className="hero__dot hero__dot--5"></div>
-      </div>
       <div className="orbit-container">
         <div className="orbit-left">
-          <h2>
-            See who's nearby.<br />
-            Right now.
+          <h2 className="features__title">
+            See who's nearby.
+            <br />
+            <span className="gradient-text">Right now.</span>
           </h2>
-          <p>
-            ORBIT shows you real people nearby who share your interests.
+
+          <p className="orbit-subtitle">
+            ORBIT shows you real people nearby, who share your interests.
           </p>
+
           <div className="radius-box">
             <div className="radius-header">
-              <span>DISCOVERY RADIUS</span>
-              <span className="radius-value">{radius}m</span>
+              <span className="radius-label">Discovery Radius</span>
+
+              <span className="radius-value gradient-text">{radius}m</span>
             </div>
+
             <input
               type="range"
               min="100"
@@ -135,12 +150,17 @@ export default function DiscoverMap() {
               onChange={(e) => setRadius(Number(e.target.value))}
               className="radius-slider"
             />
+
             <div className="radius-scale">
-              <span>100m</span>
-              <span>3km</span>
+              <span className="radius-scale-text">100m</span>
+              <span className="radius-scale-text">3km</span>
             </div>
+
             <p className="radius-count">
-              <span>{visiblePeople.length} people</span> within your radius
+              <span className="gradient-text">
+                {visiblePeople.length} people
+              </span>
+              <span className="radius-count-text"> within your radius</span>
             </p>
           </div>
         </div>
@@ -151,33 +171,35 @@ export default function DiscoverMap() {
             <div className="ring ring2"></div>
             <div className="ring ring3"></div>
             <div className="ring ring4"></div>
+
             <div className="you">You</div>
-            {people.map(person => {
+
+            {people.map((person) => {
               const visible = person.distance <= radius;
+
               return (
                 <div
                   key={person.id}
                   className={`person ${visible ? "show" : "hide"}`}
                   style={{
                     top: person.top,
-                    left: person.left
+                    left: person.left,
+                    background: person.gradient,
                   }}
                 >
                   {person.initial}
+
                   {visible && (
-                    <div className="distance">
-                      {person.distance}m
-                    </div>
+                    <div className="distance">{person.distance}m</div>
                   )}
                 </div>
-              )
+              );
             })}
-            <div className="nearby-badge">
-              ● {visiblePeople.length} nearby
-            </div>
+
+            <div className="nearby-badge">● {visiblePeople.length} nearby</div>
           </div>
         </div>
       </div>
     </section>
-  )
+  );
 }

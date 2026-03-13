@@ -1,8 +1,7 @@
 .gallery {
   position: relative;
   padding: 120px 0;
-  background-color: var(--color-bg);
-  overflow: hidden;
+  background-color: transparent;
   z-index: 1;
 }
 
@@ -167,7 +166,8 @@
   }
   .bento-item--large { grid-column: span 2; grid-row: span 1; }
   .bento-item--tall { grid-row: span 1; }
-  
+  .bento-item--wide { grid-column: span 2; }
+
   /* Show overlays on mobile by default since hover is tricky */
   .bento-overlay {
     opacity: 1;
