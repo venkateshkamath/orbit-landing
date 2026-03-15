@@ -15,32 +15,32 @@ const imageUrls = [
 const images = [
   {
     id: 1,
-    src: 'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=1200&q=80',
+    imageUrlIndex: 0,
     alt: 'Friends laughing together at sunset',
     caption: 'Reclaim your evening',
-    span: 'large', 
+    span: 'large',
   },
   {
     id: 2,
-    src: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80',
+    imageUrlIndex: 1,
     alt: 'People connecting over coffee',
     caption: 'Share real moments',
-    span: 'wide', 
+    span: 'wide',
   },
   {
     id: 3,
-    src: 'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&w=800&q=80',
+    imageUrlIndex: 2,
     alt: 'Group having fun outdoors',
     caption: 'Find your tribe',
     span: 'small',
   },
   {
     id: 4,
-    src: 'https://images.unsplash.com/photo-1536640712-4d4c36ff0e4e?auto=format&fit=crop&w=800&q=80',
+    imageUrlIndex: 3,
     alt: 'Friends at cafe laughing',
     caption: 'Laugh louder',
-    span: 'small', 
-  }
+    span: 'small',
+  },
 ];
 
 export default function Gallery() {
@@ -115,7 +115,7 @@ export default function Gallery() {
           {images.map((img) => (
             <div key={img.id} className={`bento-item bento-item--${img.span}`}>
               <div className="bento-item__inner">
-                <img src={img.src} alt={img.alt} loading="lazy" />
+                <img src={imageUrls[img.imageUrlIndex]} alt={img.alt} loading="lazy" />
                 <div className="bento-overlay">
                   <div className="bento-overlay__content">
                     <span className="bento-overlay__icon">

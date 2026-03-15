@@ -2,6 +2,15 @@ import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import './Hero.css';
 
+const formatAvatarCount = (count) => {
+  if (count < 1000) {
+    return `+${Math.floor(count / 100) * 100}`;
+  }
+
+  const thousands = count / 1000;
+  return `+${thousands.toFixed(1).replace(/\.0$/, '')}k`;
+};
+
 export default function Hero({ onJoinWaitlist }) {
   const heroRef = useRef(null);
   const titleRef = useRef(null);
@@ -196,7 +205,7 @@ export default function Hero({ onJoinWaitlist }) {
               <div className="hero__avatar" style={{ background: 'linear-gradient(135deg, #C4B5FD, #818CF8)' }}>A</div>
               <div className="hero__avatar" style={{ background: 'linear-gradient(135deg, #5EEAD4, #34D399)' }}>S</div>
               <div className="hero__avatar" style={{ background: 'linear-gradient(135deg, #FFB347, #F59E0B)' }}>R</div>
-              <div className="hero__avatar hero__avatar--count">+{Math.floor(waitlistCount/100)}00</div>
+              <div className="hero__avatar hero__avatar--count">{formatAvatarCount(waitlistCount)}</div>
             </div>
             <p className="hero__social-text">{waitlistCount.toLocaleString()} people on the waitlist</p>
           </div>
