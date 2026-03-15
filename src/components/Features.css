@@ -44,11 +44,16 @@
 }
 
 .features__card::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: -1px;
   border-radius: var(--radius-2xl);
-  background: linear-gradient(135deg, var(--card-accent, #C4B5FD), transparent 50%, var(--card-accent, #5EEAD4));
+  background: linear-gradient(
+    135deg,
+    var(--card-accent, #c4b5fd),
+    transparent 50%,
+    var(--card-accent, #5eead4)
+  );
   z-index: -1;
   opacity: 0;
   transition: opacity 0.4s ease;
@@ -60,8 +65,9 @@
 
 .features__card:hover {
   transform: translateY(-8px) rotateX(2deg) rotateY(-2deg);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.15),
-              0 0 30px rgba(var(--card-accent-rgb, 196, 181, 253), 0.1);
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.15),
+    0 0 30px rgba(var(--card-accent-rgb, 196, 181, 253), 0.1);
   border-color: var(--card-accent, var(--color-border-hover));
 }
 

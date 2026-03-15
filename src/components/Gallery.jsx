@@ -102,13 +102,14 @@ export default function Gallery() {
       <div className="container">
         <div className="gallery__header">
           <h2 className="gallery__title">
-            Stop Scrolling.
+            Find Your People
             <br />
-            <span className="gradient-text">Start Living.</span>
+            <span className="gradient-text">Closer Than You Think.</span>
           </h2>
           <p className="gallery__subtitle">
-            ORBIT is about the moments that happen when you finally put your
-            phone down and look up. Discover the beauty of offline connections.
+            Orbit is about the moments that happen when you put your phone down
+            and look up. Find like-minded people. Build your orbit. Go meet
+            them. Real people. Real places. Real experiences.
           </p>
         </div>
 
@@ -116,7 +117,11 @@ export default function Gallery() {
           {images.map((img) => (
             <div key={img.id} className={`bento-item bento-item--${img.span}`}>
               <div className="bento-item__inner">
-                <img src={img.src} alt={img.alt} loading="lazy" />
+                <img
+                  src={img.src}
+                  alt={img.alt}
+                  loading="lazy"
+                />
                 <div className="bento-overlay">
                   <div className="bento-overlay__content">
                     <span className="bento-overlay__icon">
