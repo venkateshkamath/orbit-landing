@@ -15,31 +15,31 @@ const imageUrls = [
 const images = [
   {
     id: 1,
-    imageUrlIndex: 0,
-    alt: 'Friends laughing together at sunset',
-    caption: 'Reclaim your evening',
-    span: 'large',
+    src: imageUrls[0],
+    alt: "Friends laughing together at sunset",
+    caption: "Reclaim your evening",
+    span: "large",
   },
   {
     id: 2,
-    imageUrlIndex: 1,
-    alt: 'People connecting over coffee',
-    caption: 'Share real moments',
-    span: 'wide',
+    src: imageUrls[1],
+    alt: "People connecting over coffee",
+    caption: "Share real moments",
+    span: "wide",
   },
   {
     id: 3,
-    imageUrlIndex: 2,
-    alt: 'Group having fun outdoors',
-    caption: 'Find your tribe',
-    span: 'small',
+    src: imageUrls[2],
+    alt: "Group having fun outdoors",
+    caption: "Find your tribe",
+    span: "small",
   },
   {
     id: 4,
-    imageUrlIndex: 3,
-    alt: 'Friends at cafe laughing',
-    caption: 'Laugh louder',
-    span: 'small',
+    src: imageUrls[3],
+    alt: "Friends at cafe laughing",
+    caption: "Laugh louder",
+    span: "small",
   },
 ];
 
@@ -107,7 +107,9 @@ export default function Gallery() {
             <span className="gradient-text">Closer Than You Think.</span>
           </h2>
           <p className="gallery__subtitle">
-            Orbit is about the moments that happen when you put your phone down and look up. Find like-minded people. Build your orbit. Go meet them. Real people. Real places. Real experiences.
+            Orbit is about the moments that happen when you put your phone down
+            and look up. Find like-minded people. Build your orbit. Go meet
+            them. Real people. Real places. Real experiences.
           </p>
         </div>
 
@@ -115,7 +117,11 @@ export default function Gallery() {
           {images.map((img) => (
             <div key={img.id} className={`bento-item bento-item--${img.span}`}>
               <div className="bento-item__inner">
-                <img src={imageUrls[img.imageUrlIndex]} alt={img.alt} loading="lazy" />
+                <img
+                  src={img.src}
+                  alt={img.alt}
+                  loading="lazy"
+                />
                 <div className="bento-overlay">
                   <div className="bento-overlay__content">
                     <span className="bento-overlay__icon">
