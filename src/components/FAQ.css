@@ -6,6 +6,7 @@
   padding: var(--space-5xl) 0;
   background: transparent;
   position: relative;
+  overflow: hidden;
 }
 
 /* reuse hero background */

@@ -4,6 +4,7 @@ ORBIT DISCOVERY SECTION
 
 .orbit-section {
   position: relative;
+  overflow: hidden;
   padding: 8rem 0;
   background: transparent;
 }
@@ -345,7 +346,7 @@ DISTANCE TAG
 
 .distance {
   position: absolute;
-  top: 3.125rem;
+  top: 2.7rem;
   background: #111827;
   color: #e5e7eb;
   padding: 0.1875rem 0.5625rem;
@@ -381,17 +382,17 @@ RESPONSIVE
   .orbit-section {
     padding: 5rem 1.25rem;
   }
-
   .orbit-container {
     grid-template-columns: 1fr;
-    gap: 3.125rem;
+    gap: 3rem;
     justify-items: center;
+    align-items: center;
+    text-align: center;
+    padding-inline: 0; /* remove extra side padding */
   }
-
   .radius-box {
     max-width: 21.25rem;
   }
-
   .radar {
     width: 20rem;
     height: 20rem;
@@ -403,9 +404,20 @@ RESPONSIVE
   .orbit-left h2 {
     font-size: 2.25rem;
   }
-
   .radar {
     width: 17.5rem;
     height: 17.5rem;
   }
+}
+
+@media (max-width: 48rem) {
+  .radar {
+    width: 20rem;
+    height: 22rem; /* increased height */
+    margin: 0 auto;
+  }
+}
+
+.radar {
+  padding-bottom: 20px;
 }

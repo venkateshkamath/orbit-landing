@@ -5,6 +5,7 @@
 .community {
   padding: var(--space-5xl) 0;
   position: relative;
+  overflow: hidden;
 }
 
 .community__header {

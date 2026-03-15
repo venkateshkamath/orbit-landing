@@ -5,6 +5,7 @@
 .how {
   padding: var(--space-5xl) 0;
   background: transparent;
+  overflow: hidden;
   position: relative;
 }
 
