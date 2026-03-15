@@ -8,6 +8,7 @@ import {
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
+// Components
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import Features from "./components/Features";
@@ -18,13 +19,10 @@ import FAQ from "./components/FAQ";
 import Waitlist from "./components/Waitlist";
 import Footer from "./components/Footer";
 import WaitlistModal from "./components/WaitlistModal";
-// import DiscoverMap from "./components/DiscoverMap"; (now lazy loaded)
-import { lazy, Suspense } from "react";
-
-const Dashboard = lazy(() => import("./components/Dashboard"));
-const Login = lazy(() => import("./components/Login"));
-const NotFound = lazy(() => import("./components/NotFound"));
-const DiscoverMap = lazy(() => import("./components/DiscoverMap"));
+import Dashboard from "./components/Dashboard";
+import Login from "./components/Login";
+import NotFound from "./components/NotFound";
+import DiscoverMap from "./components/DiscoverMap";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -50,9 +48,7 @@ function LandingPage({ onJoinWaitlist }) {
         <Hero onJoinWaitlist={onJoinWaitlist} />
         <Gallery />
         <Features />
-        <Suspense fallback={<div className="orbit-section" style={{ height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading Map...</div>}>
-          <DiscoverMap />
-        </Suspense>
+        <DiscoverMap />
         <HowItWorks />
         <Community />
         <FAQ />
@@ -72,28 +68,26 @@ export default function App() {
 
   return (
     <Router>
-      <Suspense fallback={<div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666' }}>Loading...</div>}>
-        <Routes>
-          <Route path="/" element={<LandingPage onJoinWaitlist={openModal} />} />
-          <Route
-            path="/orbit-admin"
-            element={
-              isAuthenticated ? (
-                <Dashboard />
-              ) : (
-                <Login onLogin={() => setIsAuthenticated(true)} />
-              )
-            }
-          />
-          {/* Redirect old dashboard link to admin */}
-          <Route
-            path="/dashboard"
-            element={<Navigate to="/orbit-admin" replace />}
-          />
-          {/* Catch-all 404 Route */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Suspense>
+      <Routes>
+        <Route path="/" element={<LandingPage onJoinWaitlist={openModal} />} />
+        <Route
+          path="/orbit-admin"
+          element={
+            isAuthenticated ? (
+              <Dashboard />
+            ) : (
+              <Login onLogin={() => setIsAuthenticated(true)} />
+            )
+          }
+        />
+        {/* Redirect old dashboard link to admin */}
+        <Route
+          path="/dashboard"
+          element={<Navigate to="/orbit-admin" replace />}
+        />
+        {/* Catch-all 404 Route */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
       <WaitlistModal isOpen={isModalOpen} onClose={closeModal} />
     </Router>
   );
