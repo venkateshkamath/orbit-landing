@@ -86,6 +86,10 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 
+main {
+  overflow-x: hidden;
+}
+
 body {
   font-family: var(--font-body);
   background-color: var(--color-bg);
