@@ -6,7 +6,6 @@
   position: relative;
   min-height: 100vh;
   display: flex;
-  overflow: hidden;
   align-items: center;
   justify-content: center;
   padding: calc(80px + var(--space-4xl)) 0 var(--space-4xl);
