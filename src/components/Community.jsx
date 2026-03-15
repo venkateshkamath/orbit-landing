@@ -30,7 +30,7 @@ const testimonials = [
   {
     name: "Aman Gatty",
     handle: "@amangatty",
-    text: "Every app I have tried wants me to post more. Orbit is the first thing that wants me to go outside more.",
+    text: "Every app today wants more screen time. Orbit feels different. It actually makes me want to step out and meet people.",
     avatar: "A",
     gradient: "linear-gradient(135deg, #FFB347, #F59E0B)",
   },
