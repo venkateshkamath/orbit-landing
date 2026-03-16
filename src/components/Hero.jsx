@@ -147,19 +147,7 @@ export default function Hero({ onJoinWaitlist }) {
         transformOrigin: "center center",
       });
 
-      // Floating dots
-      const dots = heroRef.current.querySelectorAll(".hero__dot");
-      dots.forEach((dot, i) => {
-        gsap.to(dot, {
-          y: `${15 + i * 5}`,
-          x: `${10 + i * 3}`,
-          duration: 3 + i * 0.5,
-          repeat: -1,
-          yoyo: true,
-          ease: "sine.inOut",
-          delay: i * 0.3,
-        });
-      });
+
     }, heroRef);
 
     return () => ctx.revert();
@@ -172,11 +160,7 @@ export default function Hero({ onJoinWaitlist }) {
         <div className="hero__gradient hero__gradient--1"></div>
         <div className="hero__gradient hero__gradient--2"></div>
         <div className="hero__gradient hero__gradient--3"></div>
-        <div className="hero__dot hero__dot--1"></div>
-        <div className="hero__dot hero__dot--2"></div>
-        <div className="hero__dot hero__dot--3"></div>
-        <div className="hero__dot hero__dot--4"></div>
-        <div className="hero__dot hero__dot--5"></div>
+
       </div>
 
       <div className="hero__content container">
