@@ -24,7 +24,7 @@ export default function Hero({ onJoinWaitlist }) {
     // Fetch live count from our Supabase-backed server
     const fetchCount = async () => {
       try {
-        const res = await fetch("/api/waitlist/count");
+        const res = await fetch("/api/waitlist/count", { cache: "no-store" });
         const data = await res.json();
         if (data.count > 0) {
           // Add real signups on top of our launch base
