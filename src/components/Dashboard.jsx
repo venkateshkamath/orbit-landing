@@ -105,7 +105,7 @@ export default function Dashboard() {
   const fetchStats = async (isPolling = false) => {
     if (!isPolling) setRefreshing(true);
     try {
-      const res = await fetch('/api/waitlist/stats');
+      const res = await fetch('/api/waitlist/stats', { cache: 'no-store' });
       const data = await res.json();
       setStats((prev) => (
         prev && JSON.stringify(prev) === JSON.stringify(data) ? prev : data
@@ -123,7 +123,7 @@ export default function Dashboard() {
   const fetchFeedback = async (isPolling = false) => {
     if (!isPolling) setRefreshing(true);
     try {
-      const res = await fetch('/api/feedback/stats');
+      const res = await fetch('/api/feedback/stats', { cache: 'no-store' });
       const data = await res.json();
       setFeedbackStats((prev) => (
         prev && JSON.stringify(prev) === JSON.stringify(data) ? prev : data
