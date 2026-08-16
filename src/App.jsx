@@ -22,6 +22,9 @@ import WaitlistModal from "./components/WaitlistModal";
 import Dashboard from "./components/Dashboard";
 import Login from "./components/Login";
 import NotFound from "./components/NotFound";
+import PrivacyPolicy from "./components/PrivacyPolicy";
+import Feedback from "./components/Feedback";
+import FeedbackDetail from "./components/FeedbackDetail";
 import DiscoverMap from "./components/DiscoverMap";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -85,6 +88,9 @@ export default function App() {
           path="/dashboard"
           element={<Navigate to="/orbit-admin" replace />}
         />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/feedback" element={<Feedback />} />
+        <Route path="/feedback/:id" element={<FeedbackDetail />} />
         {/* Catch-all 404 Route */}
         <Route path="*" element={<NotFound />} />
       </Routes>

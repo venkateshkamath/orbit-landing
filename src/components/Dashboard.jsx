@@ -1,8 +1,10 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { 
   Users, MapPin, TrendingUp, Activity, RefreshCw, 
   Download, ChevronLeft, Calendar, Search, 
-  Globe, MoreHorizontal 
+  Globe, MessageSquareText, Bug,
+  Lightbulb, Paintbrush, Zap, ShieldAlert, Image as ImageIcon, ExternalLink
 } from 'lucide-react';
 import { 
   AreaChart, Area, XAxis, YAxis, 
@@ -14,6 +16,16 @@ import './Dashboard.css';
 
 // ORBIT Brand Colors (from website design system)
 const COLORS = ['#FF6B6B', '#C4B5FD', '#5EEAD4', '#FFB347', '#818CF8'];
+const DASHBOARD_POLL_MS = 15000;
+
+const FEEDBACK_META = {
+  bug: { label: 'Bug Report', color: '#FF6B6B', icon: Bug },
+  feature: { label: 'Feature Request', color: '#C4B5FD', icon: Lightbulb },
+  ui: { label: 'UI / Design', color: '#5EEAD4', icon: Paintbrush },
+  performance: { label: 'Performance', color: '#FFB347', icon: Zap },
+  safety: { label: 'Privacy / Safety', color: '#818CF8', icon: ShieldAlert },
+  other: { label: 'Other', color: '#9CA3B0', icon: MessageSquareText },
+};
 
 // ─── Dynamic Geocoding via OpenStreetMap Nominatim (free, no API key) ───
 const GEO_CACHE_KEY = 'orbit_geo_cache';
@@ -77,10 +89,14 @@ function FitBounds({ markers }) {
 }
 
 export default function Dashboard() {
+  const [activeTab, setActiveTab] = useState('waitlist'); // waitlist | feedback
   const [stats, setStats] = useState(null);
+  const [feedbackStats, setFeedbackStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [feedbackSearch, setFeedbackSearch] = useState('');
+  const [filterCategory, setFilterCategory] = useState('all');
   const [geoMarkers, setGeoMarkers] = useState([]);
   const [geoLoading, setGeoLoading] = useState(false);
   const [filterCity, setFilterCity] = useState('all');
@@ -91,7 +107,9 @@ export default function Dashboard() {
     try {
       const res = await fetch('/api/waitlist/stats');
       const data = await res.json();
-      setStats(data);
+      setStats((prev) => (
+        prev && JSON.stringify(prev) === JSON.stringify(data) ? prev : data
+      ));
     } catch (err) {
       console.error('Failed to fetch stats:', err);
     } finally {
@@ -102,11 +120,80 @@ export default function Dashboard() {
     }
   };
 
+  const fetchFeedback = async (isPolling = false) => {
+    if (!isPolling) setRefreshing(true);
+    try {
+      const res = await fetch('/api/feedback/stats');
+      const data = await res.json();
+      setFeedbackStats((prev) => (
+        prev && JSON.stringify(prev) === JSON.stringify(data) ? prev : data
+      ));
+    } catch (err) {
+      console.error('Failed to fetch feedback:', err);
+    } finally {
+      if (!isPolling) setRefreshing(false);
+    }
+  };
+
+  const refreshActive = (isPolling = false) => {
+    if (activeTab === 'feedback') return fetchFeedback(isPolling);
+    return fetchStats(isPolling);
+  };
+
   useEffect(() => { 
-    fetchStats(); 
+    fetchStats();
+    fetchFeedback(true);
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === 'feedback' && !feedbackStats) fetchFeedback();
+  }, [activeTab]);
+
+  // Silent background polling — no spinners, filters, or scroll disruption
+  useEffect(() => {
+    const tick = () => {
+      if (document.hidden) return;
+      fetchStats(true);
+      fetchFeedback(true);
+    };
+    const id = setInterval(tick, DASHBOARD_POLL_MS);
+    const onVisible = () => {
+      if (!document.hidden) tick();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
   }, []);
 
   const exportToCSV = () => {
+    if (activeTab === 'feedback') {
+      if (!feedbackStats?.recentFeedback?.length) return;
+      const headers = ['Category', 'Name', 'Email', 'Message', 'Screenshots', 'Source', 'Platform', 'Version', 'Submitted'];
+      const rows = feedbackStats.recentFeedback.map(f => [
+        FEEDBACK_META[f.category]?.label || f.category,
+        `"${(f.name || '').replace(/"/g, '""')}"`,
+        f.email,
+        `"${(f.message || '').replace(/"/g, '""')}"`,
+        f.screenshot_count || 0,
+        f.source || '',
+        f.platform || '',
+        f.app_version || '',
+        f.created_at ? new Date(f.created_at).toLocaleString() : '',
+      ]);
+      const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `orbit_feedback_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      return;
+    }
+
     if (!stats || !stats.recentSignups) return;
     
     const headers = ['Email', 'City', 'Age', 'Joined Date'];
@@ -129,15 +216,22 @@ export default function Dashboard() {
     document.body.removeChild(link);
   };
 
-  // Geocode cities once stats are loaded
+  // Geocode only when city composition actually changes (not on every poll)
+  const cityStatsKey = JSON.stringify(
+    (stats?.cityStats || []).map((c) => [c.city, c.count])
+  );
+
   useEffect(() => {
     if (!stats?.cityStats?.length) return;
+    let cancelled = false;
     setGeoLoading(true);
-    geocodeAllCities(stats.cityStats).then(markers => {
+    geocodeAllCities(stats.cityStats).then((markers) => {
+      if (cancelled) return;
       setGeoMarkers(markers);
       setGeoLoading(false);
     });
-  }, [stats?.cityStats]);
+    return () => { cancelled = true; };
+  }, [cityStatsKey]);
 
   if (loading) {
     return (
@@ -164,6 +258,15 @@ export default function Dashboard() {
     ? stats.growthData[stats.growthData.length - 1].count
     : 0;
 
+  const filteredFeedback = (feedbackStats?.recentFeedback || []).filter((f) => {
+    const haystack = `${f.email} ${f.name || ''} ${f.message || ''}`.toLowerCase();
+    const matchesSearch = haystack.includes(feedbackSearch.toLowerCase());
+    const matchesCategory = filterCategory === 'all' || f.category === filterCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  const feedbackPieData = (feedbackStats?.categoryStats || []).filter((c) => c.count > 0);
+
   return (
     <div className="dashboard-container">
       {/* ── Header ────────────────────────────────── */}
@@ -179,7 +282,7 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="header-actions">
-          <button className={`btn-refresh ${refreshing ? 'spinning' : ''}`} onClick={() => fetchStats(false)}>
+          <button className={`btn-refresh ${refreshing ? 'spinning' : ''}`} onClick={() => refreshActive(false)}>
             <RefreshCw size={18} />
             {refreshing ? 'Syncing…' : 'Refresh Data'}
           </button>
@@ -190,7 +293,28 @@ export default function Dashboard() {
         </div>
       </header>
 
-      {/* ── Stats Cards ───────────────────────────── */}
+      <nav className="dashboard-tabs" aria-label="Dashboard sections">
+        <button
+          type="button"
+          className={`dashboard-tab ${activeTab === 'waitlist' ? 'is-active' : ''}`}
+          onClick={() => setActiveTab('waitlist')}
+        >
+          <Users size={16} />
+          Waitlist
+          <span className="dashboard-tab-count">{stats?.totalSignups || 0}</span>
+        </button>
+        <button
+          type="button"
+          className={`dashboard-tab ${activeTab === 'feedback' ? 'is-active' : ''}`}
+          onClick={() => setActiveTab('feedback')}
+        >
+          <MessageSquareText size={16} />
+          Feedback
+          <span className="dashboard-tab-count">{feedbackStats?.total || 0}</span>
+        </button>
+      </nav>
+
+      {activeTab === 'waitlist' ? (
       <main className="dashboard-grid">
         <section className="stats-row">
           <StatCard title="Total Waitlist"   value={stats?.totalSignups || 0}    change="+12.5%" trend="up"   icon={<Users size={24}/>}      color="coral"/>
@@ -412,12 +536,280 @@ export default function Dashboard() {
           </div>
         </section>
       </main>
+      ) : (
+      <main className="dashboard-grid">
+        <section className="stats-row feedback-stats-row">
+          <StatCard
+            title="Total Feedback"
+            value={feedbackStats?.total || 0}
+            change={`${feedbackStats?.last24h || 0} today`}
+            trend="up"
+            icon={<MessageSquareText size={24} />}
+            color="lavender"
+            comparisonLabel=""
+          />
+          <StatCard
+            title="Bug Reports"
+            value={feedbackStats?.bugs || 0}
+            change={`${feedbackStats?.total ? Math.round(((feedbackStats.bugs || 0) / feedbackStats.total) * 100) : 0}% of total`}
+            trend={(feedbackStats?.bugs || 0) > 0 ? 'down' : 'up'}
+            icon={<Bug size={24} />}
+            color="coral"
+            comparisonLabel=""
+          />
+          <StatCard
+            title="Feature Requests"
+            value={feedbackStats?.features || 0}
+            change="product ideas"
+            trend="up"
+            icon={<Lightbulb size={24} />}
+            color="amber"
+            comparisonLabel=""
+          />
+          <StatCard
+            title="With Screenshots"
+            value={feedbackStats?.withScreenshots || 0}
+            change="visual reports"
+            trend="up"
+            icon={<ImageIcon size={24} />}
+            color="teal"
+            comparisonLabel=""
+          />
+        </section>
+
+        <section className="feedback-category-row">
+          {(feedbackStats?.categoryStats || Object.keys(FEEDBACK_META).map((id) => ({
+            id,
+            label: FEEDBACK_META[id].label,
+            count: 0,
+          }))).map((cat) => {
+            const meta = FEEDBACK_META[cat.id] || FEEDBACK_META.other;
+            const Icon = meta.icon;
+            const isActive = filterCategory === cat.id;
+            return (
+              <button
+                key={cat.id}
+                type="button"
+                className={`feedback-cat-chip ${isActive ? 'is-active' : ''}`}
+                style={{ '--chip-color': meta.color }}
+                onClick={() => setFilterCategory(isActive ? 'all' : cat.id)}
+              >
+                <span className="feedback-cat-chip-icon"><Icon size={16} /></span>
+                <span className="feedback-cat-chip-label">{meta.label}</span>
+                <span className="feedback-cat-chip-count">{cat.count}</span>
+              </button>
+            );
+          })}
+        </section>
+
+        <section className="charts-row">
+          <div className="chart-card main-chart feedback-breakdown-card">
+            <div className="card-header">
+              <h3>Category Breakdown</h3>
+              <div className="card-period">Click a type to filter</div>
+            </div>
+            <div className="feedback-breakdown-list">
+              {(feedbackStats?.categoryStats || []).map((cat) => {
+                const meta = FEEDBACK_META[cat.id] || FEEDBACK_META.other;
+                const Icon = meta.icon;
+                const pct = feedbackStats?.total
+                  ? Math.round((cat.count / feedbackStats.total) * 100)
+                  : 0;
+                return (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    className={`feedback-breakdown-item ${filterCategory === cat.id ? 'is-active' : ''}`}
+                    onClick={() => setFilterCategory(filterCategory === cat.id ? 'all' : cat.id)}
+                  >
+                    <div className="feedback-breakdown-top">
+                      <span className="feedback-breakdown-label">
+                        <Icon size={15} style={{ color: meta.color }} />
+                        {meta.label}
+                      </span>
+                      <span className="feedback-breakdown-count">{cat.count}</span>
+                    </div>
+                    <div className="feedback-breakdown-bar">
+                      <div
+                        className="feedback-breakdown-fill"
+                        style={{ width: `${pct}%`, background: meta.color }}
+                      />
+                    </div>
+                    <span className="feedback-breakdown-pct">{pct}%</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="chart-card mini-chart">
+            <div className="card-header">
+              <h3>By Category</h3>
+              <MessageSquareText size={18} color="#9CA3B0" />
+            </div>
+            {feedbackPieData.length > 0 ? (
+              <>
+                <ResponsiveContainer width="100%" height={200}>
+                  <PieChart>
+                    <Pie
+                      data={feedbackPieData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={50}
+                      outerRadius={70}
+                      paddingAngle={4}
+                      dataKey="count"
+                      nameKey="label"
+                    >
+                      {feedbackPieData.map((entry) => (
+                        <Cell key={entry.id} fill={FEEDBACK_META[entry.id]?.color || '#9CA3B0'} />
+                      ))}
+                    </Pie>
+                    <Tooltip contentStyle={{ background:'#1C1C2E', border:'1px solid rgba(255,255,255,0.08)', borderRadius:12, color:'#F0F0F5' }}/>
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="pie-legend-scroll">
+                  {feedbackPieData.map((c) => (
+                    <div key={c.id} className="legend-item">
+                      <span className="dot" style={{ background: FEEDBACK_META[c.id]?.color || '#9CA3B0' }}/>
+                      <span className="label">{c.label}</span>
+                      <span className="val">{c.count}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="feedback-empty">No feedback categories yet.</div>
+            )}
+          </div>
+        </section>
+
+        <section className="activity-row feedback-activity-row">
+          <div className="activity-card feedback-activity-card">
+            <div className="card-header">
+              <div className="header-search">
+                <h3>All Feedback</h3>
+                <div className="advanced-filters">
+                  <div className="search-bar">
+                    <Search size={16}/>
+                    <input
+                      type="text"
+                      placeholder="Search email or message…"
+                      value={feedbackSearch}
+                      onChange={(e) => setFeedbackSearch(e.target.value)}
+                    />
+                  </div>
+                  <select
+                    className="filter-select"
+                    value={filterCategory}
+                    onChange={(e) => setFilterCategory(e.target.value)}
+                  >
+                    <option value="all">All Categories</option>
+                    {Object.entries(FEEDBACK_META).map(([id, meta]) => (
+                      <option key={id} value={id}>{meta.label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div className="table-container feedback-table-wrap">
+              <table className="feedback-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Category</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Message</th>
+                    <th>Screenshot</th>
+                    <th>Source</th>
+                    <th>Platform</th>
+                    <th>Version</th>
+                    <th>Submitted</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredFeedback.map((f) => {
+                    const meta = FEEDBACK_META[f.category] || FEEDBACK_META.other;
+                    return (
+                      <tr key={f.id}>
+                        <td className="feedback-id-cell">#{f.id}</td>
+                        <td>
+                          <span className="feedback-badge" style={{ '--badge-color': meta.color }}>
+                            {meta.label}
+                          </span>
+                        </td>
+                        <td>{f.name || '—'}</td>
+                        <td className="email-cell">
+                          <span className="email-text">{f.email}</span>
+                        </td>
+                        <td>
+                          <p className="feedback-message">{f.message || '—'}</p>
+                        </td>
+                        <td>
+                          {f.has_screenshot ? (
+                            <a
+                              className="feedback-thumb"
+                              href={`/feedback/${f.id}`}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <img
+                                src={`/api/feedback/${f.id}/screenshot/0`}
+                                alt={`Screenshot for feedback ${f.id}`}
+                              />
+                              {(f.screenshot_count || 0) > 1 && (
+                                <span className="feedback-thumb-count">+{f.screenshot_count - 1}</span>
+                              )}
+                            </a>
+                          ) : (
+                            <span className="feedback-meta-pill">None</span>
+                          )}
+                        </td>
+                        <td>{f.source || '—'}</td>
+                        <td>{f.platform || '—'}</td>
+                        <td>{f.app_version ? `v${f.app_version}` : '—'}</td>
+                        <td>
+                          <div className="date-cell">
+                            <Calendar size={14}/>
+                            {f.created_at
+                              ? new Date(f.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' })
+                              : '—'}
+                          </div>
+                        </td>
+                        <td>
+                          <Link
+                            to={`/feedback/${f.id}`}
+                            className="feedback-open-link"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            Open
+                            <ExternalLink size={14} />
+                          </Link>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {filteredFeedback.length === 0 && (
+                    <tr>
+                      <td colSpan={11} style={{ textAlign: 'center', padding: 40, color: '#6B7280' }}>
+                        No feedback found. Submissions from /feedback will appear here.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </main>
+      )}
     </div>
   );
 }
 
 /* ─── Sub-components ──────────────────────── */
-function StatCard({ title, value, change, trend, icon, color }) {
+function StatCard({ title, value, change, trend, icon, color, comparisonLabel = 'vs last week' }) {
   return (
     <div className={`stat-card ${color}`}>
       <div className="stat-icon">{icon}</div>
@@ -426,7 +818,7 @@ function StatCard({ title, value, change, trend, icon, color }) {
         <h2 className="stat-value">{value}</h2>
         <div className={`stat-trend ${trend}`}>
           {trend === 'up' ? '↑' : '↓'} {change}
-          <span>vs last week</span>
+          {comparisonLabel ? <span>{comparisonLabel}</span> : null}
         </div>
       </div>
     </div>

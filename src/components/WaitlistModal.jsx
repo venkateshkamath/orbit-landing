@@ -48,19 +48,10 @@ export default function WaitlistModal({ isOpen, onClose }) {
 
     debounceRef.current = setTimeout(async () => {
       try {
-        // Query OpenStreetMap for real global cities
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(val)}&format=json&featuretype=city&limit=5`, {
-          headers: { 'Accept-Language': 'en-US,en;q=0.9' }
-        });
+        // Query via server proxy (GeoDB Cities API)
+        const res = await fetch(`/api/cities/search?q=${encodeURIComponent(val)}`);
         const data = await res.json();
-        
-        // Extract clean city and country names (e.g., "Paris, Île-de-France, France" -> "Paris, France")
-        const globalCities = data.map(d => {
-             const parts = d.display_name.split(',');
-             const city = parts[0].trim();
-             const country = parts.length > 1 ? parts[parts.length - 1].trim() : '';
-             return country ? `${city}, ${country}` : city;
-        });
+        const globalCities = data.cities || [];
         
         // Merge with local matches
         const q = val.toLowerCase();
@@ -76,7 +67,7 @@ export default function WaitlistModal({ isOpen, onClose }) {
       } finally {
         setSearching(false);
       }
-    }, 400); // 400ms debounce
+    }, 300); // 300ms debounce (faster API = shorter debounce)
   }, [localCities]);
 
   // Close dropdown when clicking outside

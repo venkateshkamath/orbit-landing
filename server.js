@@ -34,7 +34,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 app.use(compression());
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '20mb' }));
 
 const toTitleCase = (str) =>
   str.trim().replace(/\s+/g, ' ').replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
@@ -328,10 +328,424 @@ app.get('/api/cities', async (req, res) => {
   }
 });
 
+// ─── GET /api/cities/search — city autocomplete ─────────────
+app.get('/api/cities/search', async (req, res) => {
+  const q = (req.query.q || '').trim();
+  if (q.length < 2) return res.json({ cities: [] });
+
+  const searchLocal = async () => {
+    try {
+      const { data } = await supabase.from('waitlist').select('city');
+      const all = [...new Set((data || []).map(r => toTitleCase(r.city || '')))];
+      return all.filter(c => c.toLowerCase().includes(q.toLowerCase())).slice(0, 6);
+    } catch {
+      return [];
+    }
+  };
+
+  const searchPhoton = async () => {
+    const response = await fetch(
+      `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=10&lang=en`,
+      { headers: { 'User-Agent': 'OrbitLanding/1.0 (hello@joinorbit.org)' } }
+    );
+    if (!response.ok) throw new Error(`Photon HTTP ${response.status}`);
+    const data = await response.json();
+    const allowed = new Set(['city', 'town', 'village', 'municipality', 'hamlet']);
+    const cities = (data.features || [])
+      .map((f) => f.properties || {})
+      .filter((p) => {
+        const kind = (p.osm_value || p.type || '').toLowerCase();
+        return allowed.has(kind) || allowed.has((p.type || '').toLowerCase());
+      })
+      .map((p) => {
+        const city = p.name || p.city;
+        const country = p.country || '';
+        if (!city) return null;
+        return country ? `${city}, ${country}` : city;
+      })
+      .filter(Boolean);
+    return [...new Set(cities)].slice(0, 6);
+  };
+
+  const apiKey = process.env.GEODB_API_KEY;
+  if (apiKey) {
+    try {
+      const response = await fetch(
+        `https://wft-geo-db.p.rapidapi.com/v1/geo/cities?namePrefix=${encodeURIComponent(q)}&limit=6&sort=-population&types=CITY`,
+        {
+          headers: {
+            'X-RapidAPI-Key': apiKey,
+            'X-RapidAPI-Host': 'wft-geo-db.p.rapidapi.com',
+          },
+        }
+      );
+      const data = await response.json();
+      const cities = (data.data || []).map(c => `${c.city}, ${c.country}`);
+      if (cities.length) return res.json({ cities });
+    } catch (err) {
+      console.error('❌ GeoDB Cities error:', err.message);
+    }
+  }
+
+  try {
+    const cities = await searchPhoton();
+    if (cities.length) return res.json({ cities });
+  } catch (err) {
+    console.error('❌ Photon Cities error:', err.message);
+  }
+
+  const local = await searchLocal();
+  res.json({ cities: local });
+});
+
 // ─── GET /api/health ────────────────────────────────────────
 app.get('/api/health', (req, res) => {
   res.json({ status: 'alive', uptime: Math.floor(process.uptime()), timestamp: new Date().toISOString() });
 });
+
+// ─── POST /api/feedback ─────────────────────────────────────
+const FEEDBACK_CATEGORIES = new Set(['bug', 'feature', 'ui', 'performance', 'safety', 'other']);
+const FEEDBACK_CATEGORY_LABELS = {
+  bug: 'Bug Report',
+  feature: 'Feature Request',
+  ui: 'UI / Design',
+  performance: 'Performance',
+  safety: 'Privacy / Safety',
+  other: 'Other',
+};
+const FEEDBACK_IMAGE_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif']);
+const FEEDBACK_MAX_SCREENSHOTS = 3;
+const FEEDBACK_MAX_BYTES = 5 * 1024 * 1024;
+
+app.post('/api/feedback', async (req, res) => {
+  try {
+    const {
+      category,
+      name = '',
+      email,
+      message,
+      screenshots = [],
+      meta = {},
+    } = req.body || {};
+
+    if (!category || !FEEDBACK_CATEGORIES.has(category)) {
+      return res.status(400).json({ error: 'Please select a valid category.' });
+    }
+    if (!email || !message) {
+      return res.status(400).json({ error: 'Email and message are required.' });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: 'Please enter a valid email.' });
+    }
+
+    const trimmedMessage = String(message).trim();
+    if (trimmedMessage.length < 10) {
+      return res.status(400).json({ error: 'Please share a bit more detail (at least 10 characters).' });
+    }
+    if (trimmedMessage.length > 4000) {
+      return res.status(400).json({ error: 'Message is too long (max 4000 characters).' });
+    }
+
+    if (!Array.isArray(screenshots) || screenshots.length > FEEDBACK_MAX_SCREENSHOTS) {
+      return res.status(400).json({ error: `You can attach up to ${FEEDBACK_MAX_SCREENSHOTS} screenshots.` });
+    }
+
+    const safeScreenshots = [];
+    for (const shot of screenshots) {
+      if (!shot || typeof shot.content !== 'string') {
+        return res.status(400).json({ error: 'Invalid screenshot attachment.' });
+      }
+      const type = shot.type || 'image/png';
+      if (!FEEDBACK_IMAGE_TYPES.has(type)) {
+        return res.status(400).json({ error: 'Screenshots must be PNG, JPG, WEBP, or GIF.' });
+      }
+      // Rough base64 size check (~4/3 of binary)
+      const approxBytes = Math.floor((shot.content.length * 3) / 4);
+      if (approxBytes > FEEDBACK_MAX_BYTES) {
+        return res.status(400).json({ error: 'Each screenshot must be under 5MB.' });
+      }
+      const ext = type.split('/')[1] === 'jpeg' ? 'jpg' : type.split('/')[1];
+      const safeName = String(shot.name || `screenshot.${ext}`).replace(/[^\w.\-]+/g, '_').slice(0, 80);
+      safeScreenshots.push({
+        name: safeName.endsWith(`.${ext}`) ? safeName : `${safeName}.${ext}`,
+        type,
+        content: shot.content,
+      });
+    }
+
+    const trimmedName = String(name || '').trim().slice(0, 120);
+    const lowerEmail = email.toLowerCase().trim();
+    const source = String(meta.source || 'web').slice(0, 40);
+    const platform = String(meta.platform || '').slice(0, 40);
+    const version = String(meta.version || '').slice(0, 40);
+    const categoryLabel = FEEDBACK_CATEGORY_LABELS[category] || category;
+
+    const screenshotUrls = safeScreenshots.map(
+      (shot) => `data:${shot.type};base64,${shot.content}`
+    );
+    // Store one or many screenshots as JSON in the screenshot column (legacy: single data URL still supported)
+    const screenshotValue = screenshotUrls.length === 0
+      ? null
+      : screenshotUrls.length === 1
+        ? screenshotUrls[0]
+        : JSON.stringify(screenshotUrls);
+
+    // Matches Supabase feedback table: screenshot = image data URL or JSON array of data URLs
+    const feedbackRow = {
+      category,
+      name: trimmedName || null,
+      email: lowerEmail,
+      message: trimmedMessage,
+      screenshot: screenshotValue,
+      source,
+      platform: platform || null,
+      app_version: version || null,
+    };
+
+    const { data: inserted, error: dbError } = await supabase
+      .from('feedback')
+      .insert([feedbackRow])
+      .select('id')
+      .single();
+    if (dbError) {
+      console.error('❌ Feedback DB insert failed:', dbError.message);
+      return res.status(500).json({
+        error: `Could not save feedback to database: ${dbError.message}`,
+      });
+    }
+
+    const targetEmail = process.env.FEEDBACK_EMAIL || process.env.EXPORT_EMAIL || 'hello@joinorbit.org';
+    const metaLines = [
+      `Category: ${categoryLabel}`,
+      trimmedName ? `Name: ${trimmedName}` : null,
+      `Email: ${lowerEmail}`,
+      `Source: ${source}`,
+      platform ? `Platform: ${platform}` : null,
+      version ? `App version: ${version}` : null,
+      `Screenshots: ${safeScreenshots.length}`,
+    ].filter(Boolean).join('\n');
+
+    try {
+      await sendResendEmail({
+        fromName: 'Orbit Feedback',
+        to: targetEmail,
+        subject: `[Orbit Feedback] ${categoryLabel}`,
+        text: `${metaLines}\n\n${trimmedMessage}`,
+        html: `
+          <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.5;color:#1a1a2e;">
+            <h2 style="margin:0 0 12px;">New Orbit feedback</h2>
+            <p style="margin:0 0 8px;"><strong>Category:</strong> ${categoryLabel}</p>
+            ${trimmedName ? `<p style="margin:0 0 8px;"><strong>Name:</strong> ${trimmedName}</p>` : ''}
+            <p style="margin:0 0 8px;"><strong>Email:</strong> ${lowerEmail}</p>
+            <p style="margin:0 0 8px;"><strong>Source:</strong> ${source}${platform ? ` · ${platform}` : ''}${version ? ` · v${version}` : ''}</p>
+            <p style="margin:0 0 16px;white-space:pre-wrap;">${trimmedMessage.replace(/</g, '&lt;')}</p>
+            <p style="margin:0;color:#6b7280;font-size:13px;">${safeScreenshots.length} screenshot(s) attached</p>
+          </div>
+        `,
+        attachments: safeScreenshots.length
+          ? safeScreenshots.map((shot) => ({ name: shot.name, content: shot.content }))
+          : undefined,
+      });
+    } catch (mailErr) {
+      console.warn('⚠️ Feedback saved, but email failed:', mailErr.message);
+    }
+
+    res.json({
+      success: true,
+      message: 'Feedback received. Thank you!',
+      id: inserted?.id,
+    });
+  } catch (err) {
+    console.error('❌ Feedback error:', err);
+    res.status(500).json({ error: 'Something went wrong. Please try again.' });
+  }
+});
+
+const parseScreenshotList = (value) => {
+  if (!value) return [];
+  if (Array.isArray(value)) {
+    return value.filter((item) => typeof item === 'string' && item.length > 0);
+  }
+  if (typeof value !== 'string') return [];
+  const trimmed = value.trim();
+  if (!trimmed) return [];
+  if (trimmed.startsWith('[')) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed)) {
+        return parsed.filter((item) => typeof item === 'string' && item.length > 0);
+      }
+    } catch {
+      // fall through to single-image handling
+    }
+  }
+  return [trimmed];
+};
+
+const mapFeedbackRow = (r, { includeScreenshot = false } = {}) => {
+  const shots = parseScreenshotList(r.screenshot);
+  const count = shots.length;
+  return {
+    id: r.id,
+    category: r.category || 'other',
+    name: r.name || '',
+    email: r.email || '',
+    message: r.message || '',
+    has_screenshot: count > 0,
+    screenshot_count: count,
+    screenshot: includeScreenshot && count > 0 ? shots[0] : null,
+    screenshots: includeScreenshot
+      ? shots.map((_, index) => `/api/feedback/${r.id}/screenshot/${index}`)
+      : [],
+    source: r.source || 'web',
+    platform: r.platform || '',
+    app_version: r.app_version || '',
+    created_at: r.created_at,
+  };
+};
+
+const parseScreenshotDataUrl = (value) => {
+  if (!value || typeof value !== 'string') return null;
+  const match = value.match(/^data:([^;]+);base64,(.+)$/);
+  if (!match) return null;
+  return {
+    contentType: match[1],
+    buffer: Buffer.from(match[2], 'base64'),
+  };
+};
+
+const sendFeedbackScreenshot = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const index = Number.parseInt(req.params.index ?? '0', 10);
+    if (!Number.isFinite(index) || index < 0) {
+      return res.status(400).json({ error: 'Invalid screenshot index.' });
+    }
+
+    const { data, error } = await supabase
+      .from('feedback')
+      .select('screenshot')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (error) throw error;
+    const shots = parseScreenshotList(data?.screenshot);
+    const shot = shots[index];
+    if (!shot) return res.status(404).json({ error: 'Screenshot not found.' });
+
+    const parsed = parseScreenshotDataUrl(shot);
+    if (!parsed) {
+      if (/^https?:\/\//i.test(shot)) return res.redirect(shot);
+      return res.status(404).json({ error: 'Screenshot format not supported.' });
+    }
+
+    res.set('Content-Type', parsed.contentType);
+    res.set('Cache-Control', 'private, max-age=3600');
+    res.send(parsed.buffer);
+  } catch (err) {
+    console.error('❌ Feedback screenshot error:', err.message);
+    res.status(500).json({ error: 'Failed to load screenshot.' });
+  }
+};
+
+// ─── GET /api/feedback/stats ────────────────────────────────
+app.get('/api/feedback/stats', async (req, res) => {
+  try {
+    const { data: allData, error: dbError } = await supabase
+      .from('feedback')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (dbError) {
+      console.error('❌ Feedback stats error:', dbError.message);
+      return res.status(500).json({
+        error: `Failed to fetch feedback: ${dbError.message}`,
+        total: 0,
+        last24h: 0,
+        withScreenshots: 0,
+        bugs: 0,
+        features: 0,
+        categoryStats: ['bug', 'feature', 'ui', 'performance', 'safety', 'other'].map((id) => ({
+          id,
+          label: FEEDBACK_CATEGORY_LABELS[id],
+          count: 0,
+        })),
+        recentFeedback: [],
+      });
+    }
+
+    const rows = allData || [];
+
+    const now = Date.now();
+    const last24h = rows.filter(r => (now - new Date(r.created_at).getTime()) < 24 * 60 * 60 * 1000).length;
+    const withScreenshots = rows.filter(r => Boolean(r.screenshot)).length;
+
+    const categoryOrder = ['bug', 'feature', 'ui', 'performance', 'safety', 'other'];
+    const categoryCounts = rows.reduce((acc, row) => {
+      const key = FEEDBACK_CATEGORIES.has(row.category) ? row.category : 'other';
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    }, {});
+
+    const categoryStats = categoryOrder.map((id) => ({
+      id,
+      label: FEEDBACK_CATEGORY_LABELS[id],
+      count: categoryCounts[id] || 0,
+    }));
+
+    res.json({
+      total: rows.length,
+      last24h,
+      withScreenshots,
+      bugs: categoryCounts.bug || 0,
+      features: categoryCounts.feature || 0,
+      categoryStats,
+      recentFeedback: rows.map((r) => mapFeedbackRow(r, { includeScreenshot: false })),
+    });
+  } catch (err) {
+    console.error('❌ Feedback stats error:', err.message);
+    res.status(500).json({
+      error: 'Failed to fetch feedback.',
+      total: 0,
+      last24h: 0,
+      withScreenshots: 0,
+      bugs: 0,
+      features: 0,
+      categoryStats: ['bug', 'feature', 'ui', 'performance', 'safety', 'other'].map((id) => ({
+        id,
+        label: FEEDBACK_CATEGORY_LABELS[id],
+        count: 0,
+      })),
+      recentFeedback: [],
+    });
+  }
+});
+
+// ─── GET /api/feedback/:id ──────────────────────────────────
+app.get('/api/feedback/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { data, error } = await supabase
+      .from('feedback')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!data) return res.status(404).json({ error: 'Feedback not found.' });
+
+    res.json({ feedback: mapFeedbackRow(data, { includeScreenshot: true }) });
+  } catch (err) {
+    console.error('❌ Feedback detail error:', err.message);
+    res.status(500).json({ error: 'Failed to load feedback.' });
+  }
+});
+
+// ─── GET /api/feedback/:id/screenshot ───────────────────────
+app.get('/api/feedback/:id/screenshot', sendFeedbackScreenshot);
+app.get('/api/feedback/:id/screenshot/:index', sendFeedbackScreenshot);
 
 // ─── SPA fallback + listen ──────────────────────────────────
 if (!process.env.VERCEL) {
