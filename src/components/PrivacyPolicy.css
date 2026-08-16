@@ -1,0 +1,165 @@
+.privacy-policy-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg);
+  transition: var(--transition-base);
+}
+
+.privacy-policy-header {
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.privacy-policy-logo {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1.5rem;
+  letter-spacing: -0.03em;
+  color: var(--color-text-primary);
+  text-decoration: none;
+  background: var(--color-accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.privacy-policy-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-primary);
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  font-family: var(--font-body);
+  transition: var(--transition-base);
+}
+
+.privacy-policy-gradient {
+  position: absolute;
+  border-radius: var(--radius-full);
+  filter: blur(120px);
+  z-index: 1;
+  pointer-events: none;
+  transition: var(--transition-base);
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.privacy-policy-container .gradient-1 {
+  width: 50vw;
+  height: 50vw;
+  max-width: 600px;
+  max-height: 600px;
+  background: radial-gradient(circle, var(--color-accent-lavender) 0%, transparent 70%);
+  opacity: 0.15;
+  top: -10%;
+  left: -10%;
+}
+
+.privacy-policy-container .gradient-2 {
+  width: 60vw;
+  height: 60vw;
+  max-width: 700px;
+  max-height: 700px;
+  background: radial-gradient(circle, var(--color-accent-coral) 0%, transparent 70%);
+  opacity: 0.1;
+  bottom: -10%;
+  right: -10%;
+}
+
+.privacy-policy-content {
+  position: relative;
+  z-index: 2;
+  max-width: 540px;
+  padding: var(--space-3xl) var(--space-2xl);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: var(--transition-base);
+  margin: var(--space-lg);
+}
+
+.privacy-policy-icon-wrapper {
+  color: var(--color-accent-lavender);
+  margin-bottom: var(--space-lg);
+  animation: privacy-float 6s ease-in-out infinite;
+  background: var(--color-bg);
+  padding: var(--space-lg);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border);
+}
+
+@keyframes privacy-float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+  100% { transform: translateY(0px); }
+}
+
+.privacy-policy-badge {
+  display: inline-block;
+  margin: 0 0 var(--space-md);
+  padding: var(--space-xs) var(--space-md);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-accent-coral);
+  background: color-mix(in srgb, var(--color-accent-coral) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-accent-coral) 25%, transparent);
+  border-radius: var(--radius-sm);
+}
+
+.privacy-policy-title {
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  font-weight: 700;
+  margin: 0 0 var(--space-md);
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  color: var(--color-text-primary);
+  font-family: var(--font-heading);
+}
+
+.privacy-policy-text {
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-2xl);
+}
+
+.privacy-policy-button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-xl);
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  font-size: 1.125rem;
+  color: #FFFFFF;
+  text-decoration: none;
+  background: var(--color-accent-gradient);
+  border: none;
+  transition: var(--transition-base);
+  box-shadow: var(--shadow-md);
+}
+
+.privacy-policy-button:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: var(--shadow-glow);
+}
+
+.privacy-policy-button:active {
+  transform: translateY(0) scale(0.98);
+}
