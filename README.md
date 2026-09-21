@@ -42,7 +42,7 @@
 | **Backend** | Node.js, Express 5 |
 | **Database** | Supabase (PostgreSQL) |
 | **Auth** | Backend-secured admin login |
-| **Hosting** | Render |
+| **Hosting** | Vercel |
 
 ## 🚀 Getting Started
 
@@ -85,12 +85,9 @@ npm start        # Serve everything from Express
 
 ## 🌍 Deployment
 
-This project is configured for **Render** (one-service deployment):
+Live site is on **Vercel** (`joinorbit.org` → `www.joinorbit.org`). `vercel.json` routes `/api/*` to the Express serverless entry (`api/index.js`), `/event/:id` to `api/event-share` (server-rendered OG HTML), serves the SPA for other routes, and leaves `/.well-known/*` as static JSON (with `Content-Type: application/json` for AASA).
 
-| Setting | Value |
-|---|---|
-| Build Command | `npm install && npm run build` |
-| Start Command | `npm start` |
+Local / alternate Node hosting still works via `npm run build && npm start`.
 
 ### Environment Variables
 
@@ -100,7 +97,38 @@ This project is configured for **Render** (one-service deployment):
 | `SUPABASE_KEY` | Your Supabase anon/public key |
 | `ADMIN_USER` | Admin dashboard username |
 | `ADMIN_PASS` | Admin dashboard password |
+| `ORBIT_API_URL` | Orbit backend base for public share OG (default `https://api.joinorbit.org`) |
+| `SITE_URL` | Canonical site origin for OG URLs (default `https://www.joinorbit.org`) |
 | `NODE_ENV` | Set to `production` |
+
+## 🔗 Event share & App Links
+
+WhatsApp / social crawlers need OG tags in the **first** HTML response. `GET /event/:id` is server-rendered (Express) and fetches:
+
+`GET ${ORBIT_API_URL}/api/events/:id/share/`
+
+If the share API 404s or fails, the page falls back to Orbit branding OG + CTAs (**Open in Orbit** / **Get the app**). No custom URL schemes in WhatsApp-facing copy.
+
+App Links files (no `.html` extension):
+
+- `public/.well-known/apple-app-site-association` — `appID` `FHXCP4XJ54.org.orbit.app`, paths `/event/*`
+- `public/.well-known/assetlinks.json` — package `org.orbit.app`
+
+**Android SHA-256:** `sha256_cert_fingerprints` is intentionally empty until filled from EAS / Play Console signing cert. Do not invent a fingerprint — App Links will not verify on Android until a real hash is added.
+
+### Curl checks (after deploy)
+
+```bash
+# OG HTML in first response (look for og:title / og:image)
+curl -sL "https://www.joinorbit.org/event/TEST_ID" | head -n 40
+
+# iOS AASA — must be application/json, no odd redirects on www
+curl -sI "https://www.joinorbit.org/.well-known/apple-app-site-association"
+
+# Android Digital Asset Links
+curl -sI "https://www.joinorbit.org/.well-known/assetlinks.json"
+curl -s "https://www.joinorbit.org/.well-known/assetlinks.json"
+```
 
 ## 📊 Analytics Dashboard
 
@@ -121,10 +149,15 @@ orbit-landing/
 ├── vite.config.js         # Vite config with dev proxy
 ├── package.json
 ├── index.html
-├── public/                # Static assets
+├── public/                # Static assets + App Links
+│   ├── .well-known/
+│   │   ├── apple-app-site-association
+│   │   └── assetlinks.json
 │   ├── orbit-icon.png
 │   ├── orbit-hero.png
 │   └── feature-*.png
+├── eventSharePage.js      # OG HTML for /event/:id
+├── vercel.json            # Vercel rewrites + AASA headers
 └── src/
     ├── main.jsx           # App entry point
     ├── App.jsx            # Router & layout
