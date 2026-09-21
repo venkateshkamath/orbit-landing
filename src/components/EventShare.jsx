@@ -7,6 +7,11 @@ const API_BASE = (import.meta.env.VITE_ORBIT_API_URL || 'https://api.joinorbit.o
   /\/$/,
   '',
 );
+const PLAY_STORE_URL =
+  import.meta.env.VITE_PLAY_STORE_URL ||
+  'https://play.google.com/store/apps/details?id=org.orbit.app';
+const APP_STORE_URL =
+  import.meta.env.VITE_APP_STORE_URL || import.meta.env.VITE_ORBIT_APP_STORE_URL || '';
 
 const FALLBACK = {
   title: 'ORBIT — Connect Offline. Live More.',
@@ -106,9 +111,24 @@ export default function EventShare() {
               <a className="event-share-btn event-share-btn--primary" href={pageUrl}>
                 Open in Orbit
               </a>
-              <Link className="event-share-btn event-share-btn--secondary" to="/#waitlist">
-                Get the app
-              </Link>
+              <a
+                className="event-share-btn event-share-btn--secondary"
+                href={PLAY_STORE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Get it on Google Play
+              </a>
+              {APP_STORE_URL ? (
+                <a
+                  className="event-share-btn event-share-btn--secondary"
+                  href={APP_STORE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Download on the App Store
+                </a>
+              ) : null}
             </div>
           </div>
         </article>

@@ -107,7 +107,11 @@ WhatsApp / social crawlers need OG tags in the **first** HTML response. `GET /ev
 
 `GET ${ORBIT_API_URL}/api/events/:id/share/`
 
-If the share API 404s or fails, the page falls back to Orbit branding OG + CTAs (**Open in Orbit** / **Get the app**). No custom URL schemes in WhatsApp-facing copy.
+If the share API 404s or fails, the page falls back to Orbit branding OG + CTAs (**Open in Orbit** / **Google Play** / **App Store** when configured). No custom URL schemes in WhatsApp-facing copy.
+
+Store CTAs (not waitlist):
+- `PLAY_STORE_URL` / `VITE_PLAY_STORE_URL` — default `https://play.google.com/store/apps/details?id=org.orbit.app`
+- `APP_STORE_URL` or `ORBIT_APP_STORE_URL` / `VITE_APP_STORE_URL` — set once the iOS listing is live (button hidden until set)
 
 App Links files (no `.html` extension):
 

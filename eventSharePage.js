@@ -5,6 +5,20 @@
 
 const SITE_URL = (process.env.SITE_URL || 'https://www.joinorbit.org').replace(/\/$/, '');
 const ORBIT_API_URL = (process.env.ORBIT_API_URL || 'https://api.joinorbit.org').replace(/\/$/, '');
+/** Play Store — package org.orbit.app. Override with PLAY_STORE_URL if listing URL differs. */
+const PLAY_STORE_URL = (
+  process.env.PLAY_STORE_URL ||
+  'https://play.google.com/store/apps/details?id=org.orbit.app'
+).trim();
+/**
+ * App Store listing. Set APP_STORE_URL (or ORBIT_APP_STORE_URL) once the iOS listing is live.
+ * Empty → hide App Store button in server HTML until configured.
+ */
+const APP_STORE_URL = (
+  process.env.APP_STORE_URL ||
+  process.env.ORBIT_APP_STORE_URL ||
+  ''
+).trim();
 const DEFAULT_OG_IMAGE = `${SITE_URL}/orbit-hero.png`;
 const DEFAULT_TITLE = 'ORBIT — Connect Offline. Live More.';
 const DEFAULT_DESCRIPTION =
@@ -99,8 +113,9 @@ export function renderEventShareHtml({ eventId, meta }) {
   const description = escapeHtml(meta.description);
   const image = escapeAttr(meta.image);
   const url = escapeAttr(meta.url);
-  const getAppHref = escapeAttr(`${SITE_URL}/#waitlist`);
   const openHref = escapeAttr(meta.url);
+  const playHref = escapeAttr(PLAY_STORE_URL);
+  const appStoreHref = APP_STORE_URL ? escapeAttr(APP_STORE_URL) : '';
   const safeId = escapeHtml(eventId);
 
   return `<!DOCTYPE html>
@@ -216,7 +231,8 @@ export function renderEventShareHtml({ eventId, meta }) {
       <p>${description}</p>
       <div class="actions">
         <a class="btn btn-primary" href="${openHref}">Open in Orbit</a>
-        <a class="btn btn-secondary" href="${getAppHref}">Get the app</a>
+        <a class="btn btn-secondary" href="${playHref}">Get it on Google Play</a>
+        ${appStoreHref ? `<a class="btn btn-secondary" href="${appStoreHref}">Download on the App Store</a>` : ''}
       </div>
       <p class="hint">Event ${safeId}</p>
     </div>
