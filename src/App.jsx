@@ -26,6 +26,7 @@ import PrivacyPolicy from "./components/PrivacyPolicy";
 import Feedback from "./components/Feedback";
 import FeedbackDetail from "./components/FeedbackDetail";
 import DiscoverMap from "./components/DiscoverMap";
+import EventShare from "./components/EventShare";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -91,6 +92,7 @@ export default function App() {
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/feedback" element={<Feedback />} />
         <Route path="/feedback/:id" element={<FeedbackDetail />} />
+        <Route path="/event/:id" element={<EventShare />} />
         {/* Catch-all 404 Route */}
         <Route path="*" element={<NotFound />} />
       </Routes>
