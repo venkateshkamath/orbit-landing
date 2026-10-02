@@ -9,12 +9,15 @@ dns.setDefaultResultOrder('ipv4first');
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
+import fs from 'fs';
 import { createClient } from '@supabase/supabase-js';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import nodemailer from 'nodemailer';
 import cron from 'node-cron';
 import compression from 'compression';
+
+import { fetchEventShare, renderEventShareHtml } from './eventSharePage.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -755,6 +758,54 @@ app.get('/api/feedback/:id', async (req, res) => {
 // ─── GET /api/feedback/:id/screenshot ───────────────────────
 app.get('/api/feedback/:id/screenshot', sendFeedbackScreenshot);
 app.get('/api/feedback/:id/screenshot/:index', sendFeedbackScreenshot);
+
+
+// ─── Event share landing (OG for WhatsApp + App Links fallback) ─
+app.get('/event/:id', async (req, res) => {
+  const eventId = String(req.params.id || '').trim();
+  if (!eventId || eventId.length > 128) {
+    return res.status(400).type('html').send('<!doctype html><title>ORBIT</title><p>Invalid event link.</p>');
+  }
+
+  const meta = await fetchEventShare(eventId);
+  const html = renderEventShareHtml({ eventId, meta });
+  res
+    .status(200)
+    .set('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600')
+    .type('html')
+    .send(html);
+});
+
+// Universal / App Links association files (correct JSON content-type; no redirect)
+const aasaPathCandidates = [
+  path.join(__dirname, 'public', '.well-known', 'apple-app-site-association'),
+  path.join(__dirname, 'dist', '.well-known', 'apple-app-site-association'),
+  path.join(__dirname, '.well-known', 'apple-app-site-association'),
+];
+const assetlinksCandidates = [
+  path.join(__dirname, 'public', '.well-known', 'assetlinks.json'),
+  path.join(__dirname, 'dist', '.well-known', 'assetlinks.json'),
+  path.join(__dirname, '.well-known', 'assetlinks.json'),
+];
+
+function sendFirstExisting(res, candidates, contentType) {
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      const body = fs.readFileSync(candidate);
+      res.set('Content-Type', contentType);
+      res.set('Cache-Control', 'public, max-age=3600');
+      return res.status(200).send(body);
+    }
+  }
+  return res.status(404).json({ error: 'Not found' });
+}
+
+app.get('/.well-known/apple-app-site-association', (req, res) => {
+  sendFirstExisting(res, aasaPathCandidates, 'application/json');
+});
+app.get('/.well-known/assetlinks.json', (req, res) => {
+  sendFirstExisting(res, assetlinksCandidates, 'application/json');
+});
 
 // ─── SPA fallback + listen ──────────────────────────────────
 if (!process.env.VERCEL) {
