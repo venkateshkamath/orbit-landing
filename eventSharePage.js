@@ -257,11 +257,19 @@ export function renderEventShareHtml({ eventId, meta }) {
         window.location.replace(btn.getAttribute('data-android-href'));
       } else if (isIOS) {
         var store = ${JSON.stringify(APP_STORE_URL || '')};
-        var start = Date.now();
+        var timer = null;
+        var cancel = function () { if (timer) { clearTimeout(timer); timer = null; } };
+        // App opened, or Safari's "Open in Orbit?" prompt took focus: never jump to the store.
+        document.addEventListener('visibilitychange', function () { if (document.hidden) cancel(); });
+        window.addEventListener('pagehide', cancel);
+        window.addEventListener('blur', cancel);
         window.location.href = btn.getAttribute('href');
-        setTimeout(function () {
-          if (!document.hidden && Date.now() - start < 3000 && store) window.location.replace(store);
-        }, 1500);
+        if (store) {
+          timer = setTimeout(function () {
+            timer = null;
+            if (!document.hidden && document.hasFocus()) window.location.replace(store);
+          }, 2000);
+        }
       }
     })();
   </script>
