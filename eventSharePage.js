@@ -238,13 +238,33 @@ export function renderEventShareHtml({ eventId, meta }) {
       <p>${description}</p>
       <div class="actions">
         <a class="btn btn-primary" id="open-in-orbit" href="${openHref}" data-android-href="${androidOpenHref}">Open in Orbit</a>
-        <script>(function(){var a=document.getElementById("open-in-orbit");if(a&&/Android/i.test(navigator.userAgent)){a.setAttribute("href",a.getAttribute("data-android-href"));}})();</script>
         <a class="btn btn-secondary" href="${playHref}">Get it on Google Play</a>
         ${appStoreHref ? `<a class="btn btn-secondary" href="${appStoreHref}">Download on the App Store</a>` : ''}
       </div>
       <p class="hint">Event ${safeId}</p>
     </div>
   </main>
+  <script>
+    // Phones only: open the event in the app, else go to the store.
+    // Crawlers don't run JS, so link previews still read the meta tags above.
+    (function () {
+      var ua = navigator.userAgent || '';
+      var btn = document.getElementById('open-in-orbit');
+      var isAndroid = /Android/i.test(ua);
+      var isIOS = /iPhone|iPad|iPod/i.test(ua);
+      if (isAndroid && btn) btn.setAttribute('href', btn.getAttribute('data-android-href'));
+      if (isAndroid) {
+        window.location.replace(btn.getAttribute('data-android-href'));
+      } else if (isIOS) {
+        var store = ${JSON.stringify(APP_STORE_URL || '')};
+        var start = Date.now();
+        window.location.href = btn.getAttribute('href');
+        setTimeout(function () {
+          if (!document.hidden && Date.now() - start < 3000 && store) window.location.replace(store);
+        }, 1500);
+      }
+    })();
+  </script>
 </body>
 </html>`;
 }
