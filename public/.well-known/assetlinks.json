@@ -6,7 +6,10 @@
     "target": {
       "namespace": "android_app",
       "package_name": "org.orbit.app",
-      "sha256_cert_fingerprints": []
+      "sha256_cert_fingerprints": [
+        "3F:FF:BB:9F:A3:52:94:E6:6F:21:8F:69:0F:06:29:DB:BE:89:26:79:3A:03:70:C7:2E:1F:53:9D:5C:6E:98:3D",
+        "D1:2B:18:BC:DA:BE:FD:FB:82:B2:C5:29:A2:C1:05:CA:53:10:44:E6:F1:D2:4D:7C:5B:1A:5C:A7:16:79:9B:6C"
+      ]
     }
   }
 ]
