@@ -113,7 +113,14 @@ export function renderEventShareHtml({ eventId, meta }) {
   const description = escapeHtml(meta.description);
   const image = escapeAttr(meta.image);
   const url = escapeAttr(meta.url);
-  const openHref = escapeAttr(meta.url);
+  // Same-site https links never hand off to the app from inside the browser,
+  // so the button uses the app scheme (Android: intent:// with Play fallback).
+  const encodedId = encodeURIComponent(String(eventId || ''));
+  const openHref = escapeAttr(`orbit://event/${encodedId}`);
+  const androidOpenHref = escapeAttr(
+    `intent://event/${encodedId}#Intent;scheme=orbit;package=org.orbit.app;` +
+      `S.browser_fallback_url=${encodeURIComponent(PLAY_STORE_URL)};end`,
+  );
   const playHref = escapeAttr(PLAY_STORE_URL);
   const appStoreHref = APP_STORE_URL ? escapeAttr(APP_STORE_URL) : '';
   const safeId = escapeHtml(eventId);
@@ -230,7 +237,8 @@ export function renderEventShareHtml({ eventId, meta }) {
       <h1>${title}</h1>
       <p>${description}</p>
       <div class="actions">
-        <a class="btn btn-primary" href="${openHref}">Open in Orbit</a>
+        <a class="btn btn-primary" id="open-in-orbit" href="${openHref}" data-android-href="${androidOpenHref}">Open in Orbit</a>
+        <script>(function(){var a=document.getElementById("open-in-orbit");if(a&&/Android/i.test(navigator.userAgent)){a.setAttribute("href",a.getAttribute("data-android-href"));}})();</script>
         <a class="btn btn-secondary" href="${playHref}">Get it on Google Play</a>
         ${appStoreHref ? `<a class="btn btn-secondary" href="${appStoreHref}">Download on the App Store</a>` : ''}
       </div>
