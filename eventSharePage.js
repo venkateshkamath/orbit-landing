@@ -113,7 +113,14 @@ export function renderEventShareHtml({ eventId, meta }) {
   const description = escapeHtml(meta.description);
   const image = escapeAttr(meta.image);
   const url = escapeAttr(meta.url);
-  const openHref = escapeAttr(meta.url);
+  // Same-site https links never hand off to the app from inside the browser,
+  // so the button uses the app scheme (Android: intent:// with Play fallback).
+  const encodedId = encodeURIComponent(String(eventId || ''));
+  const openHref = escapeAttr(`orbit://event/${encodedId}`);
+  const androidOpenHref = escapeAttr(
+    `intent://event/${encodedId}#Intent;scheme=orbit;package=org.orbit.app;` +
+      `S.browser_fallback_url=${encodeURIComponent(PLAY_STORE_URL)};end`,
+  );
   const playHref = escapeAttr(PLAY_STORE_URL);
   const appStoreHref = APP_STORE_URL ? escapeAttr(APP_STORE_URL) : '';
   const safeId = escapeHtml(eventId);
@@ -230,13 +237,42 @@ export function renderEventShareHtml({ eventId, meta }) {
       <h1>${title}</h1>
       <p>${description}</p>
       <div class="actions">
-        <a class="btn btn-primary" href="${openHref}">Open in Orbit</a>
+        <a class="btn btn-primary" id="open-in-orbit" href="${openHref}" data-android-href="${androidOpenHref}">Open in Orbit</a>
         <a class="btn btn-secondary" href="${playHref}">Get it on Google Play</a>
         ${appStoreHref ? `<a class="btn btn-secondary" href="${appStoreHref}">Download on the App Store</a>` : ''}
       </div>
       <p class="hint">Event ${safeId}</p>
     </div>
   </main>
+  <script>
+    // Phones only: open the event in the app, else go to the store.
+    // Crawlers don't run JS, so link previews still read the meta tags above.
+    (function () {
+      var ua = navigator.userAgent || '';
+      var btn = document.getElementById('open-in-orbit');
+      var isAndroid = /Android/i.test(ua);
+      var isIOS = /iPhone|iPad|iPod/i.test(ua);
+      if (isAndroid && btn) btn.setAttribute('href', btn.getAttribute('data-android-href'));
+      if (isAndroid) {
+        window.location.replace(btn.getAttribute('data-android-href'));
+      } else if (isIOS) {
+        var store = ${JSON.stringify(APP_STORE_URL || '')};
+        var timer = null;
+        var cancel = function () { if (timer) { clearTimeout(timer); timer = null; } };
+        // App opened, or Safari's "Open in Orbit?" prompt took focus: never jump to the store.
+        document.addEventListener('visibilitychange', function () { if (document.hidden) cancel(); });
+        window.addEventListener('pagehide', cancel);
+        window.addEventListener('blur', cancel);
+        window.location.href = btn.getAttribute('href');
+        if (store) {
+          timer = setTimeout(function () {
+            timer = null;
+            if (!document.hidden && document.hasFocus()) window.location.replace(store);
+          }, 2000);
+        }
+      }
+    })();
+  </script>
 </body>
 </html>`;
 }
